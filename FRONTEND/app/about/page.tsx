@@ -19,10 +19,10 @@ export default function AboutPage() {
       "Sadece projeler yapan ve yarışmalara katılan bir topluluk değiliz. Bizler kariyer basamaklarında beraber adımlar atmaya kararlı, işin sadece bilgiden ibaret olmadığına inanan, bir fikrin samimiyetle buluşmasının ardından insanların hayatlarına dokunabileceğine inanan bir aileyiz.",
   })
   const [stats, setStats] = useState([
-    { value: "150+", label: "Aktif Üye", color: "bg-gradient-to-r from-purple-500 to-purple-600" },
-    { value: "25+", label: "Düzenlenen Etkinlik", color: "bg-gradient-to-r from-green-500 to-green-600" },
-    { value: "10+", label: "Kazanılan Ödül", color: "bg-gradient-to-r from-purple-600 to-indigo-600" },
-    { value: "3", label: "Yıl Güçlü", color: "bg-gradient-to-r from-green-600 to-teal-600" },
+    { value: "150+", label: "Aktif Üye", color: "bg-purple-500/90" },
+    { value: "25+", label: "Düzenlenen Etkinlik", color: "bg-green-500/90" },
+    { value: "10+", label: "Kazanılan Ödül", color: "bg-purple-500/90" },
+    { value: "3", label: "Yıl Güçlü", color: "bg-green-500/90" },
   ])
 
   const handleEditHero = () => {
@@ -98,21 +98,26 @@ export default function AboutPage() {
       {/* Topluluk Yolculuğu */}
       <InlineEditWrapper className="py-16 px-4">
         <div className="container max-w-screen-xl mx-auto">
-          <CommunityJourney />
+          <ScrollAnimation animation="fade-up">
+            <CommunityJourney />
+          </ScrollAnimation>
         </div>
       </InlineEditWrapper>
 
       {/* Takım Bölümü */}
       <InlineEditWrapper className="py-16 px-4 bg-card/30">
         <div className="container max-w-screen-xl mx-auto">
-          <TeamSection />
+          <ScrollAnimation animation="fade-up">
+            <TeamSection />
+          </ScrollAnimation>
         </div>
       </InlineEditWrapper>
 
       {/* Alt Bilgi */}
-      <footer className="py-12 px-4 border-t border-border bg-card/20">
+      <footer className="py-12 px-4 border-t border-border bg-black/80">
         <div className="container max-w-screen-xl mx-auto">
-          <div className="flex flex-col items-center space-y-6">
+          <ScrollAnimation animation="fade-up">
+            <div className="flex flex-col items-center space-y-6">
             <div className="flex items-center space-x-2">
               <img src="/ayzek-logo.png" alt="AYZEK" className="w-6 h-6" />
               <span className="text-xl font-display font-bold text-primary">AYZEK</span>
@@ -164,6 +169,7 @@ export default function AboutPage() {
               </a>
             </div>
           </div>
+          </ScrollAnimation>
         </div>
       </footer>
 

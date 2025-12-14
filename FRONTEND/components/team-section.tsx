@@ -84,7 +84,7 @@ export function TeamSection() {
                   key={member.id}
                   className="
                     flex-none w-[68vw] sm:w-[60vw] snap-center
-                    md:w-auto
+                    md:w-auto md:h-full
                   "
                 >
                   <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm rounded-xl">
@@ -106,11 +106,9 @@ export function TeamSection() {
                     </CardHeader>
 
                     <CardContent className="p-3 pt-0 md:p-4 md:pt-0 space-y-3">
-                      {member.description && (
-                        <p className="text-xs md:text-sm text-muted-foreground leading-relaxed max-h-20 overflow-hidden text-center">
-                          {member.description}
-                        </p>
-                      )}
+                      <p className="text-xs md:text-sm text-muted-foreground leading-relaxed text-center max-h-20 min-h-[4.5rem] overflow-hidden">
+                        {member.description || ""}
+                      </p>
                       <div className="flex justify-center gap-2 md:gap-3 pt-2">
                         {member.github_url && (
                           <Button variant="ghost" size="sm" asChild>

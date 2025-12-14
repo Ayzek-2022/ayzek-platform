@@ -40,6 +40,44 @@ export default function JoinPage() {
         </div>
       </section>
 
+      {/* Quick Stats */}
+      <section className="py-8 px-4">
+        <div className="container max-w-screen-xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <ScrollAnimation animation="scale-up" delay={0}>
+              <div className="hover-lift theme-transition rounded-lg p-6 bg-purple-500/90 text-white shadow-lg">
+                <div className="text-3xl font-display font-bold mb-2 animate-float">8+</div>
+                <div className="text-white/90">Aktif Takım</div>
+              </div>
+            </ScrollAnimation>
+            <ScrollAnimation animation="scale-up" delay={100}>
+              <div className="hover-lift theme-transition rounded-lg p-6 bg-green-500/90 text-white shadow-lg">
+                <div className="text-3xl font-display font-bold mb-2 animate-float" style={{ animationDelay: "0.5s" }}>
+                  10+
+                </div>
+                <div className="text-white/90">Teknofest Ödülü</div>
+              </div>
+            </ScrollAnimation>
+            <ScrollAnimation animation="scale-up" delay={200}>
+              <div className="hover-lift theme-transition rounded-lg p-6 bg-purple-500/90 text-white shadow-lg">
+                <div className="text-3xl font-display font-bold mb-2 animate-float" style={{ animationDelay: "1s" }}>
+                  50+
+                </div>
+                <div className="text-white/90">Takım Üyesi</div>
+              </div>
+            </ScrollAnimation>
+            <ScrollAnimation animation="scale-up" delay={300}>
+              <div className="hover-lift theme-transition rounded-lg p-6 bg-green-500/90 text-white shadow-lg">
+                <div className="text-3xl font-display font-bold mb-2 animate-float" style={{ animationDelay: "1.5s" }}>
+                  15+
+                </div>
+                <div className="text-white/90">Tamamlanan Proje</div>
+              </div>
+            </ScrollAnimation>
+          </div>
+        </div>
+      </section>
+
       {/* Team */}
       <section className="py-16 px-4">
         <div className="container max-w-screen-xl mx-auto">
@@ -50,9 +88,10 @@ export default function JoinPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 border-t border-border bg-card/20">
+      <footer className="py-12 px-4 border-t border-border bg-black/80">
         <div className="container max-w-screen-xl mx-auto">
-          <div className="flex flex-col items-center space-y-6">
+          <ScrollAnimation animation="fade-up">
+            <div className="flex flex-col items-center space-y-6">
             <div className="flex items-center space-x-2">
               <img src="/ayzek-logo.png" alt="AYZEK" className="w-6 h-6" />
               <span className="text-xl font-display font-bold text-primary">AYZEK</span>
@@ -97,6 +136,7 @@ export default function JoinPage() {
               </a>
             </div>
           </div>
+          </ScrollAnimation>
         </div>
       </footer>
     </div>

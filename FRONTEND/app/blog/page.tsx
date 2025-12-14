@@ -51,9 +51,10 @@ export default function JoinPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 border-t border-border bg-card/20">
+      <footer className="py-12 px-4 border-t border-border bg-black/80">
         <div className="container max-w-screen-xl mx-auto">
-          <div className="flex flex-col items-center space-y-6">
+          <ScrollAnimation animation="fade-up">
+            <div className="flex flex-col items-center space-y-6">
             <div className="flex items-center space-x-2">
               <img src="/ayzek-logo.png" alt="AYZEK" className="w-6 h-6" />
               <span className="text-xl font-display font-bold text-primary">AYZEK</span>
@@ -98,6 +99,7 @@ export default function JoinPage() {
               </a>
             </div>
           </div>
+          </ScrollAnimation>
         </div>
       </footer>
     </div>

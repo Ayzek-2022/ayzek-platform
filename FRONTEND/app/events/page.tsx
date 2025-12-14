@@ -262,13 +262,13 @@ export default function EventsPage() {
                 <div className="container max-w-screen-xl mx-auto">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                         <ScrollAnimation animation="scale-up" delay={0}>
-                            <div className="hover-lift theme-transition rounded-lg p-6 bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg">
+                            <div className="hover-lift theme-transition rounded-lg p-6 bg-purple-500/90 text-white shadow-lg">
                                 <div className="text-3xl font-display font-bold mb-2 animate-float">25+</div>
                                 <div className="text-white/90">Bu Yıl Etkinlik</div>
                             </div>
                         </ScrollAnimation>
                         <ScrollAnimation animation="scale-up" delay={100}>
-                            <div className="hover-lift theme-transition rounded-lg p-6 bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg">
+                            <div className="hover-lift theme-transition rounded-lg p-6 bg-green-500/90 text-white shadow-lg">
                                 <div className="text-3xl font-display font-bold mb-2 animate-float" style={{ animationDelay: "0.5s" }}>
                                     500+
                                 </div>
@@ -276,7 +276,7 @@ export default function EventsPage() {
                             </div>
                         </ScrollAnimation>
                         <ScrollAnimation animation="scale-up" delay={200}>
-                            <div className="hover-lift theme-transition rounded-lg p-6 bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg">
+                            <div className="hover-lift theme-transition rounded-lg p-6 bg-purple-500/90 text-white shadow-lg">
                                 <div className="text-3xl font-display font-bold mb-2 animate-float" style={{ animationDelay: "1s" }}>
                                     5
                                 </div>
@@ -284,7 +284,7 @@ export default function EventsPage() {
                             </div>
                         </ScrollAnimation>
                         <ScrollAnimation animation="scale-up" delay={300}>
-                            <div className="hover-lift theme-transition rounded-lg p-6 bg-gradient-to-r from-green-600 to-teal-600 text-white shadow-lg">
+                            <div className="hover-lift theme-transition rounded-lg p-6 bg-green-500/90 text-white shadow-lg">
                                 <div className="text-3xl font-display font-bold mb-2 animate-float" style={{ animationDelay: "1.5s" }}>
                                     1000+
                                 </div>
@@ -318,7 +318,7 @@ export default function EventsPage() {
                 </div>
             </section>
 
-            <section className="py-16 px-4 bg-card/30">
+            <section className="py-16 px-4 bg-card/30 theme-transition">
                 <div className="container max-w-screen-xl mx-auto">
                     <ScrollAnimation animation="fade-up" className="text-center mb-12">
                         <h2 className="text-3xl font-display font-bold mb-4">Etkinlik Galerisi</h2>
@@ -332,20 +332,23 @@ export default function EventsPage() {
                 </div>
             </section>
 
-            <section className="py-16 px-4 bg-card/50">
+            <section className="py-16 px-4">
                 <div className="container max-w-screen-xl mx-auto text-center">
-                    <h2 className="text-3xl font-display font-bold mb-4">Etkinlik Düzenlemek İster misiniz?</h2>
-                    <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-                        Atölye, buluşma veya sunum için bir fikriniz mi var? Bilginizi topluluğumuzla paylaşmanıza yardımcı olmaktan
-                        memnuniyet duyarız.
-                    </p>
-                    <Dialog open={isEventModalOpen} onOpenChange={setIsEventModalOpen}>
-                        <DialogTrigger asChild>
-                            <Button size="lg" className="text-lg px-8 bg-ayzek-gradient hover:opacity-90">
-                                <Send className="w-5 h-5 mr-2" />
-                                Etkinlik Öner
-                            </Button>
-                        </DialogTrigger>
+                    <ScrollAnimation animation="fade-up">
+                        <h2 className="text-3xl font-display font-bold mb-4">Etkinlik Düzenlemek İster misiniz?</h2>
+                        <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
+                            Atölye, buluşma veya sunum için bir fikriniz mi var? Bilginizi topluluğumuzla paylaşmanıza yardımcı olmaktan
+                            memnuniyet duyarız.
+                        </p>
+                    </ScrollAnimation>
+                    <ScrollAnimation animation="scale-up" delay={200}>
+                        <Dialog open={isEventModalOpen} onOpenChange={setIsEventModalOpen}>
+                            <DialogTrigger asChild>
+                                <Button size="lg" className="text-lg px-8 bg-ayzek-gradient hover:opacity-90">
+                                    <Send className="w-5 h-5 mr-2" />
+                                    Etkinlik Öner
+                                </Button>
+                            </DialogTrigger>
                         <DialogContent className="sm:max-w-[600px]">
                             <DialogHeader>
                                 <DialogTitle>Etkinlik Önerisi Gönder</DialogTitle>
@@ -400,13 +403,15 @@ export default function EventsPage() {
                             </form>
                         </DialogContent>
                     </Dialog>
+                    </ScrollAnimation>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="py-12 px-4 border-t border-border bg-card/20">
+            <footer className="py-12 px-4 border-t border-border bg-black/80">
                 <div className="container max-w-screen-xl mx-auto">
-                    <div className="flex flex-col items-center space-y-6">
+                    <ScrollAnimation animation="fade-up">
+                        <div className="flex flex-col items-center space-y-6">
                         <div className="flex items-center space-x-2">
                             <img src="/ayzek-logo.png" alt="AYZEK" className="w-6 h-6" />
                             <span className="text-xl font-display font-bold text-primary">AYZEK</span>
@@ -451,6 +456,7 @@ export default function EventsPage() {
                             </a>
                         </div>
                     </div>
+                    </ScrollAnimation>
                 </div>
             </footer>
         </div>

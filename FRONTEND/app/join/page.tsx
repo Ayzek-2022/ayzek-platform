@@ -80,32 +80,35 @@ export default function JoinPage() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-16 px-4 bg-card/30">
+      <section className="py-16 px-4 bg-card/30 theme-transition">
         <div className="container max-w-screen-xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-display font-bold mb-4">Neden AYZEK'e Katılmalısınız?</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Gelişen teknoloji topluluğumuzun parçası olmanın avantajlarını keşfedin
-            </p>
-          </div>
+          <ScrollAnimation animation="fade-up">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-display font-bold mb-4">Neden AYZEK'e Katılmalısınız?</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Gelişen teknoloji topluluğumuzun parçası olmanın avantajlarını keşfedin
+              </p>
+            </div>
+          </ScrollAnimation>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {benefits.map((benefit, index) => {
               const Icon = benefit.icon
               return (
-                <Card
-                  key={index}
-                  className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm rounded-xl"
-                >
-                  <CardHeader className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-ayzek-gradient/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <Icon className="w-8 h-8 text-primary" />
-                    </div>
-                    <CardTitle className="font-display text-xl">{benefit.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-center leading-relaxed">{benefit.description}</CardDescription>
-                  </CardContent>
-                </Card>
+                <ScrollAnimation key={index} animation="scale-up" delay={index * 100}>
+                  <Card
+                    className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-black/80 backdrop-blur-sm border border-white/10 rounded-xl h-full flex flex-col"
+                  >
+                    <CardHeader className="text-center flex-shrink-0">
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-ayzek-gradient/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <Icon className="w-8 h-8 text-primary" />
+                      </div>
+                      <CardTitle className="font-display text-xl">{benefit.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                      <CardDescription className="text-center leading-relaxed">{benefit.description}</CardDescription>
+                    </CardContent>
+                  </Card>
+                </ScrollAnimation>
               )
             })}
           </div>
@@ -122,60 +125,71 @@ export default function JoinPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 px-4 bg-card/30">
+      <section className="py-16 px-4 bg-card/30 theme-transition">
         <div className="container max-w-screen-xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-display font-bold mb-4">Sıkça Sorulan Sorular</h2>
-          </div>
+          <ScrollAnimation animation="fade-up">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-display font-bold mb-4">Sıkça Sorulan Sorular</h2>
+            </div>
+          </ScrollAnimation>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm rounded-xl">
-              <CardHeader>
-                <CardTitle className="text-lg">Hiç Bir Şey Bilmiyorum, Yinede Topluluğa Katılabilir miyim?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Evet, katılabilirsiniz. Topluluğumuz sıfırdan başlayarak ilerlemeye bu süreçte de ekip ruhu, çalışma disiplini ve özveri gibi iş hayatında maruz kalacağınız bir çok şeyde sizlere tecrübe katacaktır.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm rounded-xl">
-              <CardHeader>
-                <CardTitle className="text-lg">Topluluğa Nasıl Üye Olabilirim?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Topluluğa katıl butonuna tıklayarak karşınıza gelen formu doldurmalısınız.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm rounded-xl">
-              <CardHeader>
-                <CardTitle className="text-lg">Etkinliklerden Nasıl Haberdar Olabilirim?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  WhatsApp gruplarımız, Instagram ve Linkedln hesaplarımızı takip ederek duyurulara anında ulaşabilir ve etkinliklerimize katılabilirsiniz.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm rounded-xl">
-              <CardHeader>
-                <CardTitle className="text-lg">Onay ne kadar sürer?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Çoğu başvuru 24-48 saat içinde incelenir ve tarafınıza iletilir.
-                </p>
-              </CardContent>
-            </Card>
+            <ScrollAnimation animation="fade-up" delay={0}>
+              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-full flex flex-col">
+                <CardHeader>
+                  <CardTitle className="text-lg">Hiç Bir Şey Bilmiyorum, Yinede Topluluğa Katılabilir miyim?</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <p className="text-muted-foreground">
+                    Evet, katılabilirsiniz. Topluluğumuz sıfırdan başlayarak ilerlemeye bu süreçte de ekip ruhu, çalışma disiplini ve özveri gibi iş hayatında maruz kalacağınız bir çok şeyde sizlere tecrübe katacaktır.
+                  </p>
+                </CardContent>
+              </Card>
+            </ScrollAnimation>
+            <ScrollAnimation animation="fade-up" delay={100}>
+              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-full flex flex-col">
+                <CardHeader>
+                  <CardTitle className="text-lg">Topluluğa Nasıl Üye Olabilirim?</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <p className="text-muted-foreground">
+                    Topluluğa katıl butonuna tıklayarak karşınıza gelen formu doldurmalısınız.
+                  </p>
+                </CardContent>
+              </Card>
+            </ScrollAnimation>
+            <ScrollAnimation animation="fade-up" delay={200}>
+              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-full flex flex-col">
+                <CardHeader>
+                  <CardTitle className="text-lg">Etkinliklerden Nasıl Haberdar Olabilirim?</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <p className="text-muted-foreground">
+                    WhatsApp gruplarımız, Instagram ve Linkedln hesaplarımızı takip ederek duyurulara anında ulaşabilir ve etkinliklerimize katılabilirsiniz.
+                  </p>
+                </CardContent>
+              </Card>
+            </ScrollAnimation>
+            <ScrollAnimation animation="fade-up" delay={300}>
+              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-full flex flex-col">
+                <CardHeader>
+                  <CardTitle className="text-lg">Onay ne kadar sürer?</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <p className="text-muted-foreground">
+                    Çoğu başvuru 24-48 saat içinde incelenir ve tarafınıza iletilir.
+                  </p>
+                </CardContent>
+              </Card>
+            </ScrollAnimation>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 border-t border-border bg-card/20">
+      <footer className="py-12 px-4 border-t border-border bg-black/80">
         <div className="container max-w-screen-xl mx-auto">
-          <div className="flex flex-col items-center space-y-6">
+          <ScrollAnimation animation="fade-up">
+            <div className="flex flex-col items-center space-y-6">
             <div className="flex items-center space-x-2">
               <img src="/ayzek-logo.png" alt="AYZEK" className="w-6 h-6" />
               <span className="text-xl font-display font-bold text-primary">AYZEK</span>
@@ -220,6 +234,7 @@ export default function JoinPage() {
               </a>
             </div>
           </div>
+          </ScrollAnimation>
         </div>
       </footer>
     </div>

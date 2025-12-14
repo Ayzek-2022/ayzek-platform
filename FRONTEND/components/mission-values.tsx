@@ -83,7 +83,7 @@ export function MissionValues() {
             return (
               <Card
                 key={index}
-                className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-black/80 backdrop-blur-sm"
               >
                 <CardHeader className="text-center p-3 md:p-4">
                   <div className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 rounded-full bg-card flex items-center justify-center group-hover:scale-110 transition-transform duration-300">

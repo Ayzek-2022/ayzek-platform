@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-
-import { useEffect, useRef, useState } from "react"
+import { motion, useScroll, useTransform } from "framer-motion"
+import { useRef } from "react"
 
 interface ParallaxSectionProps {
   children: React.ReactNode
@@ -11,36 +11,38 @@ interface ParallaxSectionProps {
   backgroundImage?: string
 }
 
-export function ParallaxSection({ children, className = "", speed = 0.5, backgroundImage }: ParallaxSectionProps) {
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const [offset, setOffset] = useState(0)
+export function ParallaxSection({ 
+  children, 
+  className = "", 
+  speed = 0.5, 
+  backgroundImage 
+}: ParallaxSectionProps) {
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  })
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (sectionRef.current) {
-        const rect = sectionRef.current.getBoundingClientRect()
-        const scrolled = window.pageYOffset
-        const rate = scrolled * -speed
-        setOffset(rate)
-      }
-    }
-
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [speed])
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", `${speed * 100}%`])
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
 
   return (
-    <div ref={sectionRef} className={`relative overflow-hidden ${className}`}>
+    <div ref={ref} className={`relative overflow-hidden ${className}`}>
       {backgroundImage && (
-        <div
+        <motion.div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url(${backgroundImage})`,
-            transform: `translateY(${offset}px)`,
+            y,
           }}
         />
       )}
-      <div className="relative z-10">{children}</div>
+      <motion.div 
+        className="relative z-10"
+        style={{ opacity }}
+      >
+        {children}
+      </motion.div>
     </div>
   )
 }

@@ -194,11 +194,12 @@ export function BlogExplorer() {
         {filtered.map((post) => (
           <Card
             key={post.id}
-            className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+            className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border-white/10 h-full flex flex-col"
+            style={{ backgroundColor: '#000000' }}
           >
             {/* Kapak görseli + kategori badge (etkinliklerdeki gibi sağ üst) */}
             {post.coverImage ? (
-              <div className="relative h-44">
+              <div className="relative h-44 flex-shrink-0">
                 <img
                   src={post.coverImage}
                   alt={post.title}
@@ -212,31 +213,38 @@ export function BlogExplorer() {
                 </div>
               </div>
             ) : (
-              // Görsel yoksa: içerik içinde sağ üstte küçük badge
-              <div className="px-6 pt-4 flex justify-end">
-                <Badge className="bg-primary text-primary-foreground border-0 shadow-sm">
-                  {post.category || "Blog"}
-                </Badge>
+              // Görsel yoksa: aynı yükseklikte boş alan
+              <div className="relative h-44 flex-shrink-0 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
+                <div className="absolute top-3 right-3">
+                  <Badge className="bg-primary text-primary-foreground border-0 shadow-sm">
+                    {post.category || "Blog"}
+                  </Badge>
+                </div>
+                <div className="text-muted-foreground/30 text-6xl font-bold">
+                  {initials(post.title)}
+                </div>
               </div>
             )}
 
-            <CardContent className="p-6">
-              <CardTitle className="font-display text-lg mb-2">
-                {post.title}
-              </CardTitle>
-              <CardDescription className="mb-4 line-clamp-3">
-                {post.excerpt}
-              </CardDescription>
+            <CardContent className="p-6 flex-grow flex flex-col justify-between">
+              <div>
+                <CardTitle className="font-display text-lg mb-2">
+                  {post.title}
+                </CardTitle>
+                <CardDescription className="mb-4 line-clamp-3">
+                  {post.excerpt}
+                </CardDescription>
 
-              <div className="space-y-2 mb-4 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-[10px] font-semibold">
-                      {initials(post.authorName)}
+                <div className="space-y-2 mb-4 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-[10px] font-semibold">
+                        {initials(post.authorName)}
+                      </span>
+                      <span className="font-medium">{post.authorName}</span>
                     </span>
-                    <span className="font-medium">{post.authorName}</span>
-                  </span>
-                  <span className="text-foreground/70">{formatDate(post.date)}</span>
+                    <span className="text-foreground/70">{formatDate(post.date)}</span>
+                  </div>
                 </div>
               </div>
 

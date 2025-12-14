@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-
-import { useEffect, useRef } from "react"
+import { motion, useInView, Variants } from "framer-motion"
+import { useRef } from "react"
 
 interface ScrollAnimationProps {
   children: React.ReactNode
@@ -11,65 +11,109 @@ interface ScrollAnimationProps {
   delay?: number
 }
 
-export function ScrollAnimation({ children, className = "", animation = "fade-up", delay = 0 }: ScrollAnimationProps) {
-  const elementRef = useRef<HTMLDivElement>(null)
+export function ScrollAnimation({ 
+  children, 
+  className = "", 
+  animation = "fade-up", 
+  delay = 0 
+}: ScrollAnimationProps) {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { 
+    once: true,
+    margin: "-50px 0px -50px 0px"
+  })
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setTimeout(() => {
-              entry.target.classList.add("animate-in")
-            }, delay)
-          }
-        })
-      },
-      {
-        threshold: 0.05,
-        rootMargin: "0px 0px -30px 0px",
-      },
-    )
-
-    if (elementRef.current) {
-      observer.observe(elementRef.current)
+  const getAnimationVariants = (): Variants => {
+    const baseTransition = {
+      duration: 0.8,
+      delay: delay / 1000,
+      ease: [0.25, 0.46, 0.45, 0.94]
     }
 
-    return () => observer.disconnect()
-  }, [delay])
-
-  const getAnimationClass = () => {
     switch (animation) {
       case "fade-up":
-        return "opacity-0 translate-y-8 transition-all duration-700 ease-out"
+        return {
+          hidden: { opacity: 0, y: 40 },
+          visible: { 
+            opacity: 1, 
+            y: 0,
+            transition: baseTransition
+          }
+        }
       case "fade-in":
-        return "opacity-0 transition-opacity duration-700 ease-out"
+        return {
+          hidden: { opacity: 0 },
+          visible: { 
+            opacity: 1,
+            transition: baseTransition
+          }
+        }
       case "slide-left":
-        return "opacity-0 -translate-x-8 transition-all duration-700 ease-out"
+        return {
+          hidden: { opacity: 0, x: -40 },
+          visible: { 
+            opacity: 1, 
+            x: 0,
+            transition: baseTransition
+          }
+        }
       case "slide-right":
-        return "opacity-0 translate-x-8 transition-all duration-700 ease-out"
+        return {
+          hidden: { opacity: 0, x: 40 },
+          visible: { 
+            opacity: 1, 
+            x: 0,
+            transition: baseTransition
+          }
+        }
       case "slide-in-left":
-        return "opacity-0 -translate-x-12 transition-all duration-800 ease-out"
+        return {
+          hidden: { opacity: 0, x: -60 },
+          visible: { 
+            opacity: 1, 
+            x: 0,
+            transition: { ...baseTransition, duration: 0.9 }
+          }
+        }
       case "slide-in-right":
-        return "opacity-0 translate-x-12 transition-all duration-800 ease-out"
+        return {
+          hidden: { opacity: 0, x: 60 },
+          visible: { 
+            opacity: 1, 
+            x: 0,
+            transition: { ...baseTransition, duration: 0.9 }
+          }
+        }
       case "scale-up":
-        return "opacity-0 scale-95 transition-all duration-700 ease-out"
+        return {
+          hidden: { opacity: 0, scale: 0.92 },
+          visible: { 
+            opacity: 1, 
+            scale: 1,
+            transition: baseTransition
+          }
+        }
       default:
-        return "opacity-0 translate-y-8 transition-all duration-700 ease-out"
+        return {
+          hidden: { opacity: 0, y: 40 },
+          visible: { 
+            opacity: 1, 
+            y: 0,
+            transition: baseTransition
+          }
+        }
     }
   }
 
   return (
-    <div
-      ref={elementRef}
-      className={`${getAnimationClass()} ${className}`}
-      style={
-        {
-          "--animate-in": "opacity-100 translate-y-0 translate-x-0 scale-100",
-        } as React.CSSProperties
-      }
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      variants={getAnimationVariants()}
+      className={className}
     >
       {children}
-    </div>
+    </motion.div>
   )
 }

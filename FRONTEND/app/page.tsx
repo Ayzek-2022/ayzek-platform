@@ -85,7 +85,7 @@ export default function HomePage() {
           id: team.id,
           name: team.name,
           logoUrl: team.photo_url,
-          code: `YZT | ${team.name.toUpperCase()}`,
+          code: team.name.toUpperCase(),
         }));
         
         setFeaturedTeams(formattedTeams);
@@ -102,10 +102,10 @@ export default function HomePage() {
 
   // Statik veriler
   const [stats, setStats] = useState([
-    { value: "150+", label: "Topluluk Üyesi", color: "bg-gradient-to-r from-purple-500 to-purple-600" },
-    { value: "25+", label: "Düzenlenen Etkinlik", color: "bg-gradient-to-r from-green-500 to-green-600" },
-    { value: "10+", label: "Tamamlanan Proje", color: "bg-gradient-to-r from-purple-600 to-indigo-600" },
-    { value: "3", label: "Yıl Aktif", color: "bg-gradient-to-r from-green-600 to-teal-600" },
+    { value: "150+", label: "Topluluk Üyesi", color: "bg-gradient-to-r from-blue-600 to-blue-500" },
+    { value: "25+", label: "Düzenlenen Etkinlik", color: "bg-gradient-to-r from-blue-500 to-cyan-500" },
+    { value: "10+", label: "Tamamlanan Proje", color: "bg-gradient-to-r from-cyan-500 to-cyan-400" },
+    { value: "3", label: "Yıl Aktif", color: "bg-gradient-to-r from-blue-700 to-cyan-600" },
   ]);
   const [aboutPreview, setAboutPreview] = useState({
     title: "Hakkımızda",
@@ -145,7 +145,7 @@ export default function HomePage() {
       <AdminNavbar onNotificationsClick={() => setIsNotificationsOpen(true)} />
       <NotificationsPanel isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
 
-      <InlineEditWrapper className="relative py-0 px-0 sm:px-4">
+      <InlineEditWrapper className="relative py-5 px-0 sm:px-4">
         <div className="container max-w-screen-xl mx-auto px-4 sm:px-0">
           <ScrollAnimation animation="fade-in">
             <AutoSlidingBanner />
@@ -154,7 +154,7 @@ export default function HomePage() {
       </InlineEditWrapper>
 
       <InlineEditWrapper>
-        <ParallaxSection className="py-12 md:py-20 px-4 bg-muted/20" speed={0.3}>
+        <ParallaxSection className="py-12 md:py-20 px-4" speed={0.3}>
           <div className="container max-w-screen-xl mx-auto">
             <ScrollAnimation animation="fade-up" className="text-center mb-8 md:mb-12">
               <h2 className="text-3xl md:text-4xl font-display font-bold mb-4 md:mb-6 gradient-text">Zaman Kapsülü</h2>
@@ -171,27 +171,7 @@ export default function HomePage() {
         </ParallaxSection>
       </InlineEditWrapper>
 
-      <InlineEditWrapper onEdit={handleEditStats} className="py-12 md:py-16 px-4 bg-card/50 theme-transition">
-        <div className="container max-w-screen-xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-center">
-            {stats.map((stat, index) => (
-              <ScrollAnimation key={index} animation="scale-up" delay={index * 100}>
-                <div className={`hover-lift theme-transition rounded-lg p-4 md:p-6 ${stat.color} text-white shadow-lg`}>
-                  <div
-                    className="text-2xl md:text-3xl font-display font-bold mb-2 animate-float"
-                    style={{ animationDelay: `${index * 0.5}s` }}
-                  >
-                    {stat.value}
-                  </div>
-                  <div className="text-sm md:text-base text-white/90">{stat.label}</div>
-                </div>
-              </ScrollAnimation>
-            ))}
-          </div>
-        </div>
-      </InlineEditWrapper>
-
-      <InlineEditWrapper onEdit={handleEditAbout} className="py-12 md:py-20 px-4 bg-background/50">
+      <InlineEditWrapper onEdit={handleEditAbout} className="py-12 md:py-20 px-4">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up" className="text-center mb-8 md:mb-12">
             <h2 className="text-2xl md:text-3xl font-display font-bold mb-3 md:mb-4">{aboutPreview.title}</h2>
@@ -199,7 +179,7 @@ export default function HomePage() {
           </ScrollAnimation>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
             <ScrollAnimation animation="slide-in-left" delay={0}>
-              <Card className="hover-lift bg-card/60 border-primary/10 h-full flex flex-col transition-all duration-300">
+              <Card className="hover-lift bg-black/80 backdrop-blur-sm border-primary/10 h-full flex flex-col transition-all duration-300">
                 <CardHeader className="text-center flex-shrink-0">
                   <Users className="w-10 h-10 md:w-12 md:h-12 text-primary mx-auto mb-3 md:mb-4" />
                   <CardTitle className="text-lg md:text-xl">Misyonumuz</CardTitle>
@@ -212,7 +192,7 @@ export default function HomePage() {
               </Card>
             </ScrollAnimation>
             <ScrollAnimation animation="scale-up" delay={100}>
-              <Card className="hover-lift bg-card/60 border-primary/10 h-full flex flex-col transition-all duration-300">
+              <Card className="hover-lift bg-black/80 backdrop-blur-sm border-primary/10 h-full flex flex-col transition-all duration-300">
                 <CardHeader className="text-center flex-shrink-0">
                   <Heart className="w-10 h-10 md:w-12 md:h-12 text-primary mx-auto mb-3 md:mb-4" />
                   <CardTitle className="text-lg md:text-xl">Değerlerimiz</CardTitle>
@@ -225,7 +205,7 @@ export default function HomePage() {
               </Card>
             </ScrollAnimation>
             <ScrollAnimation animation="slide-in-right" delay={200}>
-              <Card className="hover-lift bg-card/60 border-primary/10 h-full flex flex-col transition-all duration-300">
+              <Card className="hover-lift bg-black/80 backdrop-blur-sm border-primary/10 h-full flex flex-col transition-all duration-300">
                 <CardHeader className="text-center flex-shrink-0">
                   <Rocket className="w-10 h-10 md:w-12 md:h-12 text-primary mx-auto mb-3 md:mb-4" />
                   <CardTitle className="text-lg md:text-xl">Başarılarımız</CardTitle>
@@ -252,7 +232,7 @@ export default function HomePage() {
         </div>
       </InlineEditWrapper>
 
-      <InlineEditWrapper className="py-12 md:py-20 px-4 bg-card/40 theme-transition">
+      <InlineEditWrapper className="py-12 md:py-20 px-4 bg-card/30 theme-transition">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up" className="text-center mb-8 md:mb-12">
             <h2 className="text-2xl md:text-3xl font-display font-bold mb-3 md:mb-4">Yaklaşan Etkinlikler</h2>
@@ -269,7 +249,7 @@ export default function HomePage() {
               upcomingEvents.slice(0, 3).map((event: any, index: number) => (
                 <ScrollAnimation key={index} animation="scale-up" delay={index * 100}>
                   <Card
-                    className="hover-lift bg-background/60 border-primary/10 cursor-pointer transition-all duration-300 h-full"
+                    className="hover-lift bg-black/80 backdrop-blur-sm border-primary/10 cursor-pointer transition-all duration-300 h-full"
                     onClick={() => handleEventClick(event)}
                   >
                     <CardHeader>
@@ -305,7 +285,7 @@ export default function HomePage() {
         </div>
       </InlineEditWrapper>
 
-      <InlineEditWrapper className="py-12 md:py-20 px-4 bg-background/30">
+      <InlineEditWrapper className="py-12 md:py-20 px-4">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up" className="text-center mb-8 md:mb-12">
             <h2 className="text-2xl md:text-3xl font-display font-bold mb-3 md:mb-4">Etkinlik Galerisi</h2>
@@ -320,7 +300,7 @@ export default function HomePage() {
       </InlineEditWrapper>
 
       {/* === Takımlarımız Önizleme (GÜNCELLENEN) === */}
-      <InlineEditWrapper className="py-12 md:py-20 px-4 bg-background/30">
+      <InlineEditWrapper className="py-12 md:py-20 px-4">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up" className="text-center mb-8 md:mb-12">
             <h2 className="text-2xl md:text-3xl font-display font-bold mb-3 md:mb-4">Takımlarımız</h2>
@@ -329,8 +309,8 @@ export default function HomePage() {
             </p>
           </ScrollAnimation>
           
-          {/* HER EKRANDA 2 KART */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+          {/* BÜYÜK EKRANDA 4 KART */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
             {teamsLoading ? (
               <p className="col-span-full text-center text-muted-foreground">Takımlar yükleniyor...</p>
             ) : teamsError ? (
@@ -345,27 +325,26 @@ export default function HomePage() {
                       <div
                         className={[
                           "group cursor-pointer relative overflow-hidden rounded-[2.5rem]",
-                          "w-full h-[200px] md:h-[220px]",
+                          "w-full h-[340px] md:h-[370px]",
                           "bg-card/70 supports-[backdrop-filter]:bg-card/60 backdrop-blur",
                           "border border-white/15 ring-1 ring-white/10",
-                          "hover:shadow-xl transition-all duration-300 hover:scale-105 p-4 md:p-5",
-                          "flex flex-col items-center justify-between",
+                          "hover:shadow-xl transition-all duration-300 hover:scale-105 p-6",
+                          "flex flex-col items-center justify-start",
                         ].join(" ")}
                         aria-label={`${t.name} kartı`}
                       >
                         <div className="pointer-events-none absolute inset-0 rounded-[2.5rem] p-[1px]">
                           <div className={`h-full w-full rounded-[2.4rem] bg-gradient-to-br ${pal.ring} opacity-40`} />
                         </div>
-                        <div className={`relative z-10 mt-1 grid place-items-center size-20 md:size-24 rounded-full bg-gradient-to-br ${pal.ring} shadow-xl ${pal.glow} ring-1 ring-black/20 dark:ring-black/40 transition-transform group-hover:scale-110`}>
+                        <div className={`relative z-10 mt-3 grid place-items-center size-40 rounded-full bg-gradient-to-br ${pal.ring} shadow-xl ${pal.glow} ring-1 ring-black/20 dark:ring-black/40 overflow-hidden`}>
                           {t.logoUrl ? (
-                            <img src={t.logoUrl} alt={t.name} className="h-full w-full object-cover rounded-full" />
+                            <img src={t.logoUrl} alt={t.name} className="h-full w-full object-cover" />
                           ) : (
-                            <Users className="h-5 w-5 md:h-6 md:w-6 text-white/90" />
+                            <Users className="size-8 text-white/90" />
                           )}
                         </div>
-                        <div className="relative z-10 mb-1 text-center">
-                          <div className="text-[9px] md:text-[10px] uppercase tracking-widest text-muted-foreground">{t.code}</div>
-                          <div className={`mt-1 inline-flex items-center rounded-full px-2.5 md:px-3 py-0.5 md:py-1 text-xs font-semibold text-white bg-gradient-to-r ${pal.ring} backdrop-blur-[2px] shadow-md`}>
+                        <div className="relative z-10 mt-4 text-center">
+                          <div className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r ${pal.ring} backdrop-blur-[2px] shadow-md`}>
                             {t.name}
                           </div>
                         </div>
@@ -392,7 +371,7 @@ export default function HomePage() {
       </InlineEditWrapper>
 
       {/* === Visitor Feedback üstüne başlık + kısa metin eklendi === */}
-      <InlineEditWrapper className="pt-8 md:pt-12 px-4 bg-card/20">
+      <InlineEditWrapper className="pt-8 md:pt-12 px-4">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up" className="text-center mb-6 md:mb-8">
             <h2 className="text-2xl md:text-3xl font-display font-bold mb-2 md:mb-3">Topluluğumuzdan Yorumlar</h2>
@@ -404,7 +383,7 @@ export default function HomePage() {
         </div>
       </InlineEditWrapper>
 
-      <InlineEditWrapper className="pb-12 md:pb-16 px-4 bg-card/20">
+      <InlineEditWrapper className="pb-12 md:pb-16 px-4">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up" delay={200}>
             <VisitorFeedback />
@@ -412,7 +391,7 @@ export default function HomePage() {
         </div>
       </InlineEditWrapper>
 
-      <footer className="py-8 md:py-12 px-4 border-t border-border theme-transition bg-background/50">
+      <footer className="py-8 md:py-12 px-4 border-t border-border theme-transition bg-black/80">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-in">
             <div className="flex flex-col items-center space-y-4 md:space-y-6">
