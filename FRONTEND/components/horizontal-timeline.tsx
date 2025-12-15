@@ -145,7 +145,7 @@ export function HorizontalTimeline() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2 sm:space-y-3 md:space-y-4">
       <div className="relative py-0 overflow-hidden">
         <div
           ref={containerRef}
@@ -154,7 +154,7 @@ export function HorizontalTimeline() {
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
           onPointerLeave={endDrag}
-          className="relative w-full overflow-hidden pb-6 md:pb-8 cursor-grab active:cursor-grabbing select-none touch-pan-x"
+          className="relative w-full overflow-hidden pb-4 sm:pb-6 md:pb-8 cursor-grab active:cursor-grabbing select-none touch-pan-x"
           // Hide the far-right extra silhouette peek
           style={{
             WebkitMaskImage: "linear-gradient(to right, black 0%, black 96%, transparent 100%)",
@@ -168,7 +168,7 @@ export function HorizontalTimeline() {
               <div className="relative z-20 w-full">
                 <div
                   ref={trackRef}
-                  className="relative z-10 flex gap-3 px-4 md:gap-8 md:px-16 w-max transition-transform duration-500 ease-out"
+                  className="relative z-10 flex gap-2 px-3 sm:gap-3 sm:px-4 md:gap-6 lg:gap-8 md:px-12 lg:px-16 w-max transition-transform duration-500 ease-out"
                   style={{
                     transform: `translateX(${baseTranslate + dragOffset}px)`,
                   }}
@@ -199,32 +199,32 @@ export function HorizontalTimeline() {
                           rotate: `${localTilt}deg`,
                         }}
                         className={
-                          "relative flex-shrink-0 w-[46vw] sm:w-[45vw] md:w-[384px] transition-all duration-500 ease-out will-change-transform " +
+                          "relative flex-shrink-0 w-[75vw] xs:w-[65vw] sm:w-[55vw] md:w-[384px] transition-all duration-500 ease-out will-change-transform " +
                           (activeIndex === index
-                            ? "scale-[1.12] md:scale-[1.18] opacity-100 z-20"
-                            : "scale-[0.82] md:scale-[0.86] opacity-100 z-10")
+                            ? "scale-[1.08] sm:scale-[1.12] md:scale-[1.18] opacity-100 z-20"
+                            : "scale-[0.88] sm:scale-[0.85] md:scale-[0.86] opacity-100 z-10")
                         }
                       >
                         <Card
                           className={
-                            "w-full shadow-2xl border-2 border-primary/20 bg-background transition-all duration-500 mt-10 md:mt-12 " +
-                            (activeIndex === index ? "" : "blur-[3px]")
+                            "w-full shadow-2xl border-2 border-primary/20 bg-background transition-all duration-500 mt-6 sm:mt-8 md:mt-10 lg:mt-12 " +
+                            (activeIndex === index ? "" : "blur-[2px] sm:blur-[2.5px] md:blur-[3px]")
                           }
                         >
                           <CardHeader className="relative overflow-hidden p-0">
-                            <div className="relative h-40 md:h-48">
+                            <div className="relative h-32 sm:h-36 md:h-44 lg:h-48">
                               <img src={event.image_url || "/placeholder.svg"} alt={event.title} className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-0 hover:opacity-100 transition-opacity duration-500" />
                             </div>
-                            <div className="p-3 md:p-4 pb-3 md:pb-4">
-                              <div className="flex items-center justify-between mb-2 md:mb-3">
-                                <CardTitle className="font-display text-sm md:text-xl leading-snug md:leading-normal">{event.title}</CardTitle>
-                                <span className="text-[10px] md:text-sm font-semibold text-primary bg-primary/10 px-2 py-0.5 md:px-3 md:py-1 rounded-full">
+                            <div className="p-2.5 sm:p-3 md:p-4 pb-2.5 sm:pb-3 md:pb-4">
+                              <div className="flex items-start justify-between mb-1.5 sm:mb-2 md:mb-3 gap-2">
+                                <CardTitle className="font-display text-xs sm:text-sm md:text-base lg:text-xl leading-snug flex-1">{event.title}</CardTitle>
+                                <span className="text-[9px] sm:text-[10px] md:text-sm font-semibold text-primary bg-primary/10 px-1.5 py-0.5 sm:px-2 md:px-3 md:py-1 rounded-full flex-shrink-0">
                                   {event.date_label}
                                 </span>
                               </div>
-                              <CardDescription className="text-xs md:text-sm leading-relaxed">{event.description}</CardDescription>
+                              <CardDescription className="text-[10px] sm:text-xs md:text-sm leading-relaxed line-clamp-2 sm:line-clamp-3">{event.description}</CardDescription>
                             </div>
                           </CardHeader>
                         </Card>

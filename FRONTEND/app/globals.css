@@ -384,12 +384,25 @@
   body {
     overflow-x: clip;           /* PC'de sağ çizgi/boşluk hissini engeller */
     overscroll-behavior-y: none;/* iOS "bounce" taşmalarını azaltır */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Medya elemanları taşmasın */
   img, video, canvas, svg {
     max-width: 100%;
     height: auto;
+  }
+
+  /* Mobil touch optimizasyonları */
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* Smooth scroll mobilde de */
+  * {
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -412,4 +425,27 @@
 
   /* Medya yardımcıları */
   .object-cover-center { object-fit: cover; object-position: center; }
+
+  /* Mobil hover devre dışı (yanlış sticky hover'ları önler) */
+  @media (hover: none) and (pointer: coarse) {
+    .hover-lift:hover {
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive text helper */
+  .text-responsive-sm { @apply text-xs sm:text-sm md:text-base; }
+  .text-responsive-base { @apply text-sm sm:text-base md:text-lg; }
+  .text-responsive-lg { @apply text-base sm:text-lg md:text-xl; }
+  .text-responsive-xl { @apply text-lg sm:text-xl md:text-2xl lg:text-3xl; }
+  .text-responsive-2xl { @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl; }
+
+  /* Scrollbar gizleme */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

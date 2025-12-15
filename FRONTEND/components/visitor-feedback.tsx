@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -57,6 +57,8 @@ const testimonials = [
 export function VisitorFeedback() {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [feedback, setFeedback] = useState({ name: "", email: "", message: "" })
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,36 +67,62 @@ export function VisitorFeedback() {
     setShowFeedbackForm(false)
   }
 
+  // Scroll pozisyonunu takip et
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container || testimonials.length === 0) return
+
+    const handleScroll = () => {
+      const scrollLeft = container.scrollLeft
+      const itemWidth = container.scrollWidth / testimonials.length
+      const index = Math.round(scrollLeft / itemWidth)
+      setCurrentIndex(Math.max(0, Math.min(index, testimonials.length - 1)))
+    }
+
+    container.addEventListener("scroll", handleScroll)
+    return () => container.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  const scrollToIndex = (index: number) => {
+    const container = scrollContainerRef.current
+    if (!container) return
+    const itemWidth = container.scrollWidth / testimonials.length
+    container.scrollTo({ left: itemWidth * index, behavior: "smooth" })
+  }
+
   return (
-    <div className="space-y-8">
-      {/* Testimonials */}
+    <div className="space-y-4">
+      {/* Testimonials - Kaydırılabilir */}
       <div
+        ref={scrollContainerRef}
         className="
           flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4
           md:mx-0 md:px-0 md:overflow-visible md:snap-none
-          md:grid md:grid-cols-3 md:gap-6
+          md:grid md:grid-cols-3 md:gap-5 lg:gap-6
+          scrollbar-hide
         "
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {testimonials.map((testimonial) => (
           <div
             key={testimonial.id}
             className="
-              flex-none w-[70vw] sm:w-[58vw] snap-center
+              flex-none w-[75vw] sm:w-[65vw] snap-center
               md:w-auto
             "
           >
-            <Card className="group hover:shadow-lg transition-all duration-300 bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm">
-              <CardHeader className="text-center p-3 md:p-4">
+            <Card className="group hover:shadow-lg transition-all duration-300 bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm h-full">
+              <CardHeader className="text-center p-3 sm:p-4 md:p-5">
                 <img
                   src={testimonial.avatar || "/placeholder.svg"}
                   alt="Profil fotoğrafı"
-                  className="w-14 h-14 md:w-16 md:h-16 rounded-full mx-auto mb-3 object-cover"
+                  className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full mx-auto mb-2 sm:mb-3 object-cover"
                 />
-                <CardTitle className="font-display text-base md:text-lg">{testimonial.name}</CardTitle>
-                <p className="text-xs md:text-sm text-muted-foreground">{testimonial.role}</p>
+                <CardTitle className="font-display text-sm sm:text-base md:text-lg">{testimonial.name}</CardTitle>
+                <p className="text-xs sm:text-sm text-muted-foreground">{testimonial.role}</p>
               </CardHeader>
-              <CardContent className="p-3 md:p-4">
-                <p className="text-xs md:text-sm text-center italic line-clamp-4">
+              <CardContent className="p-3 sm:p-4 md:p-5 pt-0">
+                <p className="text-xs sm:text-sm text-center italic line-clamp-4">
                   "{testimonial.content}"
                 </p>
               </CardContent>
@@ -102,6 +130,24 @@ export function VisitorFeedback() {
           </div>
         ))}
       </div>
+
+      {/* Nokta navigasyonu - sadece mobilde göster */}
+      {testimonials.length > 1 && (
+        <div className="flex justify-center gap-2 md:hidden">
+          {testimonials.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => scrollToIndex(index)}
+              className={`
+                w-2 h-2 rounded-full transition-all duration-300
+                ${index === currentIndex ? "bg-primary scale-125" : "bg-muted-foreground/40"}
+              `}
+              aria-label={`${index + 1}. yoruma git`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -112,34 +112,34 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={prevMonth}>
-            <ChevronLeft className="w-4 h-4" />
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+          <Button variant="outline" size="sm" onClick={prevMonth} className="h-8 w-8 sm:h-9 sm:w-9">
+            <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
-          <h2 className="text-2xl font-display font-bold">
+          <h2 className="text-base sm:text-lg md:text-2xl font-display font-bold">
             {currentMonth.toLocaleDateString("tr-TR", { month: "long", year: "numeric" })}
           </h2>
-          <Button variant="outline" size="sm" onClick={nextMonth}>
-            <ChevronRight className="w-4 h-4" />
+          <Button variant="outline" size="sm" onClick={nextMonth} className="h-8 w-8 sm:h-9 sm:w-9">
+            <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
         </div>
 
         {/* Dinamik Kategori Şeridi */}
-        <div className="flex items-center gap-2 w-full md:w-auto">
+        <div className="flex items-center gap-1.5 sm:gap-2 w-full md:w-auto">
           {uniqueCategories.length > 10 && (
-            <Button variant="outline" size="icon" onClick={() => scrollCats("left")} aria-label="Kategorileri sola kaydır">
-              <ChevronLeft className="w-4 h-4" />
+            <Button variant="outline" size="icon" onClick={() => scrollCats("left")} aria-label="Kategorileri sola kaydır" className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0">
+              <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
             </Button>
           )}
 
-          <div ref={catsRef} className="flex-1 md:flex-none max-w-full overflow-x-auto">
-            <div className="flex items-center gap-2 pr-2">
+          <div ref={catsRef} className="flex-1 md:flex-none max-w-full overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-1.5 sm:gap-2 pr-2">
               <Button
                 key="all"
                 variant={selectedCategory === "all" ? "default" : "outline"}
                 size="sm"
-                className="text-xs whitespace-nowrap"
+                className="text-[10px] sm:text-xs whitespace-nowrap h-7 sm:h-8 px-2 sm:px-3"
                 onClick={() => setSelectedCategory("all")}
               >
                 Tümü
@@ -149,21 +149,21 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                   key={c}
                   variant={selectedCategory === c ? "default" : "outline"}
                   size="sm"
-                  className="text-xs whitespace-nowrap"
+                  className="text-[10px] sm:text-xs whitespace-nowrap h-7 sm:h-8 px-2 sm:px-3"
                   onClick={() => setSelectedCategory(c)}
                 >
                   {c}
                 </Button>
               ))}
               {uniqueCategories.length === 0 && (
-                <span className="text-xs text-muted-foreground">Bu ay için kategori bulunamadı</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground">Bu ay için kategori bulunamadı</span>
               )}
             </div>
           </div>
 
           {uniqueCategories.length > 10 && (
-            <Button variant="outline" size="icon" onClick={() => scrollCats("right")} aria-label="Kategorileri sağa kaydır">
-              <ChevronRight className="w-4 h-4" />
+            <Button variant="outline" size="icon" onClick={() => scrollCats("right")} aria-label="Kategorileri sağa kaydır" className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0">
+              <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
             </Button>
           )}
         </div>
@@ -187,9 +187,9 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                 md:w-auto
               "
             >
-              <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-black/80 backdrop-blur-sm border border-white/10">
                 <CardHeader className="relative overflow-hidden p-0">
-                  <div className="relative h-40 md:h-48">
+                  <div className="relative h-32 sm:h-36 md:h-44 lg:h-48">
                     <img
                       src={event.image || "/placeholder.svg"}
                       alt={event.title}
@@ -198,38 +198,38 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
                     {/* Kategori rozeti: SAĞ ÜST */}
-                    <div className="absolute top-4 right-4">
-                      <Badge className="bg-primary text-primary-foreground border-0 shadow-sm">
+                    <div className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4">
+                      <Badge className="bg-primary text-primary-foreground border-0 shadow-sm text-[10px] sm:text-xs">
                         {categoryLabel}
                       </Badge>
                     </div>
 
-                    <div className="absolute bottom-3 left-3 md:bottom-4 md:left-4 text-white">
-                      <div className="text-xs md:text-sm font-medium">{formatDate(event.date)}</div>
-                      <div className="text-[11px] md:text-xs opacity-90">{formatTime(event.time)}</div>
+                    <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 md:bottom-4 md:left-4 text-white">
+                      <div className="text-[10px] sm:text-xs md:text-sm font-medium">{formatDate(event.date)}</div>
+                      <div className="text-[9px] sm:text-[11px] md:text-xs opacity-90">{formatTime(event.time)}</div>
                     </div>
                   </div>
                 </CardHeader>
 
-                <CardContent className="p-4 md:p-6">
-                  <CardTitle className="font-display text-base md:text-lg mb-2 line-clamp-2">
+                <CardContent className="p-3 sm:p-4 md:p-5 lg:p-6">
+                  <CardTitle className="font-display text-sm sm:text-base md:text-lg mb-1.5 sm:mb-2 line-clamp-2">
                     {event.title}
                   </CardTitle>
-                  <CardDescription className="text-sm md:text-base mb-4 line-clamp-2">
+                  <CardDescription className="text-xs sm:text-sm md:text-base mb-3 sm:mb-4 line-clamp-2">
                     {event.description}
                   </CardDescription>
 
-                  <div className="space-y-2 mb-4 text-xs md:text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      <span>{event.location}</span>
+                  <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4 text-[10px] sm:text-xs md:text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="line-clamp-1">{event.location}</span>
                     </div>
                   </div>
 
                   {!!event.tags?.length && (
-                    <div className="flex flex-wrap gap-1 mb-4">
+                    <div className="flex flex-wrap gap-1 mb-3 sm:mb-4">
                       {event.tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-[11px] md:text-xs">
+                        <Badge key={tag} variant="secondary" className="text-[9px] sm:text-[10px] md:text-xs">
                           {tag}
                         </Badge>
                       ))}
@@ -238,7 +238,7 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
 
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button className="w-full">Detayları Görüntüle</Button>
+                      <Button className="w-full text-xs sm:text-sm h-8 sm:h-9 md:h-10">Detayları Görüntüle</Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl">
                       <DialogHeader>
@@ -314,10 +314,10 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
       </div>
 
       {!loading && filteredEvents.length === 0 && (
-        <div className="text-center py-12">
-          <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-xl font-display font-semibold mb-2">Etkinlik bulunamadı</h3>
-          <p className="text-muted-foreground">Farklı bir kategori seçebilir veya başka bir aya bakabilirsin.</p>
+        <div className="text-center py-8 sm:py-10 md:py-12">
+          <Calendar className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+          <h3 className="text-base sm:text-lg md:text-xl font-display font-semibold mb-1.5 sm:mb-2">Etkinlik bulunamadı</h3>
+          <p className="text-muted-foreground text-xs sm:text-sm md:text-base px-2">Farklı bir kategori seçebilir veya başka bir aya bakabilirsin.</p>
         </div>
       )}
     </div>

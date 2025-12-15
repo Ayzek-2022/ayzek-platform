@@ -7,15 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export function JoinCommunityForm() {
   return (
     <Card className="max-w-4xl mx-auto bg-[#bfbfbf] border border-white/10">
-      <CardHeader className="text-center">
-        <CardTitle className="text-3xl font-display text-black">AYZEK Topluluğuna Katıl</CardTitle>
-        <CardDescription className="text-lg text-black/80">
+      <CardHeader className="text-center p-4 sm:p-5 md:p-6">
+        <CardTitle className="text-xl sm:text-2xl md:text-3xl font-display text-black">AYZEK Topluluğuna Katıl</CardTitle>
+        <CardDescription className="text-sm sm:text-base md:text-lg text-black/80">
           Başvurunu aşağıdaki form üzerinden tamamlayabilirsin. Gönderdiğinde bilgiler doğrudan değerlendirme sistemimize düşecektir.
         </CardDescription>
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className="w-full overflow-hidden rounded-xl">
+        <div className="w-full overflow-hidden rounded-lg sm:rounded-xl">
           <iframe
             src="https://forms.gle/9jLTrgpc5uSZCuVu8"
             className="w-full"

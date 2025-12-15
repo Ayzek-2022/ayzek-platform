@@ -53,10 +53,10 @@ export function TeamSection() {
   if (error) return <div className="text-center py-20 text-red-500">Hata: {error}</div>;
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 sm:space-y-10 md:space-y-12">
       <div className="text-center">
-        <h2 className="text-3xl font-display font-bold mb-4">Ekibimizle Tanışın</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
+        <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-display font-bold mb-2 sm:mb-3 gradient-text">Ekibimizle Tanışın</h2>
+        <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base">
           AYZEK'i teknoloji meraklıları ve yenilikçiler için canlı bir topluluk haline getiren tutkulu bireylerdir.
         </p>
       </div>
@@ -66,68 +66,59 @@ export function TeamSection() {
         if (members.length === 0) return null;
 
         return (
-          <section key={key} className="space-y-4">
-            <h3 className="inline-block text-xl font-semibold px-4 py-2 rounded-lg border border-primary/30 bg-primary/5 text-primary shadow-sm">
+          <section key={key} className="space-y-3 sm:space-y-4">
+            <h3 className="inline-block text-sm sm:text-base md:text-lg font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg border border-primary/30 bg-primary/5 text-primary shadow-sm">
               {title}
             </h3>
 
-            {/* Mobil: yatay kaydırma + küçük kartlar | md+: eski grid */}
-            <div
-              className="
-                flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4
-                md:mx-0 md:px-0 md:overflow-visible md:snap-none
-                md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6
-              "
-            >
+            {/* Mobil: tek sütun minimalist | sm: 2 sütun | lg+: 3-4 sütun */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
               {members.map((member) => (
-                <div
+                <Card 
                   key={member.id}
-                  className="
-                    flex-none w-[68vw] sm:w-[60vw] snap-center
-                    md:w-auto md:h-full
-                  "
+                  className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm rounded-xl"
                 >
-                  <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm rounded-xl">
-                    <CardHeader className="text-center p-3 md:p-4">
-                      <div className="relative w-20 h-20 md:w-28 md:h-28 mx-auto mb-3">
-                        <img
-                          src={member.photo_url || "/placeholder.svg"}
-                          alt={member.name}
-                          className="w-full h-full rounded-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 rounded-full bg-gradient-to-t from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      </div>
-                      <CardTitle className="font-display text-base md:text-xl">
-                        {member.name}
-                      </CardTitle>
-                      <CardDescription className="text-primary font-medium text-sm md:text-base">
-                        {member.role}
-                      </CardDescription>
-                    </CardHeader>
+                  <CardHeader className="text-center p-3 sm:p-4">
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-2 sm:mb-3">
+                      <img
+                        src={member.photo_url || "/placeholder.svg"}
+                        alt={member.name}
+                        className="w-full h-full rounded-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-t from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
+                    <CardTitle className="font-display text-sm sm:text-base md:text-lg">
+                      {member.name}
+                    </CardTitle>
+                    <CardDescription className="text-primary font-medium text-xs sm:text-sm">
+                      {member.role}
+                    </CardDescription>
+                  </CardHeader>
 
-                    <CardContent className="p-3 pt-0 md:p-4 md:pt-0 space-y-3">
-                      <p className="text-xs md:text-sm text-muted-foreground leading-relaxed text-center max-h-20 min-h-[4.5rem] overflow-hidden">
-                        {member.description || ""}
-                      </p>
-                      <div className="flex justify-center gap-2 md:gap-3 pt-2">
+                  <CardContent className="p-3 sm:p-4 pt-0 space-y-2">
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed text-center line-clamp-3">
+                      {member.description || ""}
+                    </p>
+                    {(member.github_url || member.linkedin_url) && (
+                      <div className="flex justify-center gap-2 pt-1">
                         {member.github_url && (
                           <Button variant="ghost" size="sm" asChild>
                             <a href={member.github_url} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                              <Github className="w-4 h-4" />
+                              <Github className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </a>
                           </Button>
                         )}
                         {member.linkedin_url && (
                           <Button variant="ghost" size="sm" asChild>
                             <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                              <Linkedin className="w-4 h-4" />
+                              <Linkedin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </a>
                           </Button>
                         )}
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                    )}
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </section>

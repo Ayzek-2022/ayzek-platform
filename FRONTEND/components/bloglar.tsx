@@ -131,25 +131,26 @@ export function BlogExplorer() {
   return (
     <div className="space-y-8">
       {/* Kategori filtreleri: Tümü + dinamik kategoriler */}
-      <div className="flex items-center gap-2 w-full">
+      <div className="flex items-center gap-1.5 sm:gap-2 w-full">
         {uniqueCategories.length > 10 && (
           <Button
             variant="outline"
             size="icon"
             onClick={() => scrollCats("left")}
             aria-label="Kategorileri sola kaydır"
+            className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
         )}
 
         <div ref={catsRef} className="flex-1 max-w-full overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-2 pr-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 pr-2">
             <Button
               key="all"
               variant={selectedCategory === "all" ? "default" : "outline"}
               size="sm"
-              className="text-xs whitespace-nowrap"
+              className="text-[10px] sm:text-xs whitespace-nowrap h-7 sm:h-8 px-2 sm:px-3"
               onClick={() => setSelectedCategory("all")}
             >
               Tümü
@@ -160,7 +161,7 @@ export function BlogExplorer() {
                 key={cat}
                 variant={selectedCategory === cat ? "default" : "outline"}
                 size="sm"
-                className="text-xs whitespace-nowrap"
+                className="text-[10px] sm:text-xs whitespace-nowrap h-7 sm:h-8 px-2 sm:px-3"
                 onClick={() => setSelectedCategory(cat)}
               >
                 {cat}
@@ -168,7 +169,7 @@ export function BlogExplorer() {
             ))}
 
             {uniqueCategories.length === 0 && (
-              <span className="text-xs text-muted-foreground">Kategori bulunamadı</span>
+              <span className="text-[10px] sm:text-xs text-muted-foreground">Kategori bulunamadı</span>
             )}
           </div>
         </div>
@@ -179,87 +180,88 @@ export function BlogExplorer() {
             size="icon"
             onClick={() => scrollCats("right")}
             aria-label="Kategorileri sağa kaydır"
+            className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
         )}
       </div>
 
       {/* Yükleniyor / Hata */}
-      {loading && <div className="text-sm text-muted-foreground">Yükleniyor…</div>}
-      {error && <div className="text-sm text-red-500">{error}</div>}
+      {loading && <div className="text-xs sm:text-sm text-muted-foreground text-center py-4">Yükleniyor…</div>}
+      {error && <div className="text-xs sm:text-sm text-red-500 text-center py-4">{error}</div>}
 
       {/* Blog Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
         {filtered.map((post) => (
           <Card
             key={post.id}
-            className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border-white/10 h-full flex flex-col"
-            style={{ backgroundColor: '#000000' }}
+            className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border border-white/10 h-full flex flex-col relative"
           >
-            {/* Kapak görseli + kategori badge (etkinliklerdeki gibi sağ üst) */}
+            {/* Siyah arka plan katmanı - En altta */}
+            <div className="absolute inset-0 bg-black -z-10" />
+            
+            {/* Kapak görseli + kategori badge */}
             {post.coverImage ? (
-              <div className="relative h-44 flex-shrink-0">
+              <div className="relative h-36 sm:h-40 md:h-44 flex-shrink-0 bg-black">
                 <img
                   src={post.coverImage}
                   alt={post.title}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                <div className="absolute top-3 right-3">
-                  <Badge className="bg-primary text-primary-foreground border-0 shadow-sm">
+                <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10">
+                  <Badge className="bg-primary text-primary-foreground border-0 shadow-sm text-[10px] sm:text-xs">
                     {post.category || "Blog"}
                   </Badge>
                 </div>
               </div>
             ) : (
               // Görsel yoksa: aynı yükseklikte boş alan
-              <div className="relative h-44 flex-shrink-0 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                <div className="absolute top-3 right-3">
-                  <Badge className="bg-primary text-primary-foreground border-0 shadow-sm">
+              <div className="relative h-36 sm:h-40 md:h-44 flex-shrink-0 bg-black flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10" />
+                <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10">
+                  <Badge className="bg-primary text-primary-foreground border-0 shadow-sm text-[10px] sm:text-xs">
                     {post.category || "Blog"}
                   </Badge>
                 </div>
-                <div className="text-muted-foreground/30 text-6xl font-bold">
+                <div className="text-muted-foreground/30 text-4xl sm:text-5xl md:text-6xl font-bold relative z-10">
                   {initials(post.title)}
                 </div>
               </div>
             )}
 
-            <CardContent className="p-6 flex-grow flex flex-col justify-between">
+            <CardContent className="p-4 sm:p-5 md:p-6 flex-grow flex flex-col justify-between bg-black">
               <div>
-                <CardTitle className="font-display text-lg mb-2">
+                <CardTitle className="font-display text-base sm:text-lg mb-1.5 sm:mb-2">
                   {post.title}
                 </CardTitle>
-                <CardDescription className="mb-4 line-clamp-3">
+                <CardDescription className="mb-3 sm:mb-4 line-clamp-3 text-xs sm:text-sm">
                   {post.excerpt}
                 </CardDescription>
 
-                <div className="space-y-2 mb-4 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-[10px] font-semibold">
+                <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4 text-xs sm:text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1.5 sm:gap-2 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-[10px] sm:text-xs">
+                      <span className="inline-flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-primary/20 text-[9px] sm:text-[10px] font-semibold">
                         {initials(post.authorName)}
                       </span>
                       <span className="font-medium">{post.authorName}</span>
                     </span>
-                    <span className="text-foreground/70">{formatDate(post.date)}</span>
+                    <span className="text-foreground/70 text-[10px] sm:text-xs">{formatDate(post.date)}</span>
                   </div>
                 </div>
               </div>
 
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="w-full" onClick={() => setSelectedPost(post)}>
+                  <Button className="w-full text-xs sm:text-sm h-8 sm:h-9 md:h-10" onClick={() => setSelectedPost(post)}>
                     Yazıyı Oku
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-3xl">
                   <DialogHeader>
                     <DialogTitle className="font-display text-2xl">{post.title}</DialogTitle>
-                    <DialogDescription className="text-base">
-                      Teknik makale
-                    </DialogDescription>
                   </DialogHeader>
 
                   {/* Meta bar */}

@@ -33,10 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AnimatedBg />
           <NotificationsProvider>
             <AdminProvider>
-              {/* Mobil/tablette padding kalsın, PC'de sıfırla */}
-              <main className="px-3 sm:px-4 md:px-6 lg:px-0 pt-4 md:pt-6">
-                {children}
-              </main>
+              {children}
             </AdminProvider>
           </NotificationsProvider>
         </ThemeProvider>

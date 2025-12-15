@@ -130,14 +130,14 @@ export function AutoSlidingBanner() {
   };
 
   if (!activeSlides.length) {
-    return <div className="h-[500px] md:h-[600px] rounded-xl bg-muted/40" />;
+    return <div className="h-[280px] sm:h-[360px] md:h-[500px] lg:h-[650px] xl:h-[700px] rounded-lg md:rounded-xl bg-muted/40" />;
   }
 
   return (
     <div
       ref={wrapRef}
       className={[
-        "relative w-full h-[360px] sm:h-[450px] md:h-[550px] lg:h-[600px] overflow-hidden rounded-lg md:rounded-xl",
+        "relative w-full h-[280px] sm:h-[360px] md:h-[500px] lg:h-[650px] xl:h-[700px] overflow-hidden rounded-lg md:rounded-xl",
         "bg-gradient-to-r from-primary/10 to-accent/10",
         // drag sırasında seçim olmasın; dikey kaydırma engellenmesin
         dragging ? "select-none" : "",
@@ -160,9 +160,9 @@ export function AutoSlidingBanner() {
           return (
             <div
               key={slide.id}
-              className="relative w-full h-full flex-shrink-0 flex items-center"
+              className="relative w-full h-full flex-shrink-0 flex items-end pb-8 sm:pb-12 md:pb-16 lg:pb-20"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-background/60 to-background/20 z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/50 to-background/10 z-10" />
               <img
                 src={imgSrc}
                 alt={slide.title}
@@ -172,18 +172,18 @@ export function AutoSlidingBanner() {
                 }}
               />
 
-              <div className="relative z-20 container max-w-screen-xl mx-auto px-4">
-                <div className="max-w-2xl animate-fade-in">
+              <div className="relative z-20 container max-w-screen-xl mx-auto px-4 sm:px-6 w-full">
+                <div className="max-w-3xl animate-fade-in">
                   {slide.subtitle && (
-                    <h2 className="text-[11px] md:text-sm font-medium text-primary mb-1 md:mb-2 tracking-wide uppercase">
+                    <h2 className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-primary mb-1 md:mb-2 tracking-wide uppercase">
                       {slide.subtitle}
                     </h2>
                   )}
-                  <h1 className="text-2xl sm:text-3xl md:text-6xl font-display font-bold mb-3 md:mb-6 text-foreground leading-tight max-w-[92vw] md:max-w-none">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-display font-bold mb-2 sm:mb-3 md:mb-4 text-foreground leading-tight">
                     {slide.title}
                   </h1>
                   {slide.content && (
-                    <p className="text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed md:leading-7 max-w-[92vw] md:max-w-2xl">
+                    <p className="text-xs sm:text-sm md:text-base lg:text-lg text-muted-foreground leading-relaxed max-w-full md:max-w-2xl line-clamp-2 sm:line-clamp-3 md:line-clamp-none">
                       {slide.content}
                     </p>
                   )}
@@ -203,15 +203,15 @@ export function AutoSlidingBanner() {
             aria-label="Önceki"
             disabled={current === 0}
             className={[
-              "absolute left-3 top-1/2 -translate-y-1/2 z-30",
-              "inline-flex items-center justify-center w-11 h-11 rounded-full",
+              "absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-30",
+              "inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full",
               "bg-transparent border border-white/35 hover:border-white/80",
               "backdrop-blur-0",
               "transition focus:outline-none focus:ring-2 focus:ring-white/40",
               current === 0 ? "opacity-50 cursor-not-allowed" : "",
             ].join(" ")}
           >
-            <ChevronLeft className="w-6 h-6 text-white/80" />
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white/80" />
           </button>
 
           <button
@@ -220,8 +220,8 @@ export function AutoSlidingBanner() {
             aria-label="Sonraki"
             disabled={current === activeSlides.length - 1}
             className={[
-              "absolute right-3 top-1/2 -translate-y-1/2 z-30",
-              "inline-flex items-center justify-center w-11 h-11 rounded-full",
+              "absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-30",
+              "inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full",
               "bg-transparent border border-white/35 hover:border-white/80",
               "backdrop-blur-0",
               "transition focus:outline-none focus:ring-2 focus:ring-white/40",
@@ -230,19 +230,19 @@ export function AutoSlidingBanner() {
                 : "",
             ].join(" ")}
           >
-            <ChevronRight className="w-6 h-6 text-white/80" />
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white/80" />
           </button>
         </>
       )}
 
       {/* Nokta göstergeleri */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex space-x-2">
+      <div className="absolute bottom-3 sm:bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-30 flex space-x-1.5 sm:space-x-2">
         {activeSlides.map((_, i) => (
           <button
             key={i}
             type="button"
             onClick={() => goToSlide(i)}
-            className={`w-3 h-3 rounded-full transition-all ${
+            className={`w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 rounded-full transition-all ${
               i === current ? "bg-primary scale-125" : "bg-background/60"
             }`}
             aria-label={`Go to slide ${i + 1}`}

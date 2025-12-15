@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useAdmin } from "@/contexts/admin-context"
-import { Bell, LayoutDashboard, Menu } from "lucide-react"
+import { LayoutDashboard, Menu } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -13,12 +13,8 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 
-interface AdminNavbarProps {
-  onNotificationsClick?: () => void
-}
-
-export function AdminNavbar({ onNotificationsClick }: AdminNavbarProps) {
-  const { isAdminLoggedIn, unreadCount } = useAdmin()
+export function AdminNavbar() {
+  const { isAdminLoggedIn } = useAdmin()
   const [open, setOpen] = useState(false)
 
   const links = [
@@ -69,36 +65,18 @@ export function AdminNavbar({ onNotificationsClick }: AdminNavbarProps) {
           <div className="flex items-center gap-2">
 
             {isAdminLoggedIn && (
-              <>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="w-9 h-9 rounded-full p-0 hover:bg-primary/10 relative"
-                  title="Bildirimler"
-                  onClick={onNotificationsClick}
-                  aria-label="Bildirimler"
-                >
-                  <Bell className="w-4 h-4" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white">
-                      {unreadCount}
-                    </span>
-                  )}
-                </Button>
-
-                <Button
-                  asChild
-                  size="sm"
-                  variant="ghost"
-                  className="w-9 h-9 rounded-full p-0 hover:bg-primary/10 hidden md:inline-flex"
-                  title="Yönetici Paneli"
-                  aria-label="Yönetici Paneli"
-                >
-                  <a href="/admin">
-                    <LayoutDashboard className="w-4 h-4" />
-                  </a>
-                </Button>
-              </>
+              <Button
+                asChild
+                size="sm"
+                variant="ghost"
+                className="w-9 h-9 rounded-full p-0 hover:bg-primary/10 hidden md:inline-flex"
+                title="Yönetici Paneli"
+                aria-label="Yönetici Paneli"
+              >
+                <a href="/admin">
+                  <LayoutDashboard className="w-4 h-4" />
+                </a>
+              </Button>
             )}
 
             {/* Mobil: küçük POPUP menü (Dropdown) */}
