@@ -5,7 +5,7 @@ import { TeamSection } from "@/components/team-section"
 import { MissionValues } from "@/components/mission-values"
 import { CommunityJourney } from "@/components/community-journey"
 import { AdminNavbar } from "@/components/navbar"
-import { InlineEditWrapper } from "@/components/admin-inline-edit-wrapper"
+import { InlineEditWrapper } from "@/components/admin/admin-inline-edit-wrapper"
 import { ContentEditModal } from "@/components/content-edit-modal"
 import { ScrollAnimation } from "@/components/scroll-animations"
 
@@ -40,7 +40,7 @@ export default function AboutPage() {
       <AdminNavbar />
 
       {/* Arka plan desenli Hero Bölümü */}
-      <InlineEditWrapper onEdit={handleEditHero} className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 relative overflow-hidden">
+      <InlineEditWrapper onEdit={handleEditHero} className="py-8 sm:py-10 md:py-14 px-3 sm:px-4 relative overflow-hidden">
         <div className="absolute inset-0 opacity-5">
           <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -53,36 +53,40 @@ export default function AboutPage() {
         </div>
         <div className="container max-w-screen-xl mx-auto text-center relative z-10">
           <ScrollAnimation animation="fade-up">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-display font-bold mb-4 sm:mb-5 md:mb-6 gradient-text leading-tight">{heroContent.title}</h1>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-7 md:mb-8 max-w-3xl mx-auto leading-relaxed px-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-3 sm:mb-4 md:mb-5 gradient-text leading-tight">{heroContent.title}</h1>
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-snug px-2">
               {heroContent.description}
             </p>
           </ScrollAnimation>
         </div>
       </InlineEditWrapper>
 
-      <InlineEditWrapper className="py-10 sm:py-12 md:py-16 px-3 sm:px-4">
+      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4">
         <div className="container max-w-screen-xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 lg:gap-8 text-center">
-            {stats.map((stat, index) => (
-              <ScrollAnimation key={index} animation="scale-up" delay={index * 100}>
-                <div className={`hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 ${stat.color} text-white shadow-lg`}>
-                  <div
-                    className="text-2xl sm:text-3xl font-display font-bold mb-1 sm:mb-2 animate-float"
-                    style={{ animationDelay: `${index * 0.5}s` }}
-                  >
-                    {stat.value}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5 text-center">
+            {stats.map((stat, index) => {
+              // Mobilde çapraz sıralama için order classları
+              const mobileOrder = index === 2 ? "order-4 md:order-none" : index === 3 ? "order-3 md:order-none" : ""
+              return (
+                <ScrollAnimation key={index} animation="scale-up" delay={index * 100}>
+                  <div className={`hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 h-[110px] sm:h-[130px] md:h-[150px] flex flex-col items-center justify-center ${stat.color} text-white shadow-lg ${mobileOrder}`}>
+                    <div
+                      className="text-2xl sm:text-3xl md:text-4xl font-display font-bold mb-0.5 animate-float"
+                      style={{ animationDelay: `${index * 0.5}s` }}
+                    >
+                      {stat.value}
+                    </div>
+                    <div className="text-white/90 text-xs sm:text-sm md:text-base">{stat.label}</div>
                   </div>
-                  <div className="text-white/90 text-xs sm:text-sm md:text-base">{stat.label}</div>
-                </div>
-              </ScrollAnimation>
-            ))}
+                </ScrollAnimation>
+              )
+            })}
           </div>
         </div>
       </InlineEditWrapper>
 
       {/* Misyon & Değerler */}
-      <InlineEditWrapper className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 bg-card/30 theme-transition">
+      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4 bg-card/30 theme-transition">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up">
             <MissionValues />
@@ -91,7 +95,7 @@ export default function AboutPage() {
       </InlineEditWrapper>
 
       {/* Topluluk Yolculuğu */}
-      <InlineEditWrapper className="py-10 sm:py-12 md:py-16 px-3 sm:px-4">
+      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up">
             <CommunityJourney />
@@ -100,7 +104,7 @@ export default function AboutPage() {
       </InlineEditWrapper>
 
       {/* Takım Bölümü */}
-      <InlineEditWrapper className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 bg-card/30">
+      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4 bg-card/30">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up">
             <TeamSection />
@@ -109,10 +113,10 @@ export default function AboutPage() {
       </InlineEditWrapper>
 
       {/* Alt Bilgi */}
-      <footer className="py-8 sm:py-10 md:py-12 px-3 sm:px-4 border-t border-border bg-black/80">
+      <footer className="py-6 sm:py-8 md:py-10 px-3 sm:px-4 border-t border-border bg-black/80">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up">
-            <div className="flex flex-col items-center space-y-4 sm:space-y-5 md:space-y-6">
+            <div className="flex flex-col items-center space-y-3 sm:space-y-4">
             <div className="flex items-center space-x-2">
               <img src="/ayzek-logo.png" alt="AYZEK" className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="text-lg sm:text-xl font-display font-bold text-primary">AYZEK</span>

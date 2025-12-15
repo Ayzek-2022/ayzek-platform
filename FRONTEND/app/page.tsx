@@ -9,7 +9,7 @@ import { ParallaxSection } from "@/components/parallax-section";
 import { HorizontalTimeline } from "@/components/horizontal-timeline";
 import EventGallery from "@/components/event-gallery";
 import { AdminNavbar } from "@/components/navbar";
-import { InlineEditWrapper } from "@/components/admin-inline-edit-wrapper";
+import { InlineEditWrapper } from "@/components/admin/admin-inline-edit-wrapper";
 import { ContentEditModal } from "@/components/content-edit-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -152,47 +152,47 @@ export default function HomePage() {
       </InlineEditWrapper>
 
       {/* HAKKıMıZDA - Poster'ın hemen altında */}
-      <InlineEditWrapper onEdit={handleEditAbout} className="py-12 sm:py-16 md:py-20 lg:py-24 px-3 sm:px-4">
+      <InlineEditWrapper onEdit={handleEditAbout} className="py-4 sm:py-6 md:py-10 px-3 sm:px-4">
         <div className="container max-w-screen-xl mx-auto">
-            <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8 md:mb-12">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 sm:mb-3 md:mb-4 gradient-text">{aboutPreview.title}</h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed px-2 sm:px-4">{aboutPreview.description}</p>
+            <ScrollAnimation animation="fade-up" className="text-center mb-3 sm:mb-4 md:mb-6">
+              <h2 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-display font-bold mb-1.5 sm:mb-2 gradient-text">{aboutPreview.title}</h2>
+            <p className="text-muted-foreground max-w-3xl mx-auto text-[10px] sm:text-xs md:text-sm lg:text-base leading-snug px-2">{aboutPreview.description}</p>
           </ScrollAnimation>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 md:mb-12">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-5">
             <ScrollAnimation animation="slide-in-left" delay={0}>
-              <Card className="hover-lift bg-black/80 backdrop-blur-sm border border-white/10 h-full flex flex-col transition-all duration-300">
-                <CardHeader className="text-center flex-shrink-0 p-3 sm:p-4 md:p-5">
-                  <Users className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-primary mx-auto mb-2 sm:mb-2.5 md:mb-3" />
-                  <CardTitle className="text-base sm:text-lg md:text-xl">Misyonumuz</CardTitle>
+              <Card className="hover-lift bg-black/80 backdrop-blur-sm border border-white/10 h-[160px] sm:h-[200px] md:h-[240px] flex flex-col transition-all duration-300">
+                <CardHeader className="text-center flex-shrink-0 p-2 sm:p-3 md:p-4">
+                  <Users className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-primary mx-auto mb-1 sm:mb-1.5" />
+                  <CardTitle className="text-[10px] sm:text-sm md:text-base lg:text-lg leading-tight mb-0">Misyonumuz</CardTitle>
                 </CardHeader>
-                <CardContent className="flex-grow flex items-center p-3 sm:p-4 md:p-5 pt-0">
-                  <CardDescription className="text-center text-xs sm:text-sm md:text-base leading-relaxed">
+                <CardContent className="flex-grow flex items-center justify-center p-1.5 sm:p-2 md:p-3 pt-0">
+                  <CardDescription className="text-center text-[8px] sm:text-xs md:text-sm leading-tight line-clamp-3 sm:line-clamp-4">
                     Teknoloji çağında birlikte öğrenip gelişerek, faydalı projeler üretmek için bir araya gelmiş bir topluluğuz.
                   </CardDescription>
                 </CardContent>
               </Card>
             </ScrollAnimation>
             <ScrollAnimation animation="scale-up" delay={100}>
-              <Card className="hover-lift bg-black/80 backdrop-blur-sm border border-white/10 h-full flex flex-col transition-all duration-300">
-                <CardHeader className="text-center flex-shrink-0 p-3 sm:p-4 md:p-5">
-                  <Heart className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-primary mx-auto mb-2 sm:mb-2.5 md:mb-3" />
-                  <CardTitle className="text-base sm:text-lg md:text-xl">Değerlerimiz</CardTitle>
+              <Card className="hover-lift bg-black/80 backdrop-blur-sm border border-white/10 h-[160px] sm:h-[200px] md:h-[240px] flex flex-col transition-all duration-300">
+                <CardHeader className="text-center flex-shrink-0 p-2 sm:p-3 md:p-4">
+                  <Heart className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-primary mx-auto mb-1 sm:mb-1.5" />
+                  <CardTitle className="text-[10px] sm:text-sm md:text-base lg:text-lg leading-tight mb-0">Değerlerimiz</CardTitle>
                 </CardHeader>
-                <CardContent className="flex-grow flex items-center p-3 sm:p-4 md:p-5 pt-0">
-                  <CardDescription className="text-center text-xs sm:text-sm md:text-base leading-relaxed">
+                <CardContent className="flex-grow flex items-center justify-center p-1.5 sm:p-2 md:p-3 pt-0">
+                  <CardDescription className="text-center text-[8px] sm:text-xs md:text-sm leading-tight line-clamp-3 sm:line-clamp-4">
                     Bu değerler bizi birbirimize güçlü şekilde bağayarak başarılar inşa etmemizi sağlıyor.
                   </CardDescription>
                 </CardContent>
               </Card>
             </ScrollAnimation>
             <ScrollAnimation animation="slide-in-right" delay={200}>
-              <Card className="hover-lift bg-black/80 backdrop-blur-sm border border-white/10 h-full flex flex-col transition-all duration-300">
-                <CardHeader className="text-center flex-shrink-0 p-3 sm:p-4 md:p-5">
-                  <Rocket className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-primary mx-auto mb-2 sm:mb-2.5 md:mb-3" />
-                  <CardTitle className="text-base sm:text-lg md:text-xl">Başarılarımız</CardTitle>
+              <Card className="hover-lift bg-black/80 backdrop-blur-sm border border-white/10 h-[160px] sm:h-[200px] md:h-[240px] flex flex-col transition-all duration-300">
+                <CardHeader className="text-center flex-shrink-0 p-2 sm:p-3 md:p-4">
+                  <Rocket className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-primary mx-auto mb-1 sm:mb-1.5" />
+                  <CardTitle className="text-[10px] sm:text-sm md:text-base lg:text-lg leading-tight mb-0">Başarılarımız</CardTitle>
                 </CardHeader>
-                <CardContent className="flex-grow flex items-center p-3 sm:p-4 md:p-5 pt-0">
-                  <CardDescription className="text-center text-xs sm:text-sm md:text-base leading-relaxed">
+                <CardContent className="flex-grow flex items-center justify-center p-1.5 sm:p-2 md:p-3 pt-0">
+                  <CardDescription className="text-center text-[8px] sm:text-xs md:text-sm leading-tight line-clamp-3 sm:line-clamp-4">
                     Hackathon zaferleri, açık kaynak projeleri ve topluluk etkinlikleriyle gurur duyuyoruz.
                   </CardDescription>
                 </CardContent>
@@ -200,12 +200,12 @@ export default function HomePage() {
             </ScrollAnimation>
           </div>
           <ScrollAnimation animation="scale-up" delay={300}>
-            <div className="text-center mt-3 sm:mt-4 md:mt-4">
-              <Button asChild className="bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-shimmer text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-11 px-4 sm:px-5 md:px-6">
+            <div className="text-center mt-3 sm:mt-4">
+              <Button asChild className="bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-shimmer text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 md:h-10 px-3 sm:px-4 md:px-5">
                 <a href="/about">
-                  <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                  <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 sm:mr-1.5" />
                   Detayları Gör
-                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1.5 sm:ml-2" />
+                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 sm:ml-1.5" />
                 </a>
               </Button>
             </div>
@@ -215,11 +215,11 @@ export default function HomePage() {
 
       {/* ZAMAN KAPSÜLÜ - Hakkımızda'nın altında */}
       <InlineEditWrapper>
-        <ParallaxSection className="py-10 sm:py-12 md:py-16 px-3 sm:px-4" speed={0.3}>
+        <ParallaxSection className="py-6 sm:py-8 md:py-12 px-3 sm:px-4" speed={0.3}>
           <div className="container max-w-screen-xl mx-auto">
-            <ScrollAnimation animation="fade-up" className="text-center mb-8 sm:mb-10 md:mb-12">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-3 sm:mb-4 gradient-text">Zaman Kapsülü</h2>
-              <p className="text-muted-foreground max-w-3xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed px-3 sm:px-4">
+            <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Zaman Kapsülü</h2>
+              <p className="text-muted-foreground max-w-3xl mx-auto text-xs sm:text-sm md:text-base leading-snug px-2">
                 Topluluğumuzun yolculuğunu interaktif kilometre taşları, başarılar ve bugün kim olduğumuzu şekillendiren unutulmaz anlar aracılığıyla keşfedin.
               </p>
             </ScrollAnimation>
@@ -232,15 +232,15 @@ export default function HomePage() {
         </ParallaxSection>
       </InlineEditWrapper>
 
-      <InlineEditWrapper className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 bg-card/30 theme-transition">
+      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4 bg-card/30 theme-transition">
         <div className="container max-w-screen-xl mx-auto">
-          <ScrollAnimation animation="fade-up" className="text-center mb-8 sm:mb-10 md:mb-12">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-3 sm:mb-4 gradient-text">Yaklaşan Etkinlikler</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base md:text-lg px-3 sm:px-4 leading-relaxed">
+          <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Yaklaşan Etkinlikler</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
               Teknoloji dünyasındaki en son gelişmeleri takip edin ve topluluğumuzla birlikte öğrenin.
             </p>
           </ScrollAnimation>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5 mb-4 sm:mb-5">
             {loading ? (
               <>
                 <EventCardSkeleton />
@@ -253,20 +253,20 @@ export default function HomePage() {
               upcomingEvents.slice(0, 3).map((event: any, index: number) => (
                 <ScrollAnimation key={index} animation="scale-up" delay={index * 100}>
                   <Card
-                    className="hover-lift bg-black/80 backdrop-blur-sm border border-white/10 cursor-pointer transition-all duration-300 h-full flex flex-col"
+                    className="hover-lift bg-black/80 backdrop-blur-sm border border-white/10 cursor-pointer transition-all duration-300 min-h-[160px] sm:min-h-[180px] md:min-h-[200px] flex flex-col"
                     onClick={() => handleEventClick(event)}
                   >
-                    <CardHeader className="p-4 sm:p-5 md:p-6">
-                      <div className="flex items-center justify-between mb-2 gap-2">
-                        <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
-                        <span className="text-xs sm:text-sm text-muted-foreground text-right">
+                    <CardHeader className="p-3 sm:p-4 md:p-5 flex-shrink-0">
+                      <div className="flex items-center justify-between mb-1 sm:mb-1.5 gap-2">
+                        <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                        <span className="text-[10px] sm:text-xs text-muted-foreground text-right">
                           {new Date(event.start_at).toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" })} • {formatTime(event.start_at)}
                         </span>
                       </div>
-                      <CardTitle className="text-base sm:text-lg md:text-xl">{event.title}</CardTitle>
+                      <CardTitle className="text-sm sm:text-base md:text-lg mb-0">{event.title}</CardTitle>
                     </CardHeader>
-                    <CardContent className="p-4 sm:p-5 md:p-6 pt-0 flex-grow">
-                      <CardDescription className="text-sm sm:text-base line-clamp-3 leading-relaxed">{event.description}</CardDescription>
+                    <CardContent className="flex-grow p-3 sm:p-4 md:p-5 pt-0">
+                      <CardDescription className="text-xs sm:text-sm line-clamp-3 leading-snug">{event.description}</CardDescription>
                     </CardContent>
                   </Card>
                 </ScrollAnimation>
@@ -276,12 +276,12 @@ export default function HomePage() {
             )}
           </div>
           <ScrollAnimation animation="scale-up" delay={300}>
-            <div className="text-center mt-4 sm:mt-6 md:mt-8 lg:mt-12">
-              <Button asChild className="bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-shimmer text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-11 px-4 sm:px-5 md:px-6">
+            <div className="text-center mt-3 sm:mt-4 md:mt-5">
+              <Button asChild className="bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-shimmer text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 md:h-10 px-3 sm:px-4 md:px-5">
                 <a href="/events">
-                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                  <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 sm:mr-1.5" />
                   Tüm Etkinlikleri Gör
-                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1.5 sm:ml-2" />
+                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 sm:ml-1.5" />
                 </a>
               </Button>
             </div>
@@ -289,11 +289,11 @@ export default function HomePage() {
         </div>
       </InlineEditWrapper>
 
-      <InlineEditWrapper className="py-10 sm:py-12 md:py-16 px-3 sm:px-4">
+      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4">
         <div className="container max-w-screen-xl mx-auto">
-          <ScrollAnimation animation="fade-up" className="text-center mb-8 sm:mb-10 md:mb-12">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-3 sm:mb-4 gradient-text">Etkinlik Galerisi</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base md:text-lg px-3 sm:px-4 leading-relaxed">
+          <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Etkinlik Galerisi</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
               Geçmiş etkinliklerimizden kareler ve unutulmaz anlar. Her fotoğrafın arkasında bir hikaye var.
             </p>
           </ScrollAnimation>
@@ -304,17 +304,17 @@ export default function HomePage() {
       </InlineEditWrapper>
 
       {/* === Takımlarımız Önizleme (GÜNCELLENEN) === */}
-      <InlineEditWrapper className="py-10 sm:py-12 md:py-16 px-3 sm:px-4">
+      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4">
         <div className="container max-w-screen-xl mx-auto">
-          <ScrollAnimation animation="fade-up" className="text-center mb-8 sm:mb-10 md:mb-12">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-3 sm:mb-4 gradient-text">Takımlarımız</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base md:text-lg px-3 sm:px-4 leading-relaxed">
+          <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Takımlarımız</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
               AYZEK'i ileriye taşıyan ekiplerle tanış. Projelerimizi omuzlayan takımlarımızı keşfet.
             </p>
           </ScrollAnimation>
           
           {/* MOBİL: 2 kolon, TABLET: 2 kolon, DESKTOP: 4 kolon */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-2 sm:mb-3">
             {teamsLoading ? (
               <>
                 <TeamCardSkeleton />
@@ -334,26 +334,26 @@ export default function HomePage() {
                       <div
                         className={[
                           "group cursor-pointer relative overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem]",
-                          "w-full h-[280px] sm:h-[320px] md:h-[370px]",
+                          "w-full h-[200px] sm:h-[240px] md:h-[300px]",
                           "bg-card/70 supports-[backdrop-filter]:bg-card/60 backdrop-blur",
                           "border border-white/15 ring-1 ring-white/10",
-                          "hover:shadow-xl transition-all duration-300 hover:scale-105 p-4 sm:p-5 md:p-6",
-                          "flex flex-col items-center justify-start",
+                          "hover:shadow-xl transition-all duration-300 hover:scale-105 p-3 sm:p-4 md:p-5",
+                          "flex flex-col items-center justify-center",
                         ].join(" ")}
                         aria-label={`${t.name} kartı`}
                       >
                         <div className="pointer-events-none absolute inset-0 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] p-[1px]">
                           <div className={`h-full w-full rounded-[1.4rem] sm:rounded-[1.9rem] md:rounded-[2.4rem] bg-gradient-to-br ${pal.ring} opacity-40`} />
                         </div>
-                        <div className={`relative z-10 mt-2 sm:mt-3 grid place-items-center size-28 sm:size-32 md:size-40 rounded-full bg-gradient-to-br ${pal.ring} shadow-xl ${pal.glow} ring-1 ring-black/20 dark:ring-black/40 overflow-hidden`}>
+                        <div className={`relative z-10 grid place-items-center size-20 sm:size-24 md:size-32 rounded-full bg-gradient-to-br ${pal.ring} shadow-xl ${pal.glow} ring-1 ring-black/20 dark:ring-black/40 overflow-hidden`}>
                           {t.logoUrl ? (
                             <img src={t.logoUrl} alt={t.name} className="h-full w-full object-cover" />
                           ) : (
-                            <Users className="size-6 sm:size-7 md:size-8 text-white/90" />
+                            <Users className="size-5 sm:size-6 md:size-7 text-white/90" />
                           )}
                         </div>
-                        <div className="relative z-10 mt-3 sm:mt-4 text-center">
-                          <div className={`inline-flex items-center rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r ${pal.ring} backdrop-blur-[2px] shadow-md`}>
+                        <div className="relative z-10 mt-2 sm:mt-3 text-center">
+                          <div className={`inline-flex items-center rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-gradient-to-r ${pal.ring} backdrop-blur-[2px] shadow-md`}>
                             {t.name}
                           </div>
                         </div>
@@ -366,12 +366,12 @@ export default function HomePage() {
           </div>
 
           <ScrollAnimation animation="scale-up" delay={400}>
-            <div className="text-center mt-4 sm:mt-6 md:mt-8">
-              <Button asChild className="bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-shimmer text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-11 px-4 sm:px-5 md:px-6">
+            <div className="text-center mt-2 sm:mt-3">
+              <Button asChild className="bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-shimmer text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 md:h-10 px-3 sm:px-4 md:px-5">
                 <Link href="/teams" className="inline-flex items-center">
-                  <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                  <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 sm:mr-1.5" />
                   Tüm Takımlarımızı Gör
-                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1.5 sm:ml-2" />
+                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 sm:ml-1.5" />
                 </Link>
               </Button>
             </div>
@@ -380,11 +380,11 @@ export default function HomePage() {
       </InlineEditWrapper>
 
       {/* === Visitor Feedback üstüne başlık + kısa metin eklendi === */}
-      <InlineEditWrapper className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 bg-card/30 theme-transition">
+      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4">
         <div className="container max-w-screen-xl mx-auto">
-          <ScrollAnimation animation="fade-up" className="text-center mb-8 sm:mb-10 md:mb-12">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-3 sm:mb-4 gradient-text">Topluluğumuzdan Yorumlar</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base md:text-lg px-3 sm:px-4 leading-relaxed">
+          <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Topluluğumuzdan Yorumlar</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
               AYZEK'in hikâyesi, onu birlikte yaşayanların deneyimleriyle anlam kazanıyor. İşte ekipten ve
               kuruculardan kısa notlar.
             </p>
@@ -395,10 +395,10 @@ export default function HomePage() {
         </div>
       </InlineEditWrapper>
 
-      <footer className="py-6 sm:py-8 md:py-10 lg:py-12 px-3 sm:px-4 border-t border-border theme-transition bg-black/80">
+      <footer className="py-6 sm:py-8 md:py-10 px-3 sm:px-4 border-t border-border theme-transition bg-black/80">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-in">
-            <div className="flex flex-col items-center space-y-3 sm:space-y-4 md:space-y-6">
+            <div className="flex flex-col items-center space-y-3 sm:space-y-4">
               <div className="flex items-center space-x-2">
                 <img src="/ayzek-logo.png" alt="AYZEK" className="w-5 h-5 sm:w-6 sm:h-6" />
                 <span className="text-lg sm:text-xl font-display font-bold text-primary">AYZEK</span>

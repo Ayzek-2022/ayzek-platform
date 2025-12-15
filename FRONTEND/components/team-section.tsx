@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Github, Linkedin } from "lucide-react"
@@ -31,6 +31,8 @@ export function TeamSection() {
   const [groupedMembers, setGroupedMembers] = useState<GroupedCrewMembers>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentIndexes, setCurrentIndexes] = useState<Record<string, number>>({});
+  const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     const fetchCrewMembers = async () => {
@@ -39,6 +41,13 @@ export function TeamSection() {
         if (!response.ok) throw new Error("Ekip üyeleri verisi alınamadı.");
         const data: GroupedCrewMembers = await response.json();
         setGroupedMembers(data);
+        
+        // Initialize current indexes for each category
+        const initialIndexes: Record<string, number> = {};
+        Object.keys(data).forEach(key => {
+          initialIndexes[key] = 0;
+        });
+        setCurrentIndexes(initialIndexes);
       } catch (err: any) {
         setError(err.message);
         console.error("Ekip üyeleri çekilirken hata:", err);
@@ -49,14 +58,45 @@ export function TeamSection() {
     fetchCrewMembers();
   }, []);
 
+  const scrollToIndex = (categoryKey: string, index: number) => {
+    const container = scrollRefs.current[categoryKey];
+    if (container) {
+      const cardWidth = container.scrollWidth / (groupedMembers[categoryKey]?.length || 1);
+      container.scrollTo({
+        left: cardWidth * index,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  useEffect(() => {
+    const handleScroll = (categoryKey: string) => {
+      const container = scrollRefs.current[categoryKey];
+      if (!container) return;
+
+      const cardWidth = container.scrollWidth / (groupedMembers[categoryKey]?.length || 1);
+      const newIndex = Math.round(container.scrollLeft / cardWidth);
+      setCurrentIndexes(prev => ({ ...prev, [categoryKey]: newIndex }));
+    };
+
+    Object.keys(groupedMembers).forEach(key => {
+      const container = scrollRefs.current[key];
+      if (container) {
+        const scrollHandler = () => handleScroll(key);
+        container.addEventListener("scroll", scrollHandler);
+        return () => container.removeEventListener("scroll", scrollHandler);
+      }
+    });
+  }, [groupedMembers]);
+
   if (isLoading) return <div className="text-center py-20">Ekibimiz yükleniyor...</div>;
   if (error) return <div className="text-center py-20 text-red-500">Hata: {error}</div>;
 
   return (
-    <div className="space-y-8 sm:space-y-10 md:space-y-12">
+    <div className="space-y-6 sm:space-y-8">
       <div className="text-center">
-        <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-display font-bold mb-2 sm:mb-3 gradient-text">Ekibimizle Tanışın</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Ekibimizle Tanışın</h2>
+        <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
           AYZEK'i teknoloji meraklıları ve yenilikçiler için canlı bir topluluk haline getiren tutkulu bireylerdir.
         </p>
       </div>
@@ -66,60 +106,92 @@ export function TeamSection() {
         if (members.length === 0) return null;
 
         return (
-          <section key={key} className="space-y-3 sm:space-y-4">
-            <h3 className="inline-block text-sm sm:text-base md:text-lg font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg border border-primary/30 bg-primary/5 text-primary shadow-sm">
+          <section key={key} className="space-y-3">
+            <h3 className="inline-block text-sm sm:text-base md:text-lg font-semibold px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/5 text-primary shadow-sm">
               {title}
             </h3>
 
-            {/* Mobil: tek sütun minimalist | sm: 2 sütun | lg+: 3-4 sütun */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-              {members.map((member) => (
-                <Card 
-                  key={member.id}
-                  className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm rounded-xl"
-                >
-                  <CardHeader className="text-center p-3 sm:p-4">
-                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-2 sm:mb-3">
-                      <img
-                        src={member.photo_url || "/placeholder.svg"}
-                        alt={member.name}
-                        className="w-full h-full rounded-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-t from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
-                    <CardTitle className="font-display text-sm sm:text-base md:text-lg">
-                      {member.name}
-                    </CardTitle>
-                    <CardDescription className="text-primary font-medium text-xs sm:text-sm">
-                      {member.role}
-                    </CardDescription>
-                  </CardHeader>
+            <div className="space-y-4">
+              {/* Mobil: yatay kaydırma + küçük kartlar | md+: eski grid */}
+              <div
+                ref={(el) => { scrollRefs.current[key] = el; }}
+                className="
+                  flex gap-2.5 sm:gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4
+                  md:mx-0 md:px-0 md:overflow-visible md:snap-none
+                  md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6
+                  scrollbar-hide
+                "
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              >
+                {members.map((member) => (
+                  <div
+                    key={member.id}
+                    className="
+                      flex-none w-[65vw] sm:w-[55vw] snap-center
+                      md:w-auto md:h-full
+                    "
+                  >
+                    <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm rounded-xl h-full">
+                      <CardHeader className="text-center p-3 md:p-4">
+                        <div className="relative w-16 h-16 md:w-28 md:h-28 mx-auto mb-2">
+                          <img
+                            src={member.photo_url || "/placeholder.svg"}
+                            alt={member.name}
+                            className="w-full h-full rounded-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          />
+                          <div className="absolute inset-0 rounded-full bg-gradient-to-t from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </div>
+                        <CardTitle className="font-display text-sm md:text-xl">
+                          {member.name}
+                        </CardTitle>
+                        <CardDescription className="text-primary font-medium text-xs md:text-base">
+                          {member.role}
+                        </CardDescription>
+                      </CardHeader>
 
-                  <CardContent className="p-3 sm:p-4 pt-0 space-y-2">
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed text-center line-clamp-3">
-                      {member.description || ""}
-                    </p>
-                    {(member.github_url || member.linkedin_url) && (
-                      <div className="flex justify-center gap-2 pt-1">
-                        {member.github_url && (
-                          <Button variant="ghost" size="sm" asChild>
-                            <a href={member.github_url} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                              <Github className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            </a>
-                          </Button>
-                        )}
-                        {member.linkedin_url && (
-                          <Button variant="ghost" size="sm" asChild>
-                            <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                              <Linkedin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+                      <CardContent className="p-3 pt-0 md:p-4 md:pt-0 space-y-2">
+                        <p className="text-[10px] md:text-sm text-muted-foreground leading-tight text-center min-h-[3rem] overflow-hidden">
+                          {member.description || ""}
+                        </p>
+                        <div className="flex justify-center gap-2 md:gap-3 pt-1">
+                          {member.github_url && (
+                            <Button variant="ghost" size="sm" asChild>
+                              <a href={member.github_url} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                                <Github className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                              </a>
+                            </Button>
+                          )}
+                          {member.linkedin_url && (
+                            <Button variant="ghost" size="sm" asChild>
+                              <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                                <Linkedin className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                              </a>
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ))}
+              </div>
+
+              {/* Dot Navigation - Mobile only */}
+              {members.length > 1 && (
+                <div className="flex justify-center gap-2 md:hidden">
+                  {members.map((_, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => scrollToIndex(key, index)}
+                      className={`
+                        w-2 h-2 rounded-full transition-all duration-300
+                        ${index === (currentIndexes[key] || 0) ? "bg-primary scale-125" : "bg-muted-foreground/40"}
+                      `}
+                      aria-label={`${index + 1}. üyeye git`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </section>
         );

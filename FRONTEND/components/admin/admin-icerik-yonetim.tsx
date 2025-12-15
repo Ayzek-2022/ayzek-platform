@@ -1,0 +1,164 @@
+"use client"
+
+import { useState } from "react"
+import { useAdmin } from "@/contexts/admin-context"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Home, Clock, Images, Users, FileText, UsersIcon, Briefcase } from "lucide-react"
+import { PosterManagement } from "@/components/admin/poster-management"
+import { TimelineManagement } from "@/components/admin/timeline-management"
+import { GalleryManagement } from "@/components/admin/gallery-management"
+import { JourneyManagement } from "@/components/admin/journey-management"
+import { BlogManagement } from "@/components/admin/blog-management"
+import { TeamManagement } from "@/components/admin/team-management"
+import { CrewManagement } from "@/components/admin/crew-management"
+
+export default function ContentManagementTab() {
+  const { addNotification } = useAdmin()
+  const [posterCount] = useState(5) // Örnek değer
+  const [timelineCount] = useState(3)
+  const [galleryCount] = useState(9)
+
+  const handleNotify = (message: string) => {
+    addNotification({ type: "system", title: "Başarılı", message, read: false })
+  }
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Ana Sayfa Poster Alanı */}
+      <Card className="bg-gradient-to-br from-card/80 to-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Home className="w-5 h-5 text-primary" />
+            </div>
+            Ana Sayfa Poster Alanı
+          </CardTitle>
+          <CardDescription>Ana sayfa banner ve hero bölümünü yönetin</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-center px-3 py-2 rounded-lg bg-muted/50">
+            <span className="text-sm font-medium">Toplam Poster:</span>
+            <span className="text-2xl font-bold text-primary">{posterCount}</span>
+          </div>
+          <PosterManagement onNotify={handleNotify} />
+        </CardContent>
+      </Card>
+
+      {/* Anasayfa Zaman Kapsülü */}
+      <Card className="bg-gradient-to-br from-card/80 to-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-accent/10">
+              <Clock className="w-5 h-5 text-accent" />
+            </div>
+            Anasayfa Zaman Kapsülü
+          </CardTitle>
+          <CardDescription>Timeline etkinliklerini ve kilometre taşlarını yönetin</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-center px-3 py-2 rounded-lg bg-muted/50">
+            <span className="text-sm font-medium">Toplam Kilometre Taşı:</span>
+            <span className="text-2xl font-bold text-accent">{timelineCount}</span>
+          </div>
+          <TimelineManagement onNotify={handleNotify} />
+        </CardContent>
+      </Card>
+
+      {/* Etkinlik Galerisi */}
+      <Card className="bg-gradient-to-br from-card/80 to-card/50 border-orange-500/20 hover:border-orange-500/40 transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-orange-500/10">
+              <Images className="w-5 h-5 text-orange-500" />
+            </div>
+            Etkinlik Galerisi
+          </CardTitle>
+          <CardDescription>Ana sayfa ve etkinlik sayfası galerilerini yönetin</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-center px-3 py-2 rounded-lg bg-muted/50">
+            <span className="text-sm font-medium">Toplam Görsel:</span>
+            <span className="text-2xl font-bold text-orange-500">{galleryCount}</span>
+          </div>
+          <GalleryManagement onNotify={handleNotify} />
+        </CardContent>
+      </Card>
+
+      {/* Yolculuğumuz */}
+      <Card className="bg-gradient-to-br from-card/80 to-card/50 border-blue-500/20 hover:border-blue-500/40 transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-blue-500/10">
+              <Users className="w-5 h-5 text-blue-500" />
+            </div>
+            Yolculuğumuz
+          </CardTitle>
+          <CardDescription>Yıl seçip o yıla ait kişileri (yönetim vb.) ekleyin</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="px-3 py-2 rounded-lg bg-muted/50">
+            <p className="text-sm text-muted-foreground">Yıl seçerek kişi ekleyip düzenleyin</p>
+          </div>
+          <JourneyManagement onNotify={handleNotify} />
+        </CardContent>
+      </Card>
+
+      {/* Bloglar */}
+      <Card className="bg-gradient-to-br from-card/80 to-card/50 border-green-500/20 hover:border-green-500/40 transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-green-500/10">
+              <FileText className="w-5 h-5 text-green-500" />
+            </div>
+            Bloglar
+          </CardTitle>
+          <CardDescription>Blog yazılarını oluşturun ve yönetin</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="px-3 py-2 rounded-lg bg-muted/50">
+            <p className="text-sm text-muted-foreground">Topluluk blog yazılarını yönetin</p>
+          </div>
+          <BlogManagement onNotify={handleNotify} />
+        </CardContent>
+      </Card>
+
+      {/* Takımlar */}
+      <Card className="bg-gradient-to-br from-card/80 to-card/50 border-purple-500/20 hover:border-purple-500/40 transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-purple-500/10">
+              <Briefcase className="w-5 h-5 text-purple-500" />
+            </div>
+            Takımlar
+          </CardTitle>
+          <CardDescription>Yarışma ve proje takımlarını yönetin</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="px-3 py-2 rounded-lg bg-muted/50">
+            <p className="text-sm text-muted-foreground">Takım ve üyelerini ekleyin</p>
+          </div>
+          <TeamManagement onNotify={handleNotify} />
+        </CardContent>
+      </Card>
+
+      {/* Ekibimiz */}
+      <Card className="bg-gradient-to-br from-card/80 to-card/50 border-pink-500/20 hover:border-pink-500/40 transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-pink-500/10">
+              <UsersIcon className="w-5 h-5 text-pink-500" />
+            </div>
+            Ekibimiz
+          </CardTitle>
+          <CardDescription>Kategorilere göre ekip üyelerini yönetin</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="px-3 py-2 rounded-lg bg-muted/50">
+            <p className="text-sm text-muted-foreground">4 kategori: Başkan, Sosyal Medya, Etkinlik, Eğitim</p>
+          </div>
+          <CrewManagement onNotify={handleNotify} />
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

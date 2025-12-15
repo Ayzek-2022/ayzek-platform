@@ -4,6 +4,13 @@ import { AdminNavbar } from "@/components/navbar"
 import { ScrollAnimation } from "@/components/scroll-animations"
 import { BlogExplorer } from "@/components/bloglar"
 
+const blogStats = [
+  { value: "25+", label: "Bu Yıl Etkinlik", color: "bg-purple-500/90" },
+  { value: "500+", label: "Toplam Katılımcı", color: "bg-green-500/90" },
+  { value: "5", label: "Mekan Ortağı", color: "bg-purple-500/90" },
+  { value: "1000+", label: "Öğrenme Saati", color: "bg-green-500/90" },
+]
+
 export default function JoinPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-card to-muted theme-transition">
@@ -11,7 +18,7 @@ export default function JoinPage() {
       <AdminNavbar />
 
       {/* Hero Section with Background Pattern */}
-      <section className="py-12 sm:py-14 md:py-16 px-3 sm:px-4 relative overflow-hidden">
+      <section className="py-8 sm:py-10 md:py-14 px-3 sm:px-4 relative overflow-hidden">
         <div className="absolute inset-0 opacity-5">
           <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -24,22 +31,47 @@ export default function JoinPage() {
         </div>
         <div className="container max-w-screen-xl mx-auto text-center relative z-10">
           <ScrollAnimation animation="fade-up">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-display font-bold mb-4 sm:mb-5 md:mb-6 gradient-text leading-tight pb-1 sm:pb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-3 sm:mb-4 gradient-text leading-tight">
               Bloglar
             </h1>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-7 md:mb-8 max-w-3xl mx-auto leading-relaxed px-2">
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-snug px-2">
               Geleceğe heyecanla bakan, hızla gelişen teknolojide kendine yer bulanlar: AYZEK Takımları!
             </p>
           </ScrollAnimation>
         </div>
       </section>
 
-      {/* Blog */}
-      <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4">
+      {/* Blog Stats */}
+      <section className="py-6 sm:py-8 md:py-10 px-3 sm:px-4">
         <div className="container max-w-screen-xl mx-auto">
-          <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8 md:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold mb-3 sm:mb-4 md:mb-6 gradient-text">Teknik Makaleler</h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed px-2 sm:px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5 text-center">
+            {blogStats.map((stat, index) => {
+              // Mobilde çapraz sıralama için order classları
+              const mobileOrder = index === 2 ? "order-4 md:order-none" : index === 3 ? "order-3 md:order-none" : ""
+              return (
+                <ScrollAnimation key={index} animation="scale-up" delay={index * 100}>
+                  <div className={`hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 h-[110px] sm:h-[130px] md:h-[150px] flex flex-col items-center justify-center ${stat.color} text-white shadow-lg ${mobileOrder}`}>
+                    <div
+                      className="text-2xl sm:text-3xl md:text-4xl font-display font-bold mb-0.5 animate-float"
+                      style={{ animationDelay: `${index * 0.5}s` }}
+                    >
+                      {stat.value}
+                    </div>
+                    <div className="text-white/90 text-xs sm:text-sm md:text-base">{stat.label}</div>
+                  </div>
+                </ScrollAnimation>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Blog */}
+      <section className="py-8 sm:py-10 md:py-14 px-3 sm:px-4">
+        <div className="container max-w-screen-xl mx-auto">
+          <ScrollAnimation animation="fade-up" className="text-center mb-5 sm:mb-6 md:mb-8">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 sm:mb-3 gradient-text">Teknik Makaleler</h2>
+            <p className="text-muted-foreground max-w-3xl mx-auto text-xs sm:text-sm md:text-base leading-relaxed px-2">
               Teknoloji dünyasındaki en son gelişmeleri takip edin ve topluluğumuzla birlikte öğrenin. Yapay zeka, yazılım geliştirme ve daha fazlası hakkında derinlemesine yazılar.
             </p>
           </ScrollAnimation>
@@ -50,10 +82,10 @@ export default function JoinPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 sm:py-10 md:py-12 px-3 sm:px-4 border-t border-border bg-black/80">
+      <footer className="py-6 sm:py-8 md:py-10 px-3 sm:px-4 border-t border-border bg-black/80">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up">
-            <div className="flex flex-col items-center space-y-4 sm:space-y-5 md:space-y-6">
+            <div className="flex flex-col items-center space-y-3 sm:space-y-4">
             <div className="flex items-center space-x-2">
               <img src="/ayzek-logo.png" alt="AYZEK" className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="text-lg sm:text-xl font-display font-bold text-primary">AYZEK</span>

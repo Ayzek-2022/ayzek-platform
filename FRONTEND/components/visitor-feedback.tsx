@@ -96,9 +96,9 @@ export function VisitorFeedback() {
       <div
         ref={scrollContainerRef}
         className="
-          flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4
+          flex gap-2.5 sm:gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4
           md:mx-0 md:px-0 md:overflow-visible md:snap-none
-          md:grid md:grid-cols-3 md:gap-5 lg:gap-6
+          md:grid md:grid-cols-3 md:gap-4 lg:gap-6
           scrollbar-hide
         "
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
@@ -107,22 +107,22 @@ export function VisitorFeedback() {
           <div
             key={testimonial.id}
             className="
-              flex-none w-[75vw] sm:w-[65vw] snap-center
+              flex-none w-[72vw] sm:w-[60vw] snap-center
               md:w-auto
             "
           >
-            <Card className="group hover:shadow-lg transition-all duration-300 bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm h-full">
-              <CardHeader className="text-center p-3 sm:p-4 md:p-5">
+            <Card className="group hover:shadow-lg transition-all duration-300 bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm min-h-[180px] sm:min-h-[200px] md:min-h-[220px] flex flex-col">
+              <CardHeader className="text-center flex-shrink-0 p-3 sm:p-3.5 md:p-4">
                 <img
                   src={testimonial.avatar || "/placeholder.svg"}
                   alt="Profil fotoğrafı"
-                  className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full mx-auto mb-2 sm:mb-3 object-cover"
+                  className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-full mx-auto mb-1.5 object-cover"
                 />
-                <CardTitle className="font-display text-sm sm:text-base md:text-lg">{testimonial.name}</CardTitle>
-                <p className="text-xs sm:text-sm text-muted-foreground">{testimonial.role}</p>
+                <CardTitle className="font-display text-sm sm:text-base md:text-lg mb-0.5">{testimonial.name}</CardTitle>
+                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">{testimonial.role}</p>
               </CardHeader>
-              <CardContent className="p-3 sm:p-4 md:p-5 pt-0">
-                <p className="text-xs sm:text-sm text-center italic line-clamp-4">
+              <CardContent className="flex-grow p-3 sm:p-3.5 md:p-4 pt-0">
+                <p className="text-[10px] sm:text-xs md:text-sm text-center italic line-clamp-3">
                   "{testimonial.content}"
                 </p>
               </CardContent>

@@ -48,7 +48,7 @@ export default function JoinPage() {
       <AdminNavbar />
 
       {/* Hero Section with Background Pattern */}
-      <section className="py-12 sm:py-14 md:py-16 px-3 sm:px-4 relative overflow-hidden">
+      <section className="py-8 sm:py-10 md:py-14 px-3 sm:px-4 relative overflow-hidden">
         <div className="absolute inset-0 opacity-5">
           <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -61,10 +61,10 @@ export default function JoinPage() {
         </div>
         <div className="container max-w-screen-xl mx-auto text-center relative z-10">
           <ScrollAnimation animation="fade-up">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-display font-bold mb-4 sm:mb-5 md:mb-6 gradient-text leading-tight pb-1 sm:pb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-3 sm:mb-4 gradient-text leading-tight">
               Topluluğumuza Katıl
             </h1>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-7 md:mb-8 max-w-3xl mx-auto leading-relaxed px-2">
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-snug px-2">
               Yeniliğin işbirliğiyle buluştuğu canlı bir teknoloji topluluğunun parçası olun. Teknoloji konusunda
               tutkulu, benzer düşünen bireylerle bağlantı kurun, öğrenin ve büyüyün.
             </p>
@@ -73,32 +73,32 @@ export default function JoinPage() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 bg-card/30 theme-transition">
+      <section className="py-6 sm:py-8 md:py-12 px-3 sm:px-4 bg-card/30 theme-transition">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up">
-            <div className="text-center mb-8 sm:mb-10 md:mb-12 px-3 sm:px-4">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 sm:mb-3 gradient-text">Neden AYZEK'e Katılmalısınız?</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base">
+            <div className="text-center mb-4">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Neden AYZEK'e Katılmalısınız?</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
                 Gelişen teknoloji topluluğumuzun parçası olmanın avantajlarını keşfedin
               </p>
             </div>
           </ScrollAnimation>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
             {benefits.map((benefit, index) => {
               const Icon = benefit.icon
               return (
                 <ScrollAnimation key={index} animation="scale-up" delay={index * 100}>
                   <Card
-                    className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-black/80 backdrop-blur-sm border border-white/10 rounded-xl h-full flex flex-col"
+                    className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-black/80 backdrop-blur-sm border border-white/10 rounded-xl h-[220px] sm:h-[240px] md:h-[250px] flex flex-col overflow-hidden"
                   >
-                    <CardHeader className="text-center flex-shrink-0 p-4 sm:p-5 md:p-6">
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mx-auto mb-3 rounded-full bg-ayzek-gradient/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <Icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-primary" />
+                    <CardHeader className="text-center flex-shrink-0 p-2.5 sm:p-3 md:p-3.5">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 mx-auto mb-1 rounded-full bg-ayzek-gradient/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
                       </div>
-                      <CardTitle className="font-display text-base sm:text-lg md:text-xl">{benefit.title}</CardTitle>
+                      <CardTitle className="font-display text-[11px] sm:text-xs md:text-sm mb-0">{benefit.title}</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex-grow p-4 sm:p-5 md:p-6 pt-0">
-                      <CardDescription className="text-center leading-relaxed text-sm sm:text-base">{benefit.description}</CardDescription>
+                    <CardContent className="flex-grow flex items-center justify-center p-2.5 sm:p-3 md:p-3.5 pt-0 overflow-hidden">
+                      <CardDescription className="text-center leading-tight text-[9px] sm:text-[10px] md:text-xs">{benefit.description}</CardDescription>
                     </CardContent>
                   </Card>
                 </ScrollAnimation>
@@ -109,7 +109,7 @@ export default function JoinPage() {
       </section>
 
       {/* Join Form */}
-      <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4">
+      <section className="py-6 sm:py-8 md:py-12 px-3 sm:px-4">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up">
             <JoinCommunityForm />
@@ -118,57 +118,57 @@ export default function JoinPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 bg-card/30 theme-transition">
+      <section className="py-6 sm:py-8 md:py-12 px-3 sm:px-4 bg-card/30 theme-transition">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up">
-            <div className="text-center mb-8 sm:mb-10 md:mb-12 px-3 sm:px-4">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold gradient-text">Sıkça Sorulan Sorular</h2>
+            <div className="text-center mb-4">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Sıkça Sorulan Sorular</h2>
             </div>
           </ScrollAnimation>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
             <ScrollAnimation animation="fade-up" delay={0}>
-              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-full flex flex-col">
-                <CardHeader className="p-4 sm:p-5">
-                  <CardTitle className="text-base sm:text-lg md:text-xl">Hiç Bir Şey Bilmiyorum, Yinede Topluluğa Katılabilir miyim?</CardTitle>
+              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-[220px] sm:h-[240px] md:h-[250px] flex flex-col overflow-hidden">
+                <CardHeader className="flex-shrink-0 p-2.5 sm:p-3 md:p-3.5">
+                  <CardTitle className="text-[11px] sm:text-xs md:text-sm leading-tight">Hiç Bir Şey Bilmiyorum, Yinede Topluluğa Katılabilir miyim?</CardTitle>
                 </CardHeader>
-                <CardContent className="flex-grow p-4 sm:p-5 pt-0">
-                  <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+                <CardContent className="flex-grow flex items-center justify-center p-2.5 sm:p-3 md:p-3.5 pt-0 overflow-hidden">
+                  <p className="text-muted-foreground text-[9px] sm:text-[10px] md:text-xs leading-tight">
                     Evet, katılabilirsiniz. Topluluğumuz sıfırdan başlayarak ilerlemeye bu süreçte de ekip ruhu, çalışma disiplini ve özveri gibi iş hayatında maruz kalacağınız bir çok şeyde sizlere tecrübe katacaktır.
                   </p>
                 </CardContent>
               </Card>
             </ScrollAnimation>
             <ScrollAnimation animation="fade-up" delay={100}>
-              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-full flex flex-col">
-                <CardHeader className="p-4 sm:p-5">
-                  <CardTitle className="text-base sm:text-lg md:text-xl">Topluluğa Nasıl Üye Olabilirim?</CardTitle>
+              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-[220px] sm:h-[240px] md:h-[250px] flex flex-col overflow-hidden">
+                <CardHeader className="flex-shrink-0 p-2.5 sm:p-3 md:p-3.5">
+                  <CardTitle className="text-[11px] sm:text-xs md:text-sm leading-tight">Topluluğa Nasıl Üye Olabilirim?</CardTitle>
                 </CardHeader>
-                <CardContent className="flex-grow p-4 sm:p-5 pt-0">
-                  <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+                <CardContent className="flex-grow flex items-center justify-center p-2.5 sm:p-3 md:p-3.5 pt-0 overflow-hidden">
+                  <p className="text-muted-foreground text-[9px] sm:text-[10px] md:text-xs leading-tight">
                     Topluluğa katıl butonuna tıklayarak karşınıza gelen formu doldurmalısınız.
                   </p>
                 </CardContent>
               </Card>
             </ScrollAnimation>
             <ScrollAnimation animation="fade-up" delay={200}>
-              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-full flex flex-col">
-                <CardHeader className="p-4 sm:p-5">
-                  <CardTitle className="text-base sm:text-lg md:text-xl">Etkinliklerden Nasıl Haberdar Olabilirim?</CardTitle>
+              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-[220px] sm:h-[240px] md:h-[250px] flex flex-col overflow-hidden">
+                <CardHeader className="flex-shrink-0 p-2.5 sm:p-3 md:p-3.5">
+                  <CardTitle className="text-[11px] sm:text-xs md:text-sm leading-tight">Etkinliklerden Nasıl Haberdar Olabilirim?</CardTitle>
                 </CardHeader>
-                <CardContent className="flex-grow p-4 sm:p-5 pt-0">
-                  <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+                <CardContent className="flex-grow flex items-center justify-center p-2.5 sm:p-3 md:p-3.5 pt-0 overflow-hidden">
+                  <p className="text-muted-foreground text-[9px] sm:text-[10px] md:text-xs leading-tight">
                     WhatsApp gruplarımız, Instagram ve Linkedln hesaplarımızı takip ederek duyurulara anında ulaşabilir ve etkinliklerimize katılabilirsiniz.
                   </p>
                 </CardContent>
               </Card>
             </ScrollAnimation>
             <ScrollAnimation animation="fade-up" delay={300}>
-              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-full flex flex-col">
-                <CardHeader className="p-4 sm:p-5">
-                  <CardTitle className="text-base sm:text-lg md:text-xl">Onay ne kadar sürer?</CardTitle>
+              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-[220px] sm:h-[240px] md:h-[250px] flex flex-col overflow-hidden">
+                <CardHeader className="flex-shrink-0 p-2.5 sm:p-3 md:p-3.5">
+                  <CardTitle className="text-[11px] sm:text-xs md:text-sm leading-tight">Onay ne kadar sürer?</CardTitle>
                 </CardHeader>
-                <CardContent className="flex-grow p-4 sm:p-5 pt-0">
-                  <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+                <CardContent className="flex-grow flex items-center justify-center p-2.5 sm:p-3 md:p-3.5 pt-0 overflow-hidden">
+                  <p className="text-muted-foreground text-[9px] sm:text-[10px] md:text-xs leading-tight">
                     Çoğu başvuru 24-48 saat içinde incelenir ve tarafınıza iletilir.
                   </p>
                 </CardContent>
@@ -179,10 +179,10 @@ export default function JoinPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 sm:py-10 md:py-12 px-3 sm:px-4 border-t border-border bg-black/80">
+      <footer className="py-6 sm:py-8 md:py-10 px-3 sm:px-4 border-t border-border bg-black/80">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up">
-            <div className="flex flex-col items-center space-y-4 sm:space-y-5 md:space-y-6">
+            <div className="flex flex-col items-center space-y-3 sm:space-y-4">
             <div className="flex items-center space-x-2">
               <img src="/ayzek-logo.png" alt="AYZEK" className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="text-lg sm:text-xl font-display font-bold text-primary">AYZEK</span>

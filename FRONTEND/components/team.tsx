@@ -34,22 +34,22 @@ function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: strin
       <button
         onClick={() => setOpen(true)}
         className={[
-          "group relative overflow-hidden rounded-[2.5rem]",
-          "w-full h-[340px] md:h-[370px]",
+          "group relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem]",
+          "w-full h-[240px] sm:h-[280px] md:h-[340px]",
           "bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/60",
           "border border-white/15",
           "ring-1 ring-white/10",
           "hover:shadow-xl transition-shadow",
-          "flex flex-col items-center justify-start p-6",
+          "flex flex-col items-center justify-center p-4 sm:p-5 md:p-6",
         ].join(" ")}
         aria-label={`${team.name} kartı`}
       >
-        <div className="pointer-events-none absolute inset-0 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] p-[1px]">
-          <div className={`h-full w-full rounded-[1.4rem] sm:rounded-[1.9rem] md:rounded-[2.4rem] bg-gradient-to-br ${palette.ring} opacity-40`} />
+        <div className="pointer-events-none absolute inset-0 rounded-[1.9rem] md:rounded-[2.4rem] p-[1px]">
+          <div className={`h-full w-full rounded-[1.8rem] md:rounded-[2.3rem] bg-gradient-to-br ${palette.ring} opacity-40`} />
         </div>
 
         {/* DÜZENLEME: Anasayfadaki canlı görünüm için 'z-10', 'ring-black/20' ve 'dark:ring-black/40' sınıfları eklendi. */}
-        <div className={`relative z-10 mt-2 sm:mt-3 grid place-items-center size-28 sm:size-32 md:size-40 rounded-full bg-gradient-to-br ${palette.ring} shadow-xl ${palette.glow} ring-1 ring-black/20 dark:ring-black/40 overflow-hidden`}>
+        <div className={`relative z-10 grid place-items-center size-20 sm:size-24 md:size-32 rounded-full bg-gradient-to-br ${palette.ring} shadow-xl ${palette.glow} ring-1 ring-black/20 dark:ring-black/40 overflow-hidden`}>
           {team.logoUrl ? (
             <Image 
               src={team.logoUrl} 
@@ -59,22 +59,22 @@ function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: strin
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <Users className="size-6 sm:size-7 md:size-8 text-white/90" />
+            <Users className="size-5 sm:size-6 md:size-7 text-white/90" />
           )}
         </div>
         
-        <div className="relative z-10 mt-3 sm:mt-4 md:mt-5 w-full px-2 sm:px-3 text-center">
+        <div className="relative z-10 mt-2 sm:mt-3 md:mt-4 w-full px-2 sm:px-3 text-center">
           {team.about ? (
-            <p className="text-xs sm:text-sm text-white/75 leading-relaxed line-clamp-2">
+            <p className="text-[10px] sm:text-xs md:text-sm text-white/75 leading-tight line-clamp-2">
               {team.about}
             </p>
           ) : (
-            <p className="text-xs sm:text-sm text-white/60 line-clamp-2">&nbsp;</p>
+            <p className="text-[10px] sm:text-xs md:text-sm text-white/60 line-clamp-2">&nbsp;</p>
           )}
         </div>
 
-        <div className="relative z-10 mt-3 sm:mt-4 text-center">
-          <div className={`inline-flex items-center rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r ${palette.ring} backdrop-blur-[2px] shadow-md`}>
+        <div className="relative z-10 mt-2 sm:mt-3 text-center">
+          <div className={`inline-flex items-center rounded-full px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-gradient-to-r ${palette.ring} backdrop-blur-[2px] shadow-md`}>
             {team.name}
           </div>
         </div>

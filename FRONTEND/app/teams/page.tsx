@@ -12,7 +12,7 @@ export default function JoinPage() {
       <AdminNavbar />
 
       {/* Hero Section with Background Pattern */}
-      <section className="py-12 sm:py-14 md:py-16 px-3 sm:px-4 relative overflow-hidden">
+      <section className="py-8 sm:py-10 md:py-14 px-3 sm:px-4 relative overflow-hidden">
         <div className="absolute inset-0 opacity-5">
           <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -25,8 +25,8 @@ export default function JoinPage() {
         </div>
         <div className="container max-w-screen-xl mx-auto text-center relative z-10">
           <ScrollAnimation animation="fade-up">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-display font-bold mb-4 sm:mb-5 md:mb-6 gradient-text leading-tight">Takımlarımız</h1>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-7 md:mb-8 max-w-3xl mx-auto leading-relaxed px-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-3 sm:mb-4 gradient-text leading-tight">Takımlarımız</h1>
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-snug px-2">
               Kısa ve anlaşılır teknik yazılar: Yapay Zeka, Algoritma, Web ve daha fazlası. Kategorini seç, blog kartlarını keşfet; ilham al ve öğrenimini pekiştir.
             </p>
           </ScrollAnimation>
@@ -34,34 +34,34 @@ export default function JoinPage() {
       </section>
 
       {/* Quick Stats */}
-      <section className="py-6 sm:py-7 md:py-8 px-3 sm:px-4">
+      <section className="py-6 sm:py-8 md:py-10 px-3 sm:px-4">
         <div className="container max-w-screen-xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 lg:gap-8 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5 text-center">
             <ScrollAnimation animation="scale-up" delay={0}>
-              <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 bg-purple-500/90 text-white shadow-lg">
-                <div className="text-2xl sm:text-3xl font-display font-bold mb-1 sm:mb-2 animate-float">8+</div>
+              <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 h-[110px] sm:h-[130px] md:h-[150px] flex flex-col items-center justify-center bg-purple-500/90 text-white shadow-lg">
+                <div className="text-2xl sm:text-3xl font-display font-bold mb-0.5 animate-float">8+</div>
                 <div className="text-white/90 text-xs sm:text-sm md:text-base">Aktif Takım</div>
               </div>
             </ScrollAnimation>
             <ScrollAnimation animation="scale-up" delay={100}>
-              <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 bg-green-500/90 text-white shadow-lg">
-                <div className="text-2xl sm:text-3xl font-display font-bold mb-1 sm:mb-2 animate-float" style={{ animationDelay: "0.5s" }}>
+              <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 h-[110px] sm:h-[130px] md:h-[150px] flex flex-col items-center justify-center bg-green-500/90 text-white shadow-lg">
+                <div className="text-2xl sm:text-3xl font-display font-bold mb-0.5 animate-float" style={{ animationDelay: "0.5s" }}>
                   10+
                 </div>
                 <div className="text-white/90 text-xs sm:text-sm md:text-base">Teknofest Ödülü</div>
               </div>
             </ScrollAnimation>
             <ScrollAnimation animation="scale-up" delay={200}>
-              <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 bg-purple-500/90 text-white shadow-lg">
-                <div className="text-2xl sm:text-3xl font-display font-bold mb-1 sm:mb-2 animate-float" style={{ animationDelay: "1s" }}>
+              <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 h-[110px] sm:h-[130px] md:h-[150px] flex flex-col items-center justify-center bg-purple-500/90 text-white shadow-lg order-4 md:order-none">
+                <div className="text-2xl sm:text-3xl font-display font-bold mb-0.5 animate-float" style={{ animationDelay: "1s" }}>
                   50+
                 </div>
                 <div className="text-white/90 text-xs sm:text-sm md:text-base">Takım Üyesi</div>
               </div>
             </ScrollAnimation>
             <ScrollAnimation animation="scale-up" delay={300}>
-              <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 bg-green-500/90 text-white shadow-lg">
-                <div className="text-2xl sm:text-3xl font-display font-bold mb-1 sm:mb-2 animate-float" style={{ animationDelay: "1.5s" }}>
+              <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 h-[110px] sm:h-[130px] md:h-[150px] flex flex-col items-center justify-center bg-green-500/90 text-white shadow-lg order-3 md:order-none">
+                <div className="text-2xl sm:text-3xl font-display font-bold mb-0.5 animate-float" style={{ animationDelay: "1.5s" }}>
                   15+
                 </div>
                 <div className="text-white/90 text-xs sm:text-sm md:text-base">Tamamlanan Proje</div>
@@ -72,11 +72,11 @@ export default function JoinPage() {
       </section>
 
       {/* Team */}
-      <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4">
+      <section className="py-6 sm:py-8 md:py-12 px-3 sm:px-4">
         <div className="container max-w-screen-xl mx-auto">
-          <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8 md:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold mb-3 sm:mb-4 md:mb-6 gradient-text">Takımlarımızı Keşfedin</h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed px-2 sm:px-4">
+          <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Takımlarımızı Keşfedin</h2>
+            <p className="text-muted-foreground max-w-3xl mx-auto text-xs sm:text-sm md:text-base leading-snug px-2">
               Farklı alanlarda çalışan yetenekli takımlarımızla tanışın. Her takım, kendi alanında öncü projeler geliştirerek topluluğumuzu güçlendiriyor.
             </p>
           </ScrollAnimation>
@@ -87,10 +87,10 @@ export default function JoinPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 sm:py-10 md:py-12 px-3 sm:px-4 border-t border-border bg-black/80">
+      <footer className="py-6 sm:py-8 md:py-10 px-3 sm:px-4 border-t border-border bg-black/80">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up">
-            <div className="flex flex-col items-center space-y-4 sm:space-y-5 md:space-y-6">
+            <div className="flex flex-col items-center space-y-3 sm:space-y-4">
             <div className="flex items-center space-x-2">
               <img src="/ayzek-logo.png" alt="AYZEK" className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="text-lg sm:text-xl font-display font-bold text-primary">AYZEK</span>

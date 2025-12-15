@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { AdminLogin } from "@/components/admin-login"
-import { AdminDashboard } from "@/components/admin-dashboard"
+import { AdminLogin } from "@/components/admin/admin-login"
+import { AdminDashboard } from "@/components/admin/admin-dashboard"
 import { useAdmin } from "@/contexts/admin-context"
 
 export default function AdminPage() {

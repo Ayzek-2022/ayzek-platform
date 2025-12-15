@@ -95,16 +95,16 @@ export default function EventGallery() {
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {items.map((photo) => (
-          <div
-            key={photo.id}
-            className="
-              relative group cursor-pointer
-              flex-none w-[85vw] sm:w-[70vw] snap-center
-              md:w-auto
-            "
-            onMouseEnter={() => setHoveredId(photo.id)}
-            onMouseLeave={() => setHoveredId(null)}
-          >
+        <div
+          key={photo.id}
+          className="
+            relative group cursor-pointer
+            flex-none w-[85vw] sm:w-[70vw] snap-center
+            md:w-auto
+          "
+          onMouseEnter={() => setHoveredId(photo.id)}
+          onMouseLeave={() => setHoveredId(null)}
+        >
           <div className="relative overflow-hidden rounded-lg aspect-[4/3] bg-muted">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img

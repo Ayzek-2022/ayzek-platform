@@ -227,7 +227,7 @@ export default function EventsPage() {
             <AdminNavbar />
 
             {/* Hero Section with Background Pattern */}
-            <section className="py-12 sm:py-14 md:py-16 px-3 sm:px-4 relative overflow-hidden">
+            <section className="py-8 sm:py-10 md:py-14 px-3 sm:px-4 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-5">
                     <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                         <defs>
@@ -240,10 +240,10 @@ export default function EventsPage() {
                 </div>
         <div className="container max-w-screen-xl mx-auto text-center relative z-10">
           <ScrollAnimation animation="fade-up">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-display font-bold mb-4 sm:mb-5 md:mb-6 gradient-text leading-tight pb-1 sm:pb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-3 sm:mb-4 gradient-text leading-tight">
               Topluluk Etkinlikleri
             </h1>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-7 md:mb-8 max-w-2xl mx-auto px-2">
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-2 leading-snug">
               Teknoloji topluluğumuzu ilham vermeye, eğitmeye ve birbirine bağlamaya yönelik tasarlanmış atölyeler,
               buluşmalar, konferanslar ve hackathonları keşfedin.
             </p>
@@ -252,34 +252,34 @@ export default function EventsPage() {
             </section>
 
             {/* Quick Stats */}
-            <section className="py-6 sm:py-7 md:py-8 px-3 sm:px-4">
+            <section className="py-6 sm:py-8 md:py-10 px-3 sm:px-4">
                 <div className="container max-w-screen-xl mx-auto">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 lg:gap-8 text-center">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5 text-center">
                         <ScrollAnimation animation="scale-up" delay={0}>
-                            <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 bg-purple-500/90 text-white shadow-lg">
-                                <div className="text-2xl sm:text-3xl font-display font-bold mb-1 sm:mb-2 animate-float">25+</div>
+                            <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 h-[110px] sm:h-[130px] md:h-[150px] flex flex-col items-center justify-center bg-purple-500/90 text-white shadow-lg">
+                                <div className="text-2xl sm:text-3xl font-display font-bold mb-0.5 animate-float">25+</div>
                                 <div className="text-white/90 text-xs sm:text-sm md:text-base">Bu Yıl Etkinlik</div>
                             </div>
                         </ScrollAnimation>
                         <ScrollAnimation animation="scale-up" delay={100}>
-                            <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 bg-green-500/90 text-white shadow-lg">
-                                <div className="text-2xl sm:text-3xl font-display font-bold mb-1 sm:mb-2 animate-float" style={{ animationDelay: "0.5s" }}>
+                            <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 h-[110px] sm:h-[130px] md:h-[150px] flex flex-col items-center justify-center bg-green-500/90 text-white shadow-lg">
+                                <div className="text-2xl sm:text-3xl font-display font-bold mb-0.5 animate-float" style={{ animationDelay: "0.5s" }}>
                                     500+
                                 </div>
                                 <div className="text-white/90 text-xs sm:text-sm md:text-base">Toplam Katılımcı</div>
                             </div>
                         </ScrollAnimation>
                         <ScrollAnimation animation="scale-up" delay={200}>
-                            <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 bg-purple-500/90 text-white shadow-lg">
-                                <div className="text-2xl sm:text-3xl font-display font-bold mb-1 sm:mb-2 animate-float" style={{ animationDelay: "1s" }}>
+                            <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 h-[110px] sm:h-[130px] md:h-[150px] flex flex-col items-center justify-center bg-purple-500/90 text-white shadow-lg order-4 md:order-none">
+                                <div className="text-2xl sm:text-3xl font-display font-bold mb-0.5 animate-float" style={{ animationDelay: "1s" }}>
                                     5
                                 </div>
                                 <div className="text-white/90 text-xs sm:text-sm md:text-base">Mekan Ortağı</div>
                             </div>
                         </ScrollAnimation>
                         <ScrollAnimation animation="scale-up" delay={300}>
-                            <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 bg-green-500/90 text-white shadow-lg">
-                                <div className="text-2xl sm:text-3xl font-display font-bold mb-1 sm:mb-2 animate-float" style={{ animationDelay: "1.5s" }}>
+                            <div className="hover-lift theme-transition rounded-lg p-4 sm:p-5 md:p-6 h-[110px] sm:h-[130px] md:h-[150px] flex flex-col items-center justify-center bg-green-500/90 text-white shadow-lg order-3 md:order-none">
+                                <div className="text-2xl sm:text-3xl font-display font-bold mb-0.5 animate-float" style={{ animationDelay: "1.5s" }}>
                                     1000+
                                 </div>
                                 <div className="text-white/90 text-xs sm:text-sm md:text-base">Öğrenme Saati</div>
@@ -290,11 +290,11 @@ export default function EventsPage() {
             </section>
 
             {/* Events Calendar */}
-            <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4">
+            <section className="py-6 sm:py-8 md:py-12 px-3 sm:px-4">
                 <div className="container max-w-screen-xl mx-auto">
-                    <ScrollAnimation animation="fade-up" className="text-center mb-8 sm:mb-10 md:mb-12">
-                        <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 sm:mb-3 md:mb-4 gradient-text">Yaklaşan Etkinlikler</h2>
-                        <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2">
+                    <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Yaklaşan Etkinlikler</h2>
+                        <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
                             Yaklaşan etkinliklerimize göz atın, türe göre filtreleyin ve en çok ilginizi çekenlere kayıt olun.
                         </p>
                     </ScrollAnimation>
@@ -312,11 +312,11 @@ export default function EventsPage() {
                 </div>
             </section>
 
-            <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 bg-card/30 theme-transition">
+            <section className="py-6 sm:py-8 md:py-12 px-3 sm:px-4 bg-card/30 theme-transition">
                 <div className="container max-w-screen-xl mx-auto">
-                    <ScrollAnimation animation="fade-up" className="text-center mb-8 sm:mb-10 md:mb-12">
-                        <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 sm:mb-3 md:mb-4 gradient-text">Etkinlik Galerisi</h2>
-                        <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2">
+                    <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Etkinlik Galerisi</h2>
+                        <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
                             Geçmiş etkinliklerimizden unutulmaz anlar ve topluluk deneyimlerimizin görsel hikayesi.
                         </p>
                     </ScrollAnimation>

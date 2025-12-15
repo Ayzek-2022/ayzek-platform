@@ -175,15 +175,15 @@ export function AutoSlidingBanner() {
               <div className="relative z-20 container max-w-screen-xl mx-auto px-4 sm:px-6 w-full">
                 <div className="max-w-3xl animate-fade-in">
                   {slide.subtitle && (
-                    <h2 className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-primary mb-1 md:mb-2 tracking-wide uppercase">
+                    <h2 className="text-[10px] sm:text-[11px] md:text-sm font-medium text-primary mb-1 md:mb-2 tracking-wide uppercase">
                       {slide.subtitle}
                     </h2>
                   )}
-                  <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-display font-bold mb-2 sm:mb-3 md:mb-4 text-foreground leading-tight">
+                  <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-display font-bold mb-2 sm:mb-3 md:mb-6 text-foreground leading-tight">
                     {slide.title}
                   </h1>
                   {slide.content && (
-                    <p className="text-xs sm:text-sm md:text-base lg:text-lg text-muted-foreground leading-relaxed max-w-full md:max-w-2xl line-clamp-2 sm:line-clamp-3 md:line-clamp-none">
+                    <p className="text-xs sm:text-sm md:text-base lg:text-lg text-muted-foreground leading-relaxed md:leading-7 max-w-full md:max-w-2xl line-clamp-3 sm:line-clamp-4 md:line-clamp-none">
                       {slide.content}
                     </p>
                   )}
