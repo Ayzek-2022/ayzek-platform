@@ -12,7 +12,7 @@ import { ImageIcon, Trash2, FileText, Edit } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000").replace(/\/+$/, "")
-const api = axios.create({ baseURL: API_BASE, headers: { "Content-Type": "application/json" } })
+const api = axios.create({ baseURL: API_BASE })
 
 type BlogOut = {
   id: number
@@ -49,10 +49,17 @@ const fmtDateTR = (d: string) => {
 export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [items, setItems] = useState<BlogOut[]>([])
   const [loading, setLoading] = useState(false)
+  
+  // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
   const [newBlog, setNewBlog] = useState({ title: "", description: "", author: "", category: "", image: "", date: "", preview: "" })
+  
+  // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
   const [editBlog, setEditBlog] = useState<BlogOut | null>(null)
+
+  // Ortak Dosya State'i
+  const [blogFile, setBlogFile] = useState<File | null>(null)
 
   useEffect(() => {
     fetchBlogs()
@@ -70,47 +77,73 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
     }
   }
 
+  // --- YENİ EKLEME FONKSİYONU ---
   const handleAdd = async () => {
     const { title, description, author, category, image, date, preview } = newBlog
     if (!title || !date || !description || !author || !category) return
+    
     try {
-      const payload = {
-        title,
-        content: description,
-        author,
-        category,
-        cover_image: normalizeImageUrl(image) || undefined,
-        date,
-        preview: preview || undefined,
+      const formData = new FormData()
+      formData.append("title", title)
+      formData.append("content", description)
+      formData.append("author", author)
+      formData.append("category", category)
+      formData.append("published_date", date) 
+      formData.append("preview_text", preview || "")
+
+      if (blogFile) {
+        formData.append("file", blogFile)
+      } else if (image) {
+        formData.append("cover_image", normalizeImageUrl(image))
       }
-      const { data } = await api.post<BlogOut>("/blogs", payload)
+
+      const { data } = await api.post<BlogOut>("/blogs", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      
       setItems((prev) => [data, ...prev])
+      
       setNewBlog({ title: "", description: "", author: "", category: "", image: "", date: "", preview: "" })
+      setBlogFile(null)
       setAddOpen(false)
       onNotify(`"${data.title}" eklendi`)
     } catch (e) {
       console.error("Blog ekle hata:", e)
+      onNotify("Blog eklenemedi")
     }
   }
 
+  // --- YENİ GÜNCELLEME FONKSİYONU ---
   const handleUpdate = async () => {
     if (!editBlog) return
     try {
-      const payload = {
-        title: editBlog.title,
-        content: editBlog.content,
-        author: editBlog.author,
-        category: editBlog.category,
-        cover_image: normalizeImageUrl(editBlog.cover_image || "") || undefined,
-        date: editBlog.date,
-        preview: editBlog.preview || undefined,
+      const formData = new FormData()
+      formData.append("title", editBlog.title)
+      formData.append("content", editBlog.content)
+      formData.append("author", editBlog.author)
+      formData.append("category", editBlog.category)
+      formData.append("published_date", editBlog.date)
+      formData.append("preview_text", editBlog.preview || "")
+
+      if (blogFile) {
+        formData.append("file", blogFile)
+      } 
+      else if (editBlog.cover_image) {
+        formData.append("cover_image", normalizeImageUrl(editBlog.cover_image))
       }
-      const { data } = await api.put<BlogOut>(`/blogs/${editBlog.id}`, payload)
+
+      const { data } = await api.put<BlogOut>(`/blogs/${editBlog.id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      
       setItems((prev) => prev.map((x) => (x.id === data.id ? data : x)))
+      
+      setBlogFile(null)
       setEditOpen(false)
       onNotify(`"${data.title}" güncellendi`)
     } catch (e) {
       console.error("Blog güncelle hata:", e)
+      onNotify("Güncelleme başarısız")
     }
   }
 
@@ -123,6 +156,17 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
     } catch (e) {
       console.error("Blog sil hata:", e)
     }
+  }
+
+  const openAddDialog = (open: boolean) => {
+    if (open) setBlogFile(null)
+    setAddOpen(open)
+  }
+
+  const openEditDialog = (blog: BlogOut) => {
+    setEditBlog(blog)
+    setBlogFile(null)
+    setEditOpen(true)
   }
 
   return (
@@ -147,7 +191,7 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
         </DialogHeader>
 
         <div className="mb-4">
-          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+          <Dialog open={addOpen} onOpenChange={openAddDialog}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-primary to-accent">Yeni Blog Ekle</Button>
             </DialogTrigger>
@@ -158,13 +202,43 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
               </DialogHeader>
               <div className="space-y-4">
                 <div><Label>Başlık *</Label><Input value={newBlog.title} onChange={(e) => setNewBlog((p) => ({ ...p, title: e.target.value }))} /></div>
-                <div><Label>İçerik *</Label><Textarea value={newBlog.description} onChange={(e) => setNewBlog((p) => ({ ...p, description: e.target.value }))} rows={6} /></div>
-                <div><Label>Önizleme Metni</Label><Textarea value={newBlog.preview} onChange={(e) => setNewBlog((p) => ({ ...p, preview: e.target.value }))} rows={2} placeholder="Kısa özet..." /></div>
+                
+                {/* --- DÜZELTİLEN KISIM: İÇERİK (EKLE) --- */}
+                <div>
+                    <Label>İçerik *</Label>
+                    <Textarea 
+                        value={newBlog.description} 
+                        onChange={(e) => setNewBlog((p) => ({ ...p, description: e.target.value }))} 
+                        rows={8}
+                        // h-40: Sabit yükseklik (veya min-h-40)
+                        // overflow-y-auto: Yazı taşarsa kaydırma çubuğu çıkar
+                        // whitespace-pre-wrap: Satırları korur
+                        // break-words: Uzun kelimeleri böler
+                        className="h-40 min-h-[160px] overflow-y-auto whitespace-pre-wrap break-words resize-none" 
+                        placeholder="Blog içeriğini buraya yazın..."
+                    />
+                </div>
+
+                {/* --- DÜZELTİLEN KISIM: ÖNİZLEME (EKLE) --- */}
+                <div>
+                    <Label>Önizleme Metni</Label>
+                    <Textarea 
+                        value={newBlog.preview} 
+                        onChange={(e) => setNewBlog((p) => ({ ...p, preview: e.target.value }))} 
+                        rows={3} 
+                        // h-24: Sabit yükseklik
+                        // overflow-y-auto: Kaydırma çubuğu
+                        className="h-24 min-h-[96px] overflow-y-auto whitespace-pre-wrap break-words resize-none"
+                        placeholder="Kısa özet..." 
+                    />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div><Label>Yazar *</Label><Input value={newBlog.author} onChange={(e) => setNewBlog((p) => ({ ...p, author: e.target.value }))} /></div>
                   <div><Label>Kategori *</Label><Input value={newBlog.category} onChange={(e) => setNewBlog((p) => ({ ...p, category: e.target.value }))} /></div>
                 </div>
                 <div><Label>Tarih *</Label><Input type="date" value={newBlog.date} onChange={(e) => setNewBlog((p) => ({ ...p, date: e.target.value }))} /></div>
+                
                 <div>
                   <Label>Kapak Görseli (opsiyonel)</Label>
                   <div className="flex gap-2">
@@ -172,6 +246,7 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
+                          setBlogFile(e.target.files[0])
                           setNewBlog((p) => ({ ...p, image: e.target.files![0].name }))
                         }
                       }} />
@@ -180,7 +255,9 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
                       </Button>
                     </div>
                   </div>
+                  {blogFile && <p className="text-xs text-green-600 mt-1">Seçili: {blogFile.name}</p>}
                 </div>
+
                 <div className="flex gap-2 pt-4">
                   <Button onClick={handleAdd} className="flex-1 bg-ayzek-gradient hover:opacity-90">Ekle</Button>
                   <Button variant="outline" onClick={() => setAddOpen(false)} className="flex-1">İptal</Button>
@@ -197,8 +274,12 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
             {items.map((blog) => (
               <Card key={blog.id} className="p-4">
                 <div className="flex items-start gap-4">
-                  {blog.cover_image && (
+                  {blog.cover_image ? (
                     <img src={normalizeImageUrl(blog.cover_image)} alt={blog.title} className="w-24 h-24 rounded object-cover" />
+                  ) : (
+                    <div className="w-24 h-24 bg-muted flex items-center justify-center rounded">
+                      <FileText className="w-8 h-8 text-muted-foreground" />
+                    </div>
                   )}
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">{blog.title}</h3>
@@ -206,7 +287,7 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
                     <p className="text-sm mt-2 line-clamp-2">{blog.preview || blog.content}</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => { setEditBlog(blog); setEditOpen(true); }}>Düzenle</Button>
+                    <Button size="sm" variant="outline" onClick={() => openEditDialog(blog)}>Düzenle</Button>
                     <Button size="sm" variant="destructive" onClick={() => handleDelete(blog.id)}>
                       <Trash2 className="w-3 h-3" />
                     </Button>
@@ -224,13 +305,35 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
             {editBlog && (
               <div className="space-y-4">
                 <div><Label>Başlık</Label><Input value={editBlog.title} onChange={(e)=>setEditBlog({...editBlog, title:e.target.value})}/></div>
-                <div><Label>İçerik</Label><Textarea value={editBlog.content} onChange={(e)=>setEditBlog({...editBlog, content:e.target.value})} rows={6}/></div>
-                <div><Label>Önizleme</Label><Textarea value={editBlog.preview || ""} onChange={(e)=>setEditBlog({...editBlog, preview:e.target.value})} rows={2}/></div>
+                
+                {/* --- DÜZELTİLEN KISIM: İÇERİK (EDİT) --- */}
+                <div>
+                    <Label>İçerik</Label>
+                    <Textarea 
+                        value={editBlog.content} 
+                        onChange={(e)=>setEditBlog({...editBlog, content:e.target.value})} 
+                        rows={8}
+                        className="h-40 min-h-[160px] overflow-y-auto whitespace-pre-wrap break-words resize-none"
+                    />
+                </div>
+
+                {/* --- DÜZELTİLEN KISIM: ÖNİZLEME (EDİT) --- */}
+                <div>
+                    <Label>Önizleme</Label>
+                    <Textarea 
+                        value={editBlog.preview || ""} 
+                        onChange={(e)=>setEditBlog({...editBlog, preview:e.target.value})} 
+                        rows={3}
+                        className="h-24 min-h-[96px] overflow-y-auto whitespace-pre-wrap break-words resize-none"
+                    />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div><Label>Yazar</Label><Input value={editBlog.author} onChange={(e)=>setEditBlog({...editBlog, author:e.target.value})}/></div>
                   <div><Label>Kategori</Label><Input value={editBlog.category} onChange={(e)=>setEditBlog({...editBlog, category:e.target.value})}/></div>
                 </div>
                 <div><Label>Tarih</Label><Input type="date" value={editBlog.date} onChange={(e)=>setEditBlog({...editBlog, date:e.target.value})}/></div>
+                
                 <div>
                   <Label>Kapak Görseli (opsiyonel)</Label>
                   <div className="flex gap-2">
@@ -238,6 +341,7 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
+                          setBlogFile(e.target.files[0])
                           setEditBlog({ ...editBlog, cover_image: e.target.files[0].name })
                         }
                       }} />
@@ -246,7 +350,9 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
                       </Button>
                     </div>
                   </div>
+                  {blogFile && <p className="text-xs text-green-600 mt-1">Yeni dosya seçildi: {blogFile.name}</p>}
                 </div>
+
                 <div className="flex gap-2 pt-2">
                   <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate}>Kaydet</Button>
                   <Button variant="outline" className="flex-1" onClick={()=>setEditOpen(false)}>Kapat</Button>
@@ -259,4 +365,3 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
     </Dialog>
   )
 }
-

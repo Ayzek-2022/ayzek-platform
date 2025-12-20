@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -12,7 +12,7 @@ import { ImageIcon, Trash2, Edit } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000").replace(/\/+$/, "")
-const api = axios.create({ baseURL: API_BASE, headers: { "Content-Type": "application/json" } })
+const api = axios.create({ baseURL: API_BASE }) // Content-Type header'ını dinamik bırakıyoruz
 
 type PosterOut = {
   id: number
@@ -35,11 +35,17 @@ const normalizeImageUrl = (v: string) => {
 
 export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [posterItems, setPosterItems] = useState<PosterOut[]>([])
+  
+  // Ekleme State'leri
   const [isAddOpen, setIsAddOpen] = useState(false)
-  const [posterFile, setPosterFile] = useState<File | null>(null)
   const [newPoster, setNewPoster] = useState({ title: "", subtitle: "", content: "", image_url: "" })
+  
+  // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
   const [editPoster, setEditPoster] = useState<PosterOut | null>(null)
+
+  // Ortak Dosya State'i (Hem ekleme hem düzenleme için kullanacağız ama her işlem sonrasında temizleyeceğiz)
+  const [posterFile, setPosterFile] = useState<File | null>(null)
 
   useEffect(() => {
     fetchPosters()
@@ -60,11 +66,14 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
     formData.append("title", newPoster.title)
     if (newPoster.subtitle) formData.append("subtitle", newPoster.subtitle)
     if (newPoster.content) formData.append("content", newPoster.content)
+    
+    // Dosya varsa dosyayı, yoksa manuel girilen URL'yi gönder
     if (posterFile) {
       formData.append("file", posterFile)
     } else if (newPoster.image_url) {
       formData.append("image_url", newPoster.image_url)
     }
+    
     formData.append("is_active", "true")
     formData.append("order_index", String(posterItems.length))
 
@@ -73,6 +82,8 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
         headers: { "Content-Type": "multipart/form-data" },
       })
       setPosterItems((prev) => [data, ...prev])
+      
+      // Temizlik
       setNewPoster({ title: "", subtitle: "", content: "", image_url: "" })
       setPosterFile(null)
       setIsAddOpen(false)
@@ -83,25 +94,43 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
     }
   }
 
+  // --- DÜZELTİLEN KISIM: HANDLE UPDATE ---
   const handleUpdate = async () => {
     if (!editPoster) return
     try {
-      const payload = {
-        title: editPoster.title,
-        subtitle: editPoster.subtitle || null,
-        content: editPoster.content || null,
-        image_url: editPoster.image_url ? normalizeImageUrl(editPoster.image_url) : null,
-        is_active: editPoster.is_active,
-        order_index: editPoster.order_index,
+      const formData = new FormData()
+      formData.append("title", editPoster.title)
+      if (editPoster.subtitle) formData.append("subtitle", editPoster.subtitle)
+      if (editPoster.content) formData.append("content", editPoster.content)
+      formData.append("is_active", String(editPoster.is_active))
+      formData.append("order_index", String(editPoster.order_index))
+
+      // 1. Eğer yeni dosya seçildiyse onu ekle
+      if (posterFile) {
+        formData.append("file", posterFile)
+      } 
+      // 2. Dosya seçilmediyse ama URL kutusunda bir şey yazıyorsa onu gönder (eski resim URL'si)
+      else if (editPoster.image_url) {
+        formData.append("image_url", editPoster.image_url)
       }
-      const { data } = await api.put<PosterOut>(`/posters/${editPoster.id}`, payload)
+
+      // Backend'e FormData olarak gönder
+      const { data } = await api.put<PosterOut>(`/posters/${editPoster.id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+
       setPosterItems(prev => prev.map(x => (x.id === data.id ? data : x)))
+      
+      // Temizlik
+      setPosterFile(null)
       setEditOpen(false)
       onNotify("Poster güncellendi")
     } catch (e) {
       console.error("Poster güncelle hata:", e)
+      onNotify("Güncelleme başarısız")
     }
   }
+  // ---------------------------------------
 
   const handleDelete = async (id: number) => {
     if (!confirm("Posteri silmek istediğinizden emin misiniz?")) return
@@ -112,6 +141,18 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
     } catch (e) {
       console.error("Poster sil hata:", e)
     }
+  }
+
+  // Dialog açılıp kapanırken dosya state'ini temizle
+  const openEditDialog = (item: PosterOut) => {
+    setEditPoster(item)
+    setPosterFile(null) // Önceki işlemden kalan dosya varsa temizle
+    setEditOpen(true)
+  }
+
+  const openAddDialog = (open: boolean) => {
+    if (open) setPosterFile(null) // Pencere açılırken temizle
+    setIsAddOpen(open)
   }
 
   return (
@@ -136,7 +177,7 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
         </DialogHeader>
 
         <div className="mb-4">
-          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <Dialog open={isAddOpen} onOpenChange={openAddDialog}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-primary to-accent">Yeni Poster Ekle</Button>
             </DialogTrigger>
@@ -152,16 +193,16 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
                 </div>
                 <div>
                   <Label>Alt Başlık</Label>
-                  <Input value={newPoster.subtitle} onChange={(e) => setNewPoster((p) => ({ ...p, subtitle: e.target.value }))} />
+                  <Input value={newPoster.subtitle || ""} onChange={(e) => setNewPoster((p) => ({ ...p, subtitle: e.target.value }))} />
                 </div>
                 <div>
                   <Label>İçerik</Label>
-                  <Textarea value={newPoster.content} onChange={(e) => setNewPoster((p) => ({ ...p, content: e.target.value }))} rows={4} />
+                  <Textarea value={newPoster.content || ""} onChange={(e) => setNewPoster((p) => ({ ...p, content: e.target.value }))} rows={4} />
                 </div>
                 <div>
                   <Label>Görsel *</Label>
                   <div className="flex gap-2">
-                    <Input placeholder="URL girin veya dosya seçin" value={newPoster.image_url} onChange={(e) => setNewPoster((p) => ({ ...p, image_url: e.target.value }))} className="flex-1" />
+                    <Input placeholder="URL girin veya dosya seçin" value={newPoster.image_url || ""} onChange={(e) => setNewPoster((p) => ({ ...p, image_url: e.target.value }))} className="flex-1" />
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
@@ -200,7 +241,7 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
                 <p className="text-xs text-muted-foreground line-clamp-1">{item.subtitle}</p>
                 <p className="text-sm mt-2 line-clamp-3">{item.content}</p>
                 <div className="flex justify-end mt-3 gap-2">
-                  <Button size="sm" variant="outline" onClick={() => { setEditPoster(item); setEditOpen(true); }}>Düzenle</Button>
+                  <Button size="sm" variant="outline" onClick={() => openEditDialog(item)}>Düzenle</Button>
                   <Button size="sm" variant="destructive" onClick={() => handleDelete(item.id)}>
                     <Trash2 className="w-3 h-3 mr-1" /> Sil
                   </Button>
@@ -228,8 +269,8 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
-                          setPosterFile(e.target.files[0])
-                          setEditPoster({...editPoster, image_url: e.target.files[0].name})
+                          setPosterFile(e.target.files[0]) // Dosyayı state'e at
+                          setEditPoster({...editPoster, image_url: e.target.files[0].name}) // UI'da ismini göster
                         }
                       }} />
                       <Button type="button" variant="outline" className="border-primary/20 pointer-events-none">
@@ -237,6 +278,8 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
                       </Button>
                     </div>
                   </div>
+                  {/* Dosya seçildiyse ismini göster */}
+                  {posterFile && <p className="text-xs text-green-600 mt-1">Yeni dosya seçildi: {posterFile.name}</p>}
                 </div>
                 <div className="flex gap-2 pt-2">
                   <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate}>Kaydet</Button>
@@ -250,4 +293,3 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
     </Dialog>
   )
 }
-

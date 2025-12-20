@@ -15,14 +15,28 @@ type Poster = {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
 
+// --- GÜNCELLENMİŞ RESİM URL FONKSİYONU ---
 function buildImgSrc(raw?: string | null) {
   if (!raw) return "/ayzek-logo.png";
   const url = raw.trim();
-  if (url.startsWith("/public/")) return url.replace(/^\/?public\//, "/");
-  if (url.startsWith("/")) return url;
+
+  // 1. Eğer tam bir http/https linki ise dokunma
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
+
+  // 2. Eğer Backend tarafından yüklenen bir dosya ise (/public/uploads/...)
+  // Başına API adresini ekle ki sunucudan çekebilsin
+  if (url.startsWith("/public/") || url.startsWith("/uploads/")) {
+    const path = url.startsWith("/") ? url : `/${url}`;
+    return `${API_BASE}${path}`;
+  }
+
+  // 3. Eğer manuel olarak "/" ile başlayan bir yol girildiyse (Frontend public klasörü için)
+  if (url.startsWith("/")) return url;
+
+  // 4. Diğer durumlar için varsayılan olarak backend'e yönlendir
   return `${API_BASE}/${url.replace(/^\/+/, "")}`;
 }
+// ------------------------------------------
 
 export function AutoSlidingBanner() {
   const [slides, setSlides] = useState<Poster[]>([]);

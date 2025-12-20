@@ -6,6 +6,29 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Users, MapPin } from "lucide-react"
 import { api } from "@/lib/api"
 
+// --- YENİ EKLENEN KISIMLAR ---
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000"
+
+function normalizeImageUrl(v: string) {
+  const s = (v || "").trim()
+  if (!s) return ""
+
+  // 1. Eğer zaten tam bir http/https linki ise dokunma
+  if (s.startsWith("http://") || s.startsWith("https://")) return s
+
+  // 2. Başında slash yoksa ekle
+  const path = s.startsWith("/") ? s : `/${s}`
+
+  // 3. Eğer yol /public veya /uploads ile başlıyorsa, bu Backend'deki bir dosyadır.
+  if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
+     return `${API_BASE}${path}`
+  }
+
+  // 4. Diğer durumlar için olduğu gibi döndür
+  return path
+}
+// -----------------------------
+
 type GalleryEvent = {
   id: number
   category: string
@@ -108,7 +131,8 @@ export default function EventGallery() {
           <div className="relative overflow-hidden rounded-lg aspect-[4/3] bg-muted">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={photo.image_url || "/placeholder.svg"}
+              // --- DEĞİŞİKLİK: normalizeImageUrl kullanıldı ---
+              src={normalizeImageUrl(photo.image_url) || "/placeholder.svg"}
               alt={photo.title}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />

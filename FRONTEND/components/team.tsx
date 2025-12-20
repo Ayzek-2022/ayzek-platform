@@ -7,6 +7,29 @@ import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Users, Linkedin } from "lucide-react"
 
+// --- YENİ EKLENEN KISIMLAR ---
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000"
+
+function normalizeImageUrl(v: string) {
+  const s = (v || "").trim()
+  if (!s) return ""
+
+  // 1. Eğer tam bir http linki ise dokunma
+  if (s.startsWith("http://") || s.startsWith("https://")) return s
+
+  // 2. Başında slash yoksa ekle
+  const path = s.startsWith("/") ? s : `/${s}`
+
+  // 3. Backend'den gelen dosya ise
+  if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
+     return `${API_BASE}${path}`
+  }
+
+  // 4. Diğer durumlar
+  return path
+}
+// -----------------------------
+
 // Frontend'de kullanılacak veri tipleri
 type Member = {
   id: number | string
@@ -52,7 +75,8 @@ function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: strin
         <div className={`relative z-10 grid place-items-center size-20 sm:size-24 md:size-32 rounded-full bg-gradient-to-br ${palette.ring} shadow-xl ${palette.glow} ring-1 ring-black/20 dark:ring-black/40 overflow-hidden`}>
           {team.logoUrl ? (
             <Image 
-              src={team.logoUrl} 
+              // --- DEĞİŞİKLİK: normalizeImageUrl kullanıldı ---
+              src={normalizeImageUrl(team.logoUrl)} 
               alt={team.name} 
               fill
               className="object-cover"
@@ -166,7 +190,8 @@ export function TeamExplorer() {
   React.useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/teams")
+        // --- DEĞİŞİKLİK: API_BASE kullanıldı ---
+        const response = await fetch(`${API_BASE}/teams`)
         if (!response.ok) {
           throw new Error("Veriler alınamadı. Sunucu hatası.")
         }

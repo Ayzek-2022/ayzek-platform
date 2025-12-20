@@ -1,17 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException, Form, Request, status
+import os
+import shutil
+import uuid
+from typing import List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Form, Request, status, File, UploadFile
 from sqlalchemy.orm import Session
 
 from app.schemas.timeline import TimelineEventOut, TimelineEventCreate, TimelineEventUpdate
 from app.crud.timeline import list_events, get_event, create_event, update_event, delete_event
-from app.database import get_db  # kendi yolun
+from app.database import get_db
 
 router = APIRouter(prefix="/timeline", tags=["timeline"])
 
+# --- YENİ EKLENEN KISIM: Klasör Ayarı ---
+UPLOAD_DIR = "public/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-@router.get("", response_model=list[TimelineEventOut])
+@router.get("", response_model=List[TimelineEventOut])
 def list_timeline(db: Session = Depends(get_db)):
     return list_events(db)
-
 
 @router.get("/{event_id}", response_model=TimelineEventOut)
 def get_timeline_item(event_id: int, db: Session = Depends(get_db)):
@@ -19,7 +26,6 @@ def get_timeline_item(event_id: int, db: Session = Depends(get_db)):
     if not obj:
         raise HTTPException(status_code=404, detail="Timeline event not found")
     return obj
-
 
 @router.post(
     "",
@@ -31,16 +37,39 @@ async def create_timeline_item(
     description: str = Form(...),
     category: str = Form(...),
     date_label: str = Form(...),
-    image_url: str | None = Form(None),   # <-- DOSYA YOK, METİN (URL)
+    image_url: Optional[str] = Form(None), # Manuel link girilirse
+    file: Optional[UploadFile] = File(None), # YENİ: Dosya seçilirse
     db: Session = Depends(get_db),
 ):
+    final_image_url = image_url
+
+    # --- YENİ EKLENEN KISIM: Dosya Kaydetme ---
+    if file:
+        # Uzantıyı al (jpg, png vs)
+        file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+        # Benzersiz isim oluştur
+        unique_filename = f"{uuid.uuid4()}.{file_ext}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+        # Dosyayı kaydet
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # Veritabanına yazılacak yol
+        final_image_url = f"/public/uploads/{unique_filename}"
+    # -------------------------------------------
+
     payload = TimelineEventCreate(
         title=title,
         description=description,
         category=category,
         date_label=date_label,
+        image_url=final_image_url # Güncellenmiş URL'yi kullan
     )
-    return create_event(db, payload, image_url=image_url or None)
+    # create_event fonksiyonun yapısına göre image_url'i payload içinde mi 
+    # yoksa ayrı parametre olarak mı aldığına dikkat et. 
+    # Senin kodunda 'create_event(db, payload, image_url=...)' şeklindeydi:
+    return create_event(db, payload, image_url=final_image_url)
 
 
 @router.put(
@@ -50,34 +79,47 @@ async def create_timeline_item(
 async def update_timeline_item(
     event_id: int,
     request: Request,
-    # JSON veya FORM ile güncelleme (hepsi metin alanı)
-    title: str | None = Form(None),
-    description: str | None = Form(None),
-    category: str | None = Form(None),
-    date_label: str | None = Form(None),
-    image_url: str | None = Form(None),   # <-- metin (URL)
+    # Form ile güncelleme parametreleri
+    title: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    category: Optional[str] = Form(None),
+    date_label: Optional[str] = Form(None),
+    image_url: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None), # YENİ: Update için dosya
     db: Session = Depends(get_db),
 ):
     obj = get_event(db, event_id)
     if not obj:
         raise HTTPException(status_code=404, detail="Timeline event not found")
 
+    # --- YENİ EKLENEN KISIM: Dosya varsa işle ---
+    final_image_url = image_url
+    if file:
+        file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+        unique_filename = f"{uuid.uuid4()}.{file_ext}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        final_image_url = f"/public/uploads/{unique_filename}"
+    # -------------------------------------------
+
     ct = (request.headers.get("content-type") or "").lower()
 
-    # JSON body ile güncelleme
+    # JSON body ile güncelleme (Eski yöntem - Postman vb için)
     if ct.startswith("application/json"):
         data = await request.json()
         updates = TimelineEventUpdate(**data)
-        # JSON’da image_url geldiyse o değer updates.image_url içinde olur
         return update_event(db, obj, updates, image_url=None)
 
-    # Form ile güncelleme
+    # Form Data ile güncelleme
     updates = TimelineEventUpdate(
         title=title,
         description=description,
         category=category,
         date_label=date_label,
-        image_url=image_url,  # burada direkt image_url set ediyoruz
+        image_url=final_image_url, 
     )
     return update_event(db, obj, updates, image_url=None)
 

@@ -1,17 +1,23 @@
-# routers/journey.py
+import os
+import shutil
+import uuid
+from typing import List, Dict, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form
 from sqlalchemy.orm import Session
-from typing import List, Dict
-from ..schemas.journey import JourneyPersonUpdate
-from ..database import get_db
-from ..crud import journey as crud
-from ..schemas.journey import JourneyPersonCreate, JourneyPersonRead
+
+from app.database import get_db
+from app.crud import journey as crud
+from app.schemas.journey import JourneyPersonCreate, JourneyPersonRead, JourneyPersonUpdate
 
 router = APIRouter(
     prefix="/journey",
     tags=["Journey"]
 )
+
+# Resimlerin kaydedileceği klasör
+UPLOAD_DIR = "public/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # --- PUBLIC ROUTE (Frontend için) ---
 
@@ -26,30 +32,87 @@ def read_all_journey_people(db: Session = Depends(get_db)):
 # --- ADMIN ROUTES (Yönetim paneli için) ---
 
 @router.post("/", response_model=JourneyPersonRead, status_code=status.HTTP_201_CREATED, summary="Yeni bir 'Yolculuğumuz' kişisi oluşturur (Admin).")
-def create_journey_person(person: JourneyPersonCreate, db: Session = Depends(get_db)):
+def create_journey_person(
+    year: int = Form(...),
+    name: str = Form(...),
+    role: str = Form(...),
+    description: str = Form(...),
+    photo_url: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None), # Dosya parametresi
+    db: Session = Depends(get_db)
+):
     """
     Admin panelinden gelen verilerle yeni bir kişi kaydı oluşturur.
-    - **year**: Kişinin görüneceği yıl.
-    - **name**: İsim Soyisim.
-    - **role**: Görevi.
-    - **description**: Açıklaması / Sözü.
-    - **photo_url**: Profil fotoğrafının URL'si (opsiyonel).
+    Hem dosya yüklemeyi hem de manuel URL girmeyi destekler.
     """
-    return crud.create_journey_person(db=db, person=person)
+    final_photo_url = photo_url
+
+    # Dosya yüklendiyse kaydet
+    if file:
+        file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+        unique_filename = f"{uuid.uuid4()}.{file_ext}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        final_photo_url = f"/public/uploads/{unique_filename}"
+
+    # Şemayı oluştur
+    person_in = JourneyPersonCreate(
+        year=year,
+        name=name,
+        role=role,
+        description=description,
+        photo_url=final_photo_url
+    )
+
+    return crud.create_journey_person(db=db, person=person_in)
+
 
 @router.put("/{person_id}", response_model=JourneyPersonRead, summary="Bir 'Yolculuğumuz' kişisini günceller (Admin).")
-def update_journey_person(person_id: int, person_update: JourneyPersonUpdate, db: Session = Depends(get_db)):
+def update_journey_person(
+    person_id: int,
+    year: Optional[int] = Form(None),
+    name: Optional[str] = Form(None),
+    role: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    photo_url: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db)
+):
     """
     ID'ye göre belirtilen kişi kaydının bilgilerini günceller.
-    Sadece gönderilen alanlar güncellenir.
+    Dosya gönderilirse fotoğraf güncellenir.
     """
     db_person = crud.get_journey_person_by_id(db, person_id=person_id)
     if db_person is None:
         raise HTTPException(status_code=404, detail="Kişi bulunamadı")
     
+    final_photo_url = photo_url
+
+    # Yeni dosya varsa kaydet
+    if file:
+        file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+        unique_filename = f"{uuid.uuid4()}.{file_ext}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        final_photo_url = f"/public/uploads/{unique_filename}"
+
+    # Güncelleme şemasını oluştur
+    person_update = JourneyPersonUpdate(
+        year=year,
+        name=name,
+        role=role,
+        description=description,
+        photo_url=final_photo_url
+    )
+    
     updated_person = crud.update_journey_person(db=db, person_id=person_id, person_update=person_update)
     return updated_person
-
 
 
 @router.delete("/{person_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Bir 'Yolculuğumuz' kişisini siler (Admin).")
@@ -62,4 +125,4 @@ def delete_journey_person(person_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Kişi bulunamadı")
     
     crud.delete_journey_person(db=db, person_id=person_id)
-    return {"ok": True} # 204 No Content yanıtı boş döner, bu sadece Swagger için.
+    return {"ok": True}

@@ -19,6 +19,28 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { EventCardSkeleton, TeamCardSkeleton } from "@/components/skeleton-loaders";
 
+// --- YENİ EKLENEN KISIMLAR ---
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+
+function normalizeImageUrl(v: string | null | undefined) {
+  const s = (v || "").trim();
+  if (!s) return "";
+
+  // 1. Zaten tam URL ise dokunma
+  if (s.startsWith("http://") || s.startsWith("https://")) return s;
+
+  // 2. Başında slash yoksa ekle
+  const path = s.startsWith("/") ? s : `/${s}`;
+
+  // 3. Backend'den gelen dosya ise prefix ekle
+  if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
+     return `${API_BASE}${path}`;
+  }
+
+  return path;
+}
+// -----------------------------
+
 // Takım verisi için net bir tip tanımı
 interface FeaturedTeam {
   id: number;
@@ -61,7 +83,7 @@ export default function HomePage() {
     const fetchUpcomingEvents = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://127.0.0.1:8000/events/upcoming");
+        const response = await axios.get(`${API_BASE}/events/upcoming`);
         setUpcomingEvents(response.data);
       } catch (err: any) {
         setError(err);
@@ -78,12 +100,13 @@ export default function HomePage() {
     const fetchFeaturedTeams = async () => {
       try {
         setTeamsLoading(true);
-        const response = await axios.get("http://127.0.0.1:8000/teams/featured");
+        const response = await axios.get(`${API_BASE}/teams/featured`);
         
         const formattedTeams: FeaturedTeam[] = response.data.map((team: any) => ({
           id: team.id,
           name: team.name,
-          logoUrl: team.photo_url,
+          // --- DÜZELTME BURADA ---
+          logoUrl: normalizeImageUrl(team.photo_url), 
           code: team.name.toUpperCase(),
         }));
         
@@ -458,7 +481,8 @@ export default function HomePage() {
             <div className="flex flex-col md:flex-row">
               <div className="md:w-1/2">
                 <img
-                  src={selectedEvent.cover_image_url || "/placeholder-image.jpg"}
+                  // --- DÜZELTME BURADA ---
+                  src={normalizeImageUrl(selectedEvent.cover_image_url) || "/placeholder-image.jpg"}
                   alt={selectedEvent.title}
                   className="w-full h-48 sm:h-56 md:h-full object-cover"
                 />

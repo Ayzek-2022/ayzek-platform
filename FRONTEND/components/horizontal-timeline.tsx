@@ -3,6 +3,29 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from "react"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
+// --- YENİ EKLENEN KISIMLAR ---
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000"
+
+function normalizeImageUrl(v: string) {
+  const s = (v || "").trim()
+  if (!s) return ""
+
+  // 1. Eğer zaten tam bir http/https linki ise dokunma
+  if (s.startsWith("http://") || s.startsWith("https://")) return s
+
+  // 2. Başında slash yoksa ekle
+  const path = s.startsWith("/") ? s : `/${s}`
+
+  // 3. Eğer yol /public veya /uploads ile başlıyorsa, bu Backend'deki bir dosyadır.
+  if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
+     return `${API_BASE}${path}`
+  }
+
+  // 4. Diğer durumlar için olduğu gibi döndür
+  return path
+}
+// -----------------------------
+
 interface TimelineEvent {
   id: number
   title: string
@@ -36,7 +59,8 @@ export function HorizontalTimeline() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/timeline")
+        // URL'i API_BASE üzerinden alıyoruz
+        const response = await fetch(`${API_BASE}/timeline`)
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
         const data: TimelineEvent[] = await response.json()
         setTimelineEvents(data)
@@ -213,7 +237,13 @@ export function HorizontalTimeline() {
                         >
                           <CardHeader className="relative overflow-hidden p-0">
                             <div className="relative h-32 sm:h-36 md:h-44 lg:h-48">
-                              <img src={event.image_url || "/placeholder.svg"} alt={event.title} className="w-full h-full object-cover" />
+                              {/* --- GÖRSEL KISMI GÜNCELLENDİ --- */}
+                              <img 
+                                src={normalizeImageUrl(event.image_url) || "/placeholder.svg"} 
+                                alt={event.title} 
+                                className="w-full h-full object-cover" 
+                              />
+                              {/* ------------------------------- */}
                               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-0 hover:opacity-100 transition-opacity duration-500" />
                             </div>

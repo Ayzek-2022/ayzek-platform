@@ -13,7 +13,16 @@ import { ImageIcon, Trash2, Star, Edit } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000").replace(/\/+$/, "")
-const api = axios.create({ baseURL: API_BASE, headers: { "Content-Type": "application/json" } })
+const api = axios.create({ baseURL: API_BASE }) // Content-Type dinamik
+
+const normalizeImageUrl = (v: string | null) => {
+  const s = (v || "").trim()
+  if (!s) return ""
+  if (s.startsWith("http://") || s.startsWith("https://")) return s
+  const path = s.startsWith("/") ? s : `/${s}`
+  if (path.startsWith("/public/") || path.startsWith("/uploads/")) return `${API_BASE}${path}`
+  return path
+}
 
 type TeamMemberOut = {
   id: number
@@ -42,6 +51,8 @@ type NewTeamMember = {
 export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [teams, setTeams] = useState<TeamOut[]>([])
   const [loading, setLoading] = useState(true)
+  
+  // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
   const initialNewTeamState = {
     name: "",
@@ -53,8 +64,13 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
     members: [{ name: "", role: "", linkedin_url: "" }],
   }
   const [newTeam, setNewTeam] = useState(initialNewTeamState)
+  
+  // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
   const [editTeam, setEditTeam] = useState<TeamOut | null>(null)
+
+  // Ortak Dosya State'i
+  const [teamFile, setTeamFile] = useState<File | null>(null)
 
   useEffect(() => {
     fetchTeams()
@@ -73,6 +89,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
     }
   }
 
+  // Üye Ekleme/Çıkarma Helperları (State üzerinde)
   const addTeamMemberRow = () =>
     setNewTeam((p) => ({ ...p, members: [...p.members, { name: "", role: "", linkedin_url: "" }] }))
 
@@ -86,25 +103,41 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
   const removeTeamMemberRow = (idx: number) =>
     setNewTeam((p) => ({ ...p, members: p.members.filter((_, i) => i !== idx) }))
 
+  // --- YENİ EKLEME FONKSİYONU ---
   const handleAdd = async () => {
     if (!newTeam.name || !newTeam.project_name || !newTeam.category || !newTeam.description) {
       onNotify("Lütfen tüm zorunlu alanları doldurun")
       return
     }
-    const payload = {
-      name: newTeam.name,
-      project_name: newTeam.project_name,
-      category: newTeam.category,
-      description: newTeam.description,
-      photo_url: newTeam.photo_url || null,
-      is_featured: newTeam.is_featured,
-      members: newTeam.members.filter(m => m.name && m.role).map(m => ({ ...m, linkedin_url: m.linkedin_url || null })),
-    }
 
     try {
-      const { data } = await api.post<TeamOut>("/teams", payload)
+      const formData = new FormData()
+      formData.append("name", newTeam.name)
+      formData.append("project_name", newTeam.project_name)
+      formData.append("category", newTeam.category)
+      formData.append("description", newTeam.description)
+      formData.append("is_featured", String(newTeam.is_featured))
+
+      // Üyeleri JSON string olarak ekle
+      const validMembers = newTeam.members.filter(m => m.name && m.role).map(m => ({
+          name: m.name,
+          role: m.role,
+          linkedin_url: m.linkedin_url || null
+      }))
+      formData.append("members", JSON.stringify(validMembers))
+
+      // Dosya varsa dosyayı, yoksa manuel linki ekle
+      if (teamFile) {
+        formData.append("file", teamFile)
+      } else if (newTeam.photo_url) {
+        formData.append("photo_url", normalizeImageUrl(newTeam.photo_url))
+      }
+
+      const { data } = await api.post<TeamOut>("/teams", formData) // Headers otomatik
+      
       setTeams((prev) => [data, ...prev])
       setNewTeam(initialNewTeamState)
+      setTeamFile(null)
       setAddOpen(false)
       onNotify(`"${data.name}" takımı eklendi`)
     } catch (e) {
@@ -113,29 +146,45 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
     }
   }
 
+  // --- YENİ GÜNCELLEME FONKSİYONU ---
   const handleUpdate = async () => {
     if (!editTeam) return
     try {
-      const payload = {
-        name: editTeam.name,
-        project_name: editTeam.project_name,
-        category: editTeam.category,
-        description: editTeam.description,
-        photo_url: editTeam.photo_url || null,
-        is_featured: editTeam.is_featured,
-        members: (editTeam.members || []).map((m: any) => ({
-          id: m.id,
-          name: m.name,
-          role: m.role,
-          linkedin_url: m.linkedin_url || null,
-        })),
+      const formData = new FormData()
+      formData.append("name", editTeam.name)
+      formData.append("project_name", editTeam.project_name)
+      formData.append("category", editTeam.category)
+      formData.append("description", editTeam.description)
+      formData.append("is_featured", String(editTeam.is_featured))
+
+      // Üyeleri JSON string olarak ekle (Edit modunda id'leri varsa onları da koruyarak gönderebiliriz ama backend yeniden oluşturabilir)
+      const validMembers = (editTeam.members || []).map((m: any) => ({
+        // id varsa gönder, yoksa gönderme (Backend bunu handle ediyor mu emin olmalısın, yoksa sadece name/role gönder)
+        // Genellikle update işleminde members listesi tamamen yenilenir.
+        name: m.name,
+        role: m.role,
+        linkedin_url: m.linkedin_url || null
+      }))
+      formData.append("members", JSON.stringify(validMembers))
+
+      // 1. Yeni dosya seçildiyse onu ekle
+      if (teamFile) {
+        formData.append("file", teamFile)
+      } 
+      // 2. Dosya yoksa mevcut URL'yi koru
+      else if (editTeam.photo_url) {
+        formData.append("photo_url", normalizeImageUrl(editTeam.photo_url))
       }
-      const { data } = await api.put<TeamOut>(`/teams/${editTeam.id}`, payload)
+
+      const { data } = await api.put<TeamOut>(`/teams/${editTeam.id}`, formData)
+      
       setTeams(prev => prev.map(x => (x.id === data.id ? data : x)))
+      setTeamFile(null)
       setEditOpen(false)
       onNotify(`"${data.name}" güncellendi`)
     } catch (e) {
       console.error("Takım güncelle hata:", e)
+      onNotify("Güncelleme başarısız")
     }
   }
 
@@ -149,6 +198,18 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
       console.error("Takım silme hatası:", e)
       onNotify("Takım silinemedi")
     }
+  }
+
+  // Dialog açılışlarında dosya state'ini temizle
+  const openAddDialog = (open: boolean) => {
+    if (open) setTeamFile(null)
+    setAddOpen(open)
+  }
+
+  const openEditDialog = (team: TeamOut) => {
+    setEditTeam(team)
+    setTeamFile(null)
+    setEditOpen(true)
   }
 
   return (
@@ -173,7 +234,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
         </DialogHeader>
 
         <div className="mb-4">
-          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+          <Dialog open={addOpen} onOpenChange={openAddDialog}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-primary to-accent">Yeni Takım Ekle</Button>
             </DialogTrigger>
@@ -197,6 +258,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
                       <div className="relative">
                         <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                           if (e.target.files && e.target.files[0]) {
+                            setTeamFile(e.target.files[0])
                             setNewTeam((p) => ({ ...p, photo_url: e.target.files![0].name }))
                           }
                         }} />
@@ -205,12 +267,15 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
                         </Button>
                       </div>
                     </div>
+                    {teamFile && <p className="text-xs text-green-600 mt-1">Seçili: {teamFile.name}</p>}
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox id="teamFeatured" checked={newTeam.is_featured} onCheckedChange={(c) => setNewTeam((p) => ({ ...p, is_featured: !!c }))} />
                   <Label htmlFor="teamFeatured">Anasayfada öne çıkar</Label>
                 </div>
+                
+                {/* ÜYE EKLEME KISMI */}
                 <div className="space-y-2">
                   <Label>Takım Üyeleri</Label>
                   {newTeam.members.map((m, idx) => (
@@ -223,6 +288,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
                   ))}
                   <Button type="button" variant="outline" size="sm" onClick={addTeamMemberRow}>+ Üye Ekle</Button>
                 </div>
+
                 <div className="flex gap-2 pt-4">
                   <Button onClick={handleAdd} className="flex-1 bg-ayzek-gradient hover:opacity-90">Ekle</Button>
                   <Button variant="outline" onClick={() => setAddOpen(false)} className="flex-1">İptal</Button>
@@ -240,7 +306,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
               <Card key={team.id} className="overflow-hidden">
                 <div className="aspect-video bg-muted flex items-center justify-center relative">
                   {team.photo_url ? (
-                    <img src={team.photo_url} alt={team.name} className="w-full h-full object-cover" />
+                    <img src={normalizeImageUrl(team.photo_url)} alt={team.name} className="w-full h-full object-cover" />
                   ) : (
                     <ImageIcon className="w-8 h-8 text-muted-foreground" />
                   )}
@@ -255,7 +321,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
                   <p className="text-xs text-muted-foreground">{team.project_name}</p>
                   <p className="text-sm mt-2 line-clamp-2">{team.description}</p>
                   <div className="flex justify-end mt-3 gap-2">
-                    <Button size="sm" variant="outline" onClick={() => { setEditTeam({ ...team }); setEditOpen(true); }}>Düzenle</Button>
+                    <Button size="sm" variant="outline" onClick={() => openEditDialog(team)}>Düzenle</Button>
                     <Button size="sm" variant="destructive" onClick={() => handleDelete(team.id)}>
                       <Trash2 className="w-3 h-3" />
                     </Button>
@@ -286,6 +352,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
                       <div className="relative">
                         <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                           if (e.target.files && e.target.files[0]) {
+                            setTeamFile(e.target.files[0])
                             setEditTeam({...editTeam, photo_url: e.target.files[0].name})
                           }
                         }} />
@@ -294,12 +361,45 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
                         </Button>
                       </div>
                     </div>
+                    {teamFile && <p className="text-xs text-green-600 mt-1">Yeni dosya seçildi: {teamFile.name}</p>}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Checkbox id="editTeamFeatured" checked={!!editTeam.is_featured} onCheckedChange={(c)=>setEditTeam({...editTeam, is_featured: !!c})}/>
                   <Label htmlFor="editTeamFeatured">Anasayfada öne çıkar</Label>
                 </div>
+                
+                {/* EDIT MODUNDA ÜYELERİ DÜZENLEME (Basitçe gösterim, daha complex yapılabilir) */}
+                <div className="space-y-2">
+                   <Label>Takım Üyeleri (Düzenlemek için silip yeniden ekleyin)</Label>
+                   {(editTeam.members || []).map((m, idx) => (
+                      <div key={idx} className="grid grid-cols-4 gap-2">
+                        <Input placeholder="Ad Soyad" value={m.name} onChange={(e) => {
+                             const newMembers = [...editTeam.members];
+                             newMembers[idx] = {...newMembers[idx], name: e.target.value};
+                             setEditTeam({...editTeam, members: newMembers});
+                        }} />
+                        <Input placeholder="Rol" value={m.role} onChange={(e) => {
+                             const newMembers = [...editTeam.members];
+                             newMembers[idx] = {...newMembers[idx], role: e.target.value};
+                             setEditTeam({...editTeam, members: newMembers});
+                        }} />
+                        <Input placeholder="LinkedIn" value={m.linkedin_url || ""} onChange={(e) => {
+                             const newMembers = [...editTeam.members];
+                             newMembers[idx] = {...newMembers[idx], linkedin_url: e.target.value};
+                             setEditTeam({...editTeam, members: newMembers});
+                        }} />
+                        <Button type="button" variant="destructive" size="sm" onClick={() => {
+                             const newMembers = editTeam.members.filter((_, i) => i !== idx);
+                             setEditTeam({...editTeam, members: newMembers});
+                        }}>Sil</Button>
+                      </div>
+                   ))}
+                   <Button type="button" variant="outline" size="sm" onClick={() => {
+                       setEditTeam({...editTeam, members: [...editTeam.members, { id: 0, name: "", role: "", linkedin_url: "" }]})
+                   }}>+ Üye Ekle</Button>
+                </div>
+
                 <div className="flex gap-2 pt-2">
                   <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate}>Kaydet</Button>
                   <Button variant="outline" className="flex-1" onClick={()=>setEditOpen(false)}>Kapat</Button>
@@ -312,4 +412,3 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
     </Dialog>
   )
 }
-

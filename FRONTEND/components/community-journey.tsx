@@ -5,6 +5,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
+// --- YENİ EKLENEN KISIMLAR ---
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000"
+
+function normalizeImageUrl(v: string) {
+  const s = (v || "").trim()
+  if (!s) return ""
+
+  // 1. Eğer tam bir http linki ise dokunma
+  if (s.startsWith("http://") || s.startsWith("https://")) return s
+
+  // 2. Başında slash yoksa ekle
+  const path = s.startsWith("/") ? s : `/${s}`
+
+  // 3. Backend'den gelen dosya ise
+  if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
+     return `${API_BASE}${path}`
+  }
+
+  // 4. Diğer durumlar
+  return path
+}
+// -----------------------------
+
 type Leader = {
   id: string | number
   name: string
@@ -23,7 +46,8 @@ function PersonCard({ leader }: { leader: Leader }) {
     <Card className="bg-white/90 dark:bg-black/70 border border-black/10 dark:border-white/10 backdrop-blur-sm transition-shadow hover:shadow-lg">
       <CardHeader className="text-center p-2.5 sm:p-3 md:p-4">
         <img
-          src={leader.avatar || "/placeholder.svg"}
+          // --- DEĞİŞİKLİK: normalizeImageUrl kullanıldı ---
+          src={normalizeImageUrl(leader.avatar || "") || "/placeholder.svg"}
           alt={leader.name}
           className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full mx-auto mb-2 sm:mb-2.5 md:mb-3 object-cover"
         />
@@ -53,7 +77,8 @@ export function CommunityJourney() {
   useEffect(() => {
     const fetchJourneyData = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/journey/");
+        // --- DEĞİŞİKLİK: API_BASE kullanıldı ---
+        const response = await fetch(`${API_BASE}/journey/`);
         if (!response.ok) throw new Error("Veriler alınamadı. Sunucu yanıt vermiyor.");
         const dataFromBackend: Record<string, any[]> = await response.json();
 
@@ -181,7 +206,7 @@ export function CommunityJourney() {
         </p>
       </div>
 
-      {/* timeline bar ve yıl balonları (aynı) */}
+      {/* timeline bar ve yıl balonları */}
       <div className="relative h-16 mb-8">
         <div
           aria-hidden

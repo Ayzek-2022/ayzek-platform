@@ -12,7 +12,7 @@ import { ImageIcon, Trash2, Users as UsersIcon, Edit } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000").replace(/\/+$/, "")
-const api = axios.create({ baseURL: API_BASE, headers: { "Content-Type": "application/json" } })
+const api = axios.create({ baseURL: API_BASE }) // Content-Type dinamik
 
 type JourneyPersonOut = {
   id: number
@@ -23,14 +23,30 @@ type JourneyPersonOut = {
   photo_url: string | null
 }
 
+const normalizeImageUrl = (v: string | null) => {
+  const s = (v || "").trim()
+  if (!s) return ""
+  if (s.startsWith("http://") || s.startsWith("https://")) return s
+  const path = s.startsWith("/") ? s : `/${s}`
+  if (path.startsWith("/public/") || path.startsWith("/uploads/")) return `${API_BASE}${path}`
+  return path
+}
+
 export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [journeyPeople, setJourneyPeople] = useState<Record<number, JourneyPersonOut[]>>({})
   const [loading, setLoading] = useState(true)
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear())
+  
+  // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
   const [newPerson, setNewPerson] = useState({ name: "", role: "", description: "", photo_url: "" })
+  
+  // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
   const [editPerson, setEditPerson] = useState<JourneyPersonOut | null>(null)
+
+  // Ortak Dosya State'i
+  const [journeyFile, setJourneyFile] = useState<File | null>(null)
 
   const yearsList = (() => {
     const now = new Date().getFullYear()
@@ -56,19 +72,39 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
     }
   }
 
+  // --- YENİ EKLEME FONKSİYONU ---
   const handleAdd = async () => {
     if (!newPerson.name || !newPerson.role || !newPerson.description) {
       onNotify("İsim, Görev ve Açıklama alanları zorunludur")
       return
     }
-    const payload = { year: selectedYear, ...newPerson, photo_url: newPerson.photo_url || null }
+    
     try {
-      const { data } = await api.post<JourneyPersonOut>("/journey/", payload)
+      const formData = new FormData()
+      formData.append("year", String(selectedYear))
+      formData.append("name", newPerson.name)
+      formData.append("role", newPerson.role)
+      formData.append("description", newPerson.description)
+      
+      // Dosya varsa dosyayı, yoksa manuel linki ekle
+      if (journeyFile) {
+        formData.append("file", journeyFile)
+      } else if (newPerson.photo_url) {
+        formData.append("photo_url", normalizeImageUrl(newPerson.photo_url))
+      }
+
+      const { data } = await api.post<JourneyPersonOut>("/journey/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      
       setJourneyPeople(prev => {
         const yearData = prev[data.year] ? [...prev[data.year], data] : [data]
         return { ...prev, [data.year]: yearData }
       })
+      
+      // Temizlik
       setNewPerson({ name: "", role: "", description: "", photo_url: "" })
+      setJourneyFile(null)
       setAddOpen(false)
       onNotify(`"${data.name}" kişisi ${data.year} yılına eklendi`)
     } catch (e) {
@@ -77,20 +113,42 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
     }
   }
 
+  // --- YENİ GÜNCELLEME FONKSİYONU ---
   const handleUpdate = async () => {
     if (!editPerson) return
     try {
-      const payload = { year: editPerson.year, name: editPerson.name, role: editPerson.role, description: editPerson.description, photo_url: editPerson.photo_url }
-      const { data } = await api.put<JourneyPersonOut>(`/journey/${editPerson.id}`, payload)
+      const formData = new FormData()
+      formData.append("year", String(editPerson.year))
+      formData.append("name", editPerson.name)
+      formData.append("role", editPerson.role)
+      formData.append("description", editPerson.description)
+      
+      // 1. Yeni dosya seçildiyse onu ekle
+      if (journeyFile) {
+        formData.append("file", journeyFile)
+      } 
+      // 2. Dosya yoksa mevcut URL'yi koru
+      else if (editPerson.photo_url) {
+        formData.append("photo_url", normalizeImageUrl(editPerson.photo_url))
+      }
+
+      const { data } = await api.put<JourneyPersonOut>(`/journey/${editPerson.id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      
       setJourneyPeople(prev => {
         const cp = { ...prev }
         cp[data.year] = (cp[data.year] || []).map(x => (x.id === data.id ? data : x))
         return cp
       })
+      
+      // Temizlik
+      setJourneyFile(null)
       setEditOpen(false)
       onNotify(`"${data.name}" güncellendi`)
     } catch (e) {
       console.error("Yolculuğumuz güncelle hata:", e)
+      onNotify("Güncelleme başarısız")
     }
   }
 
@@ -108,6 +166,18 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
       console.error("Yolculuğumuz kişisi silinirken hata:", e)
       onNotify("Kişi silinemedi")
     }
+  }
+
+  // Dialog açılışlarında dosya state'ini temizle
+  const openAddDialog = (open: boolean) => {
+    if (open) setJourneyFile(null)
+    setAddOpen(open)
+  }
+
+  const openEditDialog = (person: JourneyPersonOut) => {
+    setEditPerson(person)
+    setJourneyFile(null)
+    setEditOpen(true)
   }
 
   return (
@@ -138,7 +208,8 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
               {yearsList.map((y) => (<option key={y} value={y}>{y}</option>))}
             </select>
           </div>
-          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+          
+          <Dialog open={addOpen} onOpenChange={openAddDialog}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-primary to-accent mt-6">Kişi Ekle</Button>
             </DialogTrigger>
@@ -151,13 +222,15 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
                 <div><Label>İsim Soyisim *</Label><Input value={newPerson.name} onChange={(e) => setNewPerson(p => ({ ...p, name: e.target.value }))} /></div>
                 <div><Label>Görevi *</Label><Input value={newPerson.role} onChange={(e) => setNewPerson(p => ({ ...p, role: e.target.value }))} /></div>
                 <div><Label>Açıklama (Kısa Söz) *</Label><Textarea value={newPerson.description} onChange={(e) => setNewPerson(p => ({ ...p, description: e.target.value }))} rows={3} /></div>
+                
                 <div>
                   <Label>Resim (opsiyonel)</Label>
                   <div className="flex gap-2">
-                    <Input value={newPerson.photo_url} onChange={(e) => setNewPerson(p => ({ ...p, photo_url: e.target.value }))} className="flex-1" placeholder="URL girin veya dosya seçin" />
+                    <Input placeholder="URL girin veya dosya seçin" value={newPerson.photo_url} onChange={(e) => setNewPerson(p => ({ ...p, photo_url: e.target.value }))} className="flex-1" />
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
+                          setJourneyFile(e.target.files[0])
                           setNewPerson(p => ({ ...p, photo_url: e.target.files![0].name }))
                         }
                       }} />
@@ -166,7 +239,10 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
                       </Button>
                     </div>
                   </div>
+                  {journeyFile && <p className="text-xs text-green-600 mt-1">Seçili: {journeyFile.name}</p>}
+                  {!journeyFile && newPerson.photo_url && <img src={normalizeImageUrl(newPerson.photo_url)} alt="Önizleme" className="mt-2 h-24 w-auto rounded object-cover border border-border/30" />}
                 </div>
+
                 <div className="flex gap-2 pt-2">
                   <Button onClick={handleAdd} className="flex-1 bg-ayzek-gradient hover:opacity-90">Ekle</Button>
                   <Button variant="outline" onClick={() => setAddOpen(false)} className="flex-1">İptal</Button>
@@ -187,8 +263,12 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
                   {journeyPeople[year].map((person) => (
                     <Card key={person.id} className="p-4">
                       <div className="flex items-start gap-4">
-                        {person.photo_url && (
-                          <img src={person.photo_url} alt={person.name} className="w-16 h-16 rounded-full object-cover" />
+                        {person.photo_url ? (
+                          <img src={normalizeImageUrl(person.photo_url)} alt={person.name} className="w-16 h-16 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                            <UsersIcon className="w-8 h-8 text-muted-foreground" />
+                          </div>
                         )}
                         <div className="flex-1">
                           <h4 className="font-semibold">{person.name}</h4>
@@ -196,7 +276,7 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
                           <p className="text-sm mt-1">{person.description}</p>
                         </div>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => { setEditPerson(person); setEditOpen(true); }}>Düzenle</Button>
+                          <Button size="sm" variant="outline" onClick={() => openEditDialog(person)}>Düzenle</Button>
                           <Button size="sm" variant="destructive" onClick={() => handleDelete(person.id)}>
                             <Trash2 className="w-3 h-3" />
                           </Button>
@@ -221,7 +301,26 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
                 <div><Label>İsim Soyisim</Label><Input value={editPerson.name} onChange={(e)=>setEditPerson({...editPerson, name:e.target.value})}/></div>
                 <div><Label>Görevi</Label><Input value={editPerson.role} onChange={(e)=>setEditPerson({...editPerson, role:e.target.value})}/></div>
                 <div><Label>Açıklama</Label><Textarea value={editPerson.description} onChange={(e)=>setEditPerson({...editPerson, description:e.target.value})}/></div>
-                <div><Label>Resim URL</Label><Input value={editPerson.photo_url ?? ""} onChange={(e)=>setEditPerson({...editPerson, photo_url:e.target.value})}/></div>
+                
+                <div>
+                  <Label>Resim URL</Label>
+                  <div className="flex gap-2">
+                    <Input value={editPerson.photo_url ?? ""} onChange={(e)=>setEditPerson({...editPerson, photo_url:e.target.value})} className="flex-1" placeholder="URL girin veya dosya seçin" />
+                    <div className="relative">
+                      <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setJourneyFile(e.target.files[0])
+                          setEditPerson({...editPerson, photo_url: e.target.files[0].name})
+                        }
+                      }} />
+                      <Button type="button" variant="outline" className="border-primary/20 pointer-events-none">
+                        <ImageIcon className="w-4 h-4 mr-2" /> Dosya Seç
+                      </Button>
+                    </div>
+                  </div>
+                  {journeyFile && <p className="text-xs text-green-600 mt-1">Yeni dosya seçildi: {journeyFile.name}</p>}
+                </div>
+
                 <div className="flex gap-2 pt-2">
                   <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate}>Kaydet</Button>
                   <Button variant="outline" className="flex-1" onClick={()=>setEditOpen(false)}>Kapat</Button>
@@ -234,4 +333,3 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
     </Dialog>
   )
 }
-

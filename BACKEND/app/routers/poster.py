@@ -31,21 +31,21 @@ def get_poster(poster_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Poster bulunamadı")
     return obj
 
-# --- DÜZELTİLMESİ GEREKEN KRİTİK KISIM BURASI ---
+# --- YENİ EKLENEN POST (DOSYA YÜKLEME) ---
 @router.post("", response_model=PosterOut, status_code=status.HTTP_201_CREATED)
 def create_poster(
-    # Eski kodda burası 'body: PosterCreate' idi. Form(...) olmalı.
     title: str = Form(..., max_length=200),
     subtitle: Optional[str] = Form(None, max_length=250),
     content: Optional[str] = Form(None),
-    image_url: Optional[str] = Form(None),
+    image_url: Optional[str] = Form(None), # Manuel link girilirse
     is_active: bool = Form(True),
     order_index: Optional[int] = Form(None),
-    file: Optional[UploadFile] = File(None), # Dosya parametresi
+    file: Optional[UploadFile] = File(None), # Dosya seçilirse
     db: Session = Depends(get_db)
 ):
     final_image_url = image_url
 
+    # Dosya varsa kaydet
     if file:
         file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
         unique_filename = f"{uuid.uuid4()}.{file_ext}"
@@ -67,14 +67,52 @@ def create_poster(
     )
 
     return poster.create(db, obj_in=poster_in)
-# -----------------------------------------------
 
+# --- GÜNCELLENEN PUT (DOSYA DEĞİŞTİRME DESTEĞİ) ---
 @router.put("/{poster_id}", response_model=PosterOut)
-def update_poster(poster_id: int, body: PosterUpdate, db: Session = Depends(get_db)):
+def update_poster(
+    poster_id: int,
+    # JSON body yerine Form kullanıyoruz
+    title: Optional[str] = Form(None),
+    subtitle: Optional[str] = Form(None),
+    content: Optional[str] = Form(None),
+    image_url: Optional[str] = Form(None),
+    is_active: Optional[bool] = Form(None),
+    order_index: Optional[int] = Form(None),
+    file: Optional[UploadFile] = File(None), # Yeni dosya yüklenirse
+    db: Session = Depends(get_db)
+):
     db_obj = poster.get(db, poster_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="Poster bulunamadı")
-    return poster.update(db, db_obj=db_obj, obj_in=body)
+
+    final_image_url = image_url
+
+    # Eğer yeni dosya yüklendiyse
+    if file:
+        file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+        unique_filename = f"{uuid.uuid4()}.{file_ext}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        final_image_url = f"/public/uploads/{unique_filename}"
+    
+    # Güncelleme objesini hazırla (Eğer final_image_url None ise eskisini korur crud tarafında)
+    update_data = PosterUpdate(
+        title=title,
+        subtitle=subtitle,
+        content=content,
+        image_url=final_image_url,
+        is_active=is_active,
+        order_index=order_index
+    )
+    
+    # Eğer title gelmediyse güncelleme hatası almamak için (Form opsiyonel olduğu için)
+    # Pydantic modelinde exclude_unset=True kullanıldığı için sadece dolu gelenler güncellenir.
+    
+    return poster.update(db, db_obj=db_obj, obj_in=update_data)
 
 @router.delete("/{poster_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_poster(poster_id: int, db: Session = Depends(get_db)):

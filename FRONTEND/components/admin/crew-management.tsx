@@ -8,11 +8,20 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ImageIcon, Trash2, Users, Edit } from "lucide-react"
+import { ImageIcon, Trash2, Edit, Plus, Users } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000").replace(/\/+$/, "")
-const api = axios.create({ baseURL: API_BASE, headers: { "Content-Type": "application/json" } })
+const api = axios.create({ baseURL: API_BASE }) // Content-Type dinamik
+
+const normalizeImageUrl = (v: string | null) => {
+  const s = (v || "").trim()
+  if (!s) return ""
+  if (s.startsWith("http://") || s.startsWith("https://")) return s
+  const path = s.startsWith("/") ? s : `/${s}`
+  if (path.startsWith("/public/") || path.startsWith("/uploads/")) return `${API_BASE}${path}`
+  return path
+}
 
 type CrewMemberOut = {
   id: number
@@ -39,11 +48,18 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
   const [crewMembers, setCrewMembers] = useState<Record<string, CrewMemberOut[]>>({})
   const [loading, setLoading] = useState(true)
   const [selectedCat, setSelectedCat] = useState<CrewCategory>("Başkan ve Yardımcılar")
+  
+  // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
   const initialNewCrewState = { name: "", role: "", description: "", photo_url: "", linkedin_url: "", github_url: "" }
   const [newCrew, setNewCrew] = useState(initialNewCrewState)
+  
+  // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
   const [editCrew, setEditCrew] = useState<CrewMemberOut | null>(null)
+
+  // Ortak Dosya State'i
+  const [crewFile, setCrewFile] = useState<File | null>(null)
 
   useEffect(() => {
     fetchCrewMembers()
@@ -62,26 +78,41 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
     }
   }
 
+  // --- YENİ EKLEME FONKSİYONU ---
   const handleAdd = async () => {
     if (!newCrew.name || !newCrew.role) {
       onNotify("İsim ve Görev alanları zorunludur")
       return
     }
-    const payload = {
-      ...newCrew,
-      category: selectedCat,
-      description: newCrew.description || null,
-      photo_url: newCrew.photo_url || null,
-      linkedin_url: newCrew.linkedin_url || null,
-      github_url: newCrew.github_url || null,
-    }
+    
     try {
-      const { data } = await api.post<CrewMemberOut>("/crew/", payload)
+      const formData = new FormData()
+      formData.append("name", newCrew.name)
+      formData.append("role", newCrew.role)
+      formData.append("category", selectedCat)
+      formData.append("description", newCrew.description)
+      formData.append("linkedin_url", newCrew.linkedin_url)
+      formData.append("github_url", newCrew.github_url)
+
+      // Dosya varsa dosyayı, yoksa manuel linki ekle
+      if (crewFile) {
+        formData.append("file", crewFile)
+      } else if (newCrew.photo_url) {
+        formData.append("photo_url", normalizeImageUrl(newCrew.photo_url))
+      }
+
+      const { data } = await api.post<CrewMemberOut>("/crew/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      
       setCrewMembers(prev => {
         const categoryData = prev[data.category] ? [...prev[data.category], data] : [data]
         return { ...prev, [data.category]: categoryData }
       })
+      
+      // Temizlik
       setNewCrew(initialNewCrewState)
+      setCrewFile(null)
       setAddOpen(false)
       onNotify(`"${data.name}" kişisi ${data.category} kategorisine eklendi`)
     } catch (e) {
@@ -90,29 +121,45 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
     }
   }
 
+  // --- YENİ GÜNCELLEME FONKSİYONU ---
   const handleUpdate = async () => {
     if (!editCrew) return
     try {
-      const payload = {
-        name: editCrew.name,
-        role: editCrew.role,
-        description: editCrew.description || null,
-        category: editCrew.category,
-        photo_url: editCrew.photo_url || null,
-        linkedin_url: editCrew.linkedin_url || null,
-        github_url: editCrew.github_url || null,
-        order_index: editCrew.order_index,
+      const formData = new FormData()
+      formData.append("name", editCrew.name)
+      formData.append("role", editCrew.role)
+      formData.append("category", editCrew.category)
+      formData.append("description", editCrew.description || "")
+      formData.append("linkedin_url", editCrew.linkedin_url || "")
+      formData.append("github_url", editCrew.github_url || "")
+      formData.append("order_index", String(editCrew.order_index))
+
+      // 1. Yeni dosya seçildiyse onu ekle
+      if (crewFile) {
+        formData.append("file", crewFile)
+      } 
+      // 2. Dosya yoksa mevcut URL'yi koru
+      else if (editCrew.photo_url) {
+        formData.append("photo_url", normalizeImageUrl(editCrew.photo_url))
       }
-      const { data } = await api.put<CrewMemberOut>(`/crew/${editCrew.id}`, payload)
+
+      const { data } = await api.put<CrewMemberOut>(`/crew/${editCrew.id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      
       setCrewMembers(prev => {
         const cp = { ...prev }
         cp[data.category] = (cp[data.category] || []).map(x => (x.id === data.id ? data : x))
         return cp
       })
+      
+      // Temizlik
+      setCrewFile(null)
       setEditOpen(false)
       onNotify(`"${data.name}" güncellendi`)
     } catch (e) {
       console.error("Crew güncelle hata:", e)
+      onNotify("Güncelleme başarısız")
     }
   }
 
@@ -130,6 +177,18 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
       console.error("Ekip üyesi silinirken hata:", e)
       onNotify("Üye silinemedi")
     }
+  }
+
+  // Dialog açılışlarında dosya state'ini temizle
+  const openAddDialog = (open: boolean) => {
+    if (open) setCrewFile(null)
+    setAddOpen(open)
+  }
+
+  const openEditDialog = (member: CrewMemberOut) => {
+    setEditCrew(member)
+    setCrewFile(null)
+    setEditOpen(true)
   }
 
   return (
@@ -160,7 +219,8 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
               {CREW_CATEGORIES.map((c) => (<option key={c} value={c}>{c}</option>))}
             </select>
           </div>
-          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+          
+          <Dialog open={addOpen} onOpenChange={openAddDialog}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-primary to-accent mt-6">Üye Ekle</Button>
             </DialogTrigger>
@@ -173,13 +233,15 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
                 <div><Label>İsim Soyisim *</Label><Input value={newCrew.name} onChange={(e) => setNewCrew(p => ({ ...p, name: e.target.value }))} /></div>
                 <div><Label>Görevi *</Label><Input value={newCrew.role} onChange={(e) => setNewCrew(p => ({ ...p, role: e.target.value }))} /></div>
                 <div><Label>Açıklama (Kısa Konuşma)</Label><Textarea value={newCrew.description} onChange={(e) => setNewCrew(p => ({ ...p, description: e.target.value }))} rows={3} /></div>
+                
                 <div>
                   <Label>Fotoğraf (opsiyonel)</Label>
                   <div className="flex gap-2">
-                    <Input value={newCrew.photo_url} onChange={(e) => setNewCrew(p => ({ ...p, photo_url: e.target.value }))} className="flex-1" placeholder="URL girin veya dosya seçin" />
+                    <Input placeholder="URL girin veya dosya seçin" value={newCrew.photo_url} onChange={(e) => setNewCrew(p => ({ ...p, photo_url: e.target.value }))} className="flex-1" />
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
+                          setCrewFile(e.target.files[0])
                           setNewCrew(p => ({ ...p, photo_url: e.target.files![0].name }))
                         }
                       }} />
@@ -188,7 +250,10 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
                       </Button>
                     </div>
                   </div>
+                  {crewFile && <p className="text-xs text-green-600 mt-1">Seçili: {crewFile.name}</p>}
+                  {!crewFile && newCrew.photo_url && <img src={normalizeImageUrl(newCrew.photo_url)} alt="Önizleme" className="mt-2 h-24 w-auto rounded object-cover border border-border/30" />}
                 </div>
+
                 <div><Label>LinkedIn URL</Label><Input value={newCrew.linkedin_url} onChange={(e) => setNewCrew(p => ({ ...p, linkedin_url: e.target.value }))} /></div>
                 <div><Label>GitHub URL</Label><Input value={newCrew.github_url} onChange={(e) => setNewCrew(p => ({ ...p, github_url: e.target.value }))} /></div>
                 <div className="flex gap-2 pt-2">
@@ -211,8 +276,12 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
                   {crewMembers[category].map((member) => (
                     <Card key={member.id} className="p-4">
                       <div className="flex items-start gap-4">
-                        {member.photo_url && (
-                          <img src={member.photo_url} alt={member.name} className="w-16 h-16 rounded-full object-cover" />
+                        {member.photo_url ? (
+                          <img src={normalizeImageUrl(member.photo_url)} alt={member.name} className="w-16 h-16 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                            <Users className="w-8 h-8 text-muted-foreground" />
+                          </div>
                         )}
                         <div className="flex-1">
                           <h4 className="font-semibold">{member.name}</h4>
@@ -220,7 +289,7 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
                           {member.description && <p className="text-sm mt-1">{member.description}</p>}
                         </div>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => { setEditCrew(member); setEditOpen(true); }}>Düzenle</Button>
+                          <Button size="sm" variant="outline" onClick={() => openEditDialog(member)}>Düzenle</Button>
                           <Button size="sm" variant="destructive" onClick={() => handleDelete(member.id)}>
                             <Trash2 className="w-3 h-3" />
                           </Button>
@@ -245,7 +314,26 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
                 <div><Label>İsim Soyisim</Label><Input value={editCrew.name} onChange={(e)=>setEditCrew({...editCrew, name:e.target.value})}/></div>
                 <div><Label>Görevi</Label><Input value={editCrew.role} onChange={(e)=>setEditCrew({...editCrew, role:e.target.value})}/></div>
                 <div><Label>Açıklama</Label><Textarea value={editCrew.description ?? ""} onChange={(e)=>setEditCrew({...editCrew, description:e.target.value})}/></div>
-                <div><Label>Fotoğraf URL</Label><Input value={editCrew.photo_url ?? ""} onChange={(e)=>setEditCrew({...editCrew, photo_url:e.target.value})}/></div>
+                
+                <div>
+                  <Label>Fotoğraf URL</Label>
+                  <div className="flex gap-2">
+                    <Input value={editCrew.photo_url ?? ""} onChange={(e)=>setEditCrew({...editCrew, photo_url:e.target.value})} className="flex-1" placeholder="URL girin veya dosya seçin" />
+                    <div className="relative">
+                      <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setCrewFile(e.target.files[0])
+                          setEditCrew({...editCrew, photo_url: e.target.files[0].name})
+                        }
+                      }} />
+                      <Button type="button" variant="outline" className="border-primary/20 pointer-events-none">
+                        <ImageIcon className="w-4 h-4 mr-2" /> Dosya Seç
+                      </Button>
+                    </div>
+                  </div>
+                  {crewFile && <p className="text-xs text-green-600 mt-1">Yeni dosya seçildi: {crewFile.name}</p>}
+                </div>
+
                 <div><Label>LinkedIn URL</Label><Input value={editCrew.linkedin_url ?? ""} onChange={(e)=>setEditCrew({...editCrew, linkedin_url:e.target.value})}/></div>
                 <div><Label>GitHub URL</Label><Input value={editCrew.github_url ?? ""} onChange={(e)=>setEditCrew({...editCrew, github_url:e.target.value})}/></div>
                 <div className="flex gap-2 pt-2">
@@ -260,4 +348,3 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
     </Dialog>
   )
 }
-

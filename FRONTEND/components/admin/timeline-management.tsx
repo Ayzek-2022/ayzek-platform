@@ -12,7 +12,7 @@ import { ImageIcon, Trash2, Edit } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000").replace(/\/+$/, "")
-const api = axios.create({ baseURL: API_BASE, headers: { "Content-Type": "application/json" } })
+const api = axios.create({ baseURL: API_BASE }) // Content-Type dinamik olacak
 
 type TimelineOut = {
   id: number
@@ -35,10 +35,17 @@ const normalizeImageUrl = (v: string) => {
 export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [items, setItems] = useState<TimelineOut[]>([])
   const [loading, setLoading] = useState(false)
+  
+  // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
   const [newItem, setNewItem] = useState({ title: "", description: "", date_label: "", category: "milestone", image_url: "" })
+  
+  // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
   const [editItem, setEditItem] = useState<TimelineOut | null>(null)
+
+  // Ortak Dosya State'i
+  const [timelineFile, setTimelineFile] = useState<File | null>(null)
 
   useEffect(() => {
     fetchTimeline()
@@ -56,46 +63,73 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
     }
   }
 
+  // --- YENİ EKLEME FONKSİYONU (FormData) ---
   const handleAdd = async () => {
     if (!newItem.title || !newItem.date_label || !newItem.category) return
+    
     try {
-      const form = new URLSearchParams()
-      form.set("title", newItem.title)
-      form.set("description", newItem.description || "")
-      form.set("category", newItem.category)
-      form.set("date_label", newItem.date_label)
-      if (newItem.image_url) form.set("image_url", normalizeImageUrl(newItem.image_url))
+      const formData = new FormData()
+      formData.append("title", newItem.title)
+      formData.append("description", newItem.description || "")
+      formData.append("category", newItem.category)
+      formData.append("date_label", newItem.date_label)
+      
+      // Dosya varsa dosyayı, yoksa manuel linki ekle
+      if (timelineFile) {
+        formData.append("file", timelineFile)
+      } else if (newItem.image_url) {
+        formData.append("image_url", normalizeImageUrl(newItem.image_url))
+      }
 
-      const { data } = await axios.post<TimelineOut>(`${API_BASE}/timeline`, form.toString(), {
-        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+      const { data } = await api.post<TimelineOut>("/timeline", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       })
+      
       setItems((prev) => [...prev, data])
+      
+      // Temizlik
       setNewItem({ title: "", description: "", date_label: "", category: "milestone", image_url: "" })
+      setTimelineFile(null)
       setAddOpen(false)
       onNotify("Timeline eklendi")
     } catch (e) {
       console.error("Timeline ekle hata:", e)
+      onNotify("Timeline eklenemedi")
     }
   }
 
+  // --- YENİ GÜNCELLEME FONKSİYONU (FormData) ---
   const handleUpdate = async () => {
     if (!editItem) return
     try {
-      const form = new URLSearchParams()
-      form.set("title", editItem.title)
-      form.set("description", editItem.description || "")
-      form.set("category", editItem.category)
-      form.set("date_label", editItem.date_label)
-      if (editItem.image_url) form.set("image_url", normalizeImageUrl(editItem.image_url))
+      const formData = new FormData()
+      formData.append("title", editItem.title)
+      formData.append("description", editItem.description || "")
+      formData.append("category", editItem.category)
+      formData.append("date_label", editItem.date_label)
+      
+      // 1. Yeni dosya seçildiyse onu ekle
+      if (timelineFile) {
+        formData.append("file", timelineFile)
+      } 
+      // 2. Dosya yoksa mevcut URL'yi koru
+      else if (editItem.image_url) {
+        formData.append("image_url", normalizeImageUrl(editItem.image_url))
+      }
 
-      const { data } = await axios.put<TimelineOut>(`${API_BASE}/timeline/${editItem.id}`, form.toString(), {
-        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+      const { data } = await api.put<TimelineOut>(`/timeline/${editItem.id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       })
+      
       setItems(prev => prev.map(x => (x.id === data.id ? data : x)))
+      
+      // Temizlik
+      setTimelineFile(null)
       setEditOpen(false)
       onNotify("Timeline güncellendi")
     } catch (e) {
       console.error("Timeline güncelle hata:", e)
+      onNotify("Güncelleme başarısız")
     }
   }
 
@@ -108,6 +142,18 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
     } catch (e) {
       console.error("Timeline sil hata:", e)
     }
+  }
+
+  // Dialog açılışlarında dosya state'ini temizleme
+  const openAddDialog = (open: boolean) => {
+    if (open) setTimelineFile(null)
+    setAddOpen(open)
+  }
+
+  const openEditDialog = (item: TimelineOut) => {
+    setEditItem(item)
+    setTimelineFile(null)
+    setEditOpen(true)
   }
 
   return (
@@ -132,7 +178,7 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
         </DialogHeader>
 
         <div className="mb-4">
-          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+          <Dialog open={addOpen} onOpenChange={openAddDialog}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-primary to-accent">Yeni Timeline Ekle</Button>
             </DialogTrigger>
@@ -153,6 +199,7 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
+                          setTimelineFile(e.target.files[0])
                           setNewItem((p) => ({ ...p, image_url: e.target.files![0].name }))
                         }
                       }} />
@@ -161,7 +208,8 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
                       </Button>
                     </div>
                   </div>
-                  {newItem.image_url && <img src={normalizeImageUrl(newItem.image_url)} alt="Önizleme" className="mt-2 h-24 w-auto rounded object-cover border border-border/30" />}
+                  {timelineFile && <p className="text-xs text-green-600 mt-1">Seçili: {timelineFile.name}</p>}
+                  {!timelineFile && newItem.image_url && <img src={normalizeImageUrl(newItem.image_url)} alt="Önizleme" className="mt-2 h-24 w-auto rounded object-cover border border-border/30" />}
                 </div>
                 <div className="flex gap-2 pt-4">
                   <Button onClick={handleAdd} className="flex-1 bg-ayzek-gradient hover:opacity-90">Ekle</Button>
@@ -183,7 +231,7 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
                   {item.image_url && <img src={normalizeImageUrl(item.image_url)} alt={item.title} className="mt-2 h-24 w-auto rounded object-cover" />}
                 </div>
                 <div className="flex gap-2 ml-4">
-                  <Button size="sm" variant="outline" onClick={() => { setEditItem(item); setEditOpen(true); }}>Düzenle</Button>
+                  <Button size="sm" variant="outline" onClick={() => openEditDialog(item)}>Düzenle</Button>
                   <Button size="sm" variant="destructive" onClick={() => handleDelete(item.id)}>
                     <Trash2 className="w-3 h-3" />
                   </Button>
@@ -203,7 +251,26 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
                 <div><Label>Açıklama</Label><Textarea value={editItem.description} onChange={(e)=>setEditItem({...editItem, description:e.target.value})}/></div>
                 <div><Label>Tarih Etiketi</Label><Input value={editItem.date_label} onChange={(e)=>setEditItem({...editItem, date_label:e.target.value})}/></div>
                 <div><Label>Kategori</Label><Input value={editItem.category} onChange={(e)=>setEditItem({...editItem, category:e.target.value})}/></div>
-                <div><Label>Görsel URL</Label><Input value={editItem.image_url ?? ""} onChange={(e)=>setEditItem({...editItem, image_url:e.target.value})}/></div>
+                
+                <div>
+                  <Label>Görsel URL</Label>
+                  <div className="flex gap-2">
+                    <Input value={editItem.image_url ?? ""} onChange={(e)=>setEditItem({...editItem, image_url:e.target.value})} className="flex-1" placeholder="URL girin veya dosya seçin" />
+                    <div className="relative">
+                      <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setTimelineFile(e.target.files[0])
+                          setEditItem({...editItem, image_url: e.target.files[0].name})
+                        }
+                      }} />
+                      <Button type="button" variant="outline" className="border-primary/20 pointer-events-none">
+                        <ImageIcon className="w-4 h-4 mr-2" /> Dosya Seç
+                      </Button>
+                    </div>
+                  </div>
+                  {timelineFile && <p className="text-xs text-green-600 mt-1">Yeni dosya seçildi: {timelineFile.name}</p>}
+                </div>
+
                 <div className="flex gap-2 pt-2">
                   <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate}>Kaydet</Button>
                   <Button variant="outline" className="flex-1" onClick={()=>setEditOpen(false)}>Kapat</Button>
@@ -216,4 +283,3 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
     </Dialog>
   )
 }
-

@@ -1,13 +1,20 @@
-# backend/app/routers/blogs.py
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+import os
+import shutil
+import uuid
 from typing import List, Optional, Dict, Any
 
-from app.database import get_db  # sende nasıl ise öyle import et
+from fastapi import APIRouter, Depends, HTTPException, Query, File, UploadFile, Form, status
+from sqlalchemy.orm import Session
+
+from app.database import get_db
 from app.schemas.blog import BlogOut, BlogCreate, BlogUpdate
 from app.crud.blog import list_blogs, get_blog, create_blog, update_blog, delete_blog
 
 router = APIRouter(prefix="/blogs", tags=["blogs"])
+
+# Resimlerin kaydedileceği klasör
+UPLOAD_DIR = "public/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.get("", response_model=Dict[str, Any])
 def api_list_blogs(
@@ -27,13 +34,95 @@ def api_get_blog(blog_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Blog bulunamadı")
     return BlogOut.model_validate(obj)
 
+# --- YENİ: DOSYA DESTEKLİ CREATE ---
 @router.post("", response_model=BlogOut, status_code=201)
-def api_create_blog(payload: BlogCreate, db: Session = Depends(get_db)):
+def api_create_blog(
+    title: str = Form(...),
+    content: str = Form(...),
+    preview_text: Optional[str] = Form(None),
+    author: Optional[str] = Form(None),
+    category: Optional[str] = Form(None),
+    published_date: Optional[str] = Form(None), # Parametre adı published_date
+    is_published: bool = Form(True),
+    cover_image: Optional[str] = Form(None), 
+    file: Optional[UploadFile] = File(None), 
+    db: Session = Depends(get_db)
+):
+    final_cover_image = cover_image
+
+    # Dosya yüklendiyse kaydet
+    if file:
+        file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+        unique_filename = f"{uuid.uuid4()}.{file_ext}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        final_cover_image = f"/public/uploads/{unique_filename}"
+
+    # Pydantic şemasını oluştur
+    # --- DÜZELTME BURADA: published_date değerini 'date' alanına atıyoruz ---
+    payload = BlogCreate(
+        title=title,
+        content=content,
+        preview_text=preview_text,
+        author=author,
+        category=category,
+        date=published_date,  # <-- BURASI DÜZELTİLDİ (published_date -> date)
+        is_published=is_published,
+        cover_image=final_cover_image
+    )
+
     obj = create_blog(db, payload)
     return BlogOut.model_validate(obj)
 
+# --- YENİ: DOSYA DESTEKLİ UPDATE ---
 @router.put("/{blog_id}", response_model=BlogOut)
-def api_update_blog(blog_id: int, payload: BlogUpdate, db: Session = Depends(get_db)):
+def api_update_blog(
+    blog_id: int,
+    title: Optional[str] = Form(None),
+    content: Optional[str] = Form(None),
+    preview_text: Optional[str] = Form(None),
+    author: Optional[str] = Form(None),
+    category: Optional[str] = Form(None),
+    published_date: Optional[str] = Form(None),
+    is_published: Optional[bool] = Form(None),
+    cover_image: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db)
+):
+    # Önce kaydı bulalım
+    existing_blog = get_blog(db, blog_id)
+    if not existing_blog:
+        raise HTTPException(status_code=404, detail="Blog bulunamadı")
+
+    final_cover_image = cover_image
+
+    # Yeni dosya varsa kaydet
+    if file:
+        file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+        unique_filename = f"{uuid.uuid4()}.{file_ext}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        final_cover_image = f"/public/uploads/{unique_filename}"
+
+    # Güncelleme şemasını oluştur
+    # --- DÜZELTME BURADA: published_date değerini 'date' alanına atıyoruz ---
+    payload = BlogUpdate(
+        title=title,
+        content=content,
+        preview_text=preview_text,
+        author=author,
+        category=category,
+        date=published_date,  # <-- BURASI DÜZELTİLDİ
+        is_published=is_published,
+        cover_image=final_cover_image
+    )
+
     obj = update_blog(db, blog_id, payload)
     if not obj:
         raise HTTPException(status_code=404, detail="Blog bulunamadı")

@@ -1,20 +1,42 @@
-// components/blog-explorer.tsx  (veya pages/bloglar.tsx)
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
+import axios from "axios" // Axios import edildi
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { api } from "@/lib/api" // axios instance: baseURL = NEXT_PUBLIC_API_BASE
 import { ChevronLeft, ChevronRight } from "lucide-react"
+
+// --- AYARLAR ---
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000").replace(/\/+$/, "")
+const api = axios.create({ baseURL: API_BASE })
+
+function normalizeImageUrl(v: string | null | undefined) {
+  const s = (v || "").trim()
+  if (!s) return null
+
+  // 1. Tam link ise dokunma
+  if (s.startsWith("http://") || s.startsWith("https://")) return s
+
+  // 2. Başında slash yoksa ekle
+  const path = s.startsWith("/") ? s : `/${s}`
+
+  // 3. Backend'den gelen dosya ise
+  if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
+     return `${API_BASE}${path}`
+  }
+
+  // 4. Diğer durumlar
+  return path
+}
+// -----------------------------
 
 // === Backend tipleri ===
 type BlogFromAPI = {
@@ -22,10 +44,10 @@ type BlogFromAPI = {
   title: string
   content: string
   author: string
-  category: string            // Örn: "Yapay Zeka" (admin serbest metin)
+  category: string
   cover_image?: string | null
-  date: string                // "2025-08-01"
-  preview?: string | null     // kısa özet
+  date: string
+  preview?: string | null
 }
 
 type BlogListResponse = {
@@ -81,7 +103,7 @@ export function BlogExplorer() {
         setError("")
         const params: Record<string, string | number> = { page: 1, page_size: 30 }
         if (selectedCategory !== "all") {
-          params.category = selectedCategory // admin serbest metni direkt gönder
+          params.category = selectedCategory 
         }
         const { data } = await api.get<BlogListResponse>("/blogs", { params })
         if (cancelled) return
@@ -96,7 +118,7 @@ export function BlogExplorer() {
             (b.content ? b.content.replace(/\s+/g, " ").slice(0, 160) + "…" : ""),
           content: b.content,
           authorName: b.author || "AYZEK Ekibi",
-          coverImage: b.cover_image ?? null,
+          coverImage: normalizeImageUrl(b.cover_image),
         }))
         setPosts(mapped)
       } catch (e: any) {
@@ -110,7 +132,7 @@ export function BlogExplorer() {
     return () => { cancelled = true }
   }, [selectedCategory])
 
-  // Dinamik benzersiz kategoriler (mevcut listeden)
+  // Dinamik benzersiz kategoriler
   const uniqueCategories = useMemo(() => {
     const set = new Set<string>()
     for (const p of posts) {
@@ -120,7 +142,7 @@ export function BlogExplorer() {
     return Array.from(set)
   }, [posts])
 
-  const filtered = posts // server tarafında kategori param'ı ile filtrelemeye çalışıyoruz; yine de burada da aynı listeyi kullanıyoruz.
+  const filtered = posts 
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr)
@@ -130,7 +152,7 @@ export function BlogExplorer() {
 
   return (
     <div className="space-y-8">
-      {/* Kategori filtreleri: Tümü + dinamik kategoriler */}
+      {/* Kategori filtreleri */}
       <div className="flex items-center gap-1.5 sm:gap-2 w-full">
         {uniqueCategories.length > 10 && (
           <Button
@@ -198,10 +220,9 @@ export function BlogExplorer() {
             key={post.id}
             className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border border-white/10 h-full flex flex-col relative"
           >
-            {/* Siyah arka plan katmanı - En altta */}
             <div className="absolute inset-0 bg-black -z-10" />
             
-            {/* Kapak görseli + kategori badge */}
+            {/* Kapak görseli */}
             {post.coverImage ? (
               <div className="relative h-36 sm:h-40 md:h-44 flex-shrink-0 bg-black">
                 <img
@@ -217,7 +238,6 @@ export function BlogExplorer() {
                 </div>
               </div>
             ) : (
-              // Görsel yoksa: aynı yükseklikte boş alan
               <div className="relative h-36 sm:h-40 md:h-44 flex-shrink-0 bg-black flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10" />
                 <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10">
@@ -264,7 +284,6 @@ export function BlogExplorer() {
                     <DialogTitle className="font-display text-2xl">{post.title}</DialogTitle>
                   </DialogHeader>
 
-                  {/* Meta bar */}
                   <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
                     <span className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
                       <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-[10px] font-semibold">
@@ -286,7 +305,11 @@ export function BlogExplorer() {
 
                   {/* İçerik */}
                   <div className="max-h-[60vh] overflow-auto pr-2">
-                    <article className="text-[15px] leading-7 text-foreground/90 whitespace-pre-wrap">
+                    {post.coverImage && (
+                        <img src={post.coverImage} alt={post.title} className="w-full h-auto mb-4 rounded-lg" />
+                    )}
+                    {/* DÜZELTME: break-words eklendi */}
+                    <article className="text-[15px] leading-7 text-foreground/90 whitespace-pre-wrap break-words">
                       {post.content}
                     </article>
                   </div>

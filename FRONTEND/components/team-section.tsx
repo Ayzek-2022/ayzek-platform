@@ -5,6 +5,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Github, Linkedin } from "lucide-react"
 
+// --- YENİ EKLENEN KISIMLAR ---
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000"
+
+function normalizeImageUrl(v: string | null) {
+  const s = (v || "").trim()
+  if (!s) return ""
+
+  // 1. Tam link ise dokunma
+  if (s.startsWith("http://") || s.startsWith("https://")) return s
+
+  // 2. Başında slash yoksa ekle
+  const path = s.startsWith("/") ? s : `/${s}`
+
+  // 3. Backend'den gelen dosya ise
+  if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
+     return `${API_BASE}${path}`
+  }
+
+  // 4. Diğer durumlar
+  return path
+}
+// -----------------------------
+
 const CATEGORIES = [
   { key: "Başkan ve Yardımcılar", title: "Başkan ve Yardımcılar" },
   { key: "Sosyal Medya ve Tasarım", title: "Sosyal Medya ve Tasarım" },
@@ -37,7 +60,8 @@ export function TeamSection() {
   useEffect(() => {
     const fetchCrewMembers = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/crew/");
+        // --- DEĞİŞİKLİK: API_BASE kullanıldı ---
+        const response = await fetch(`${API_BASE}/crew/`);
         if (!response.ok) throw new Error("Ekip üyeleri verisi alınamadı.");
         const data: GroupedCrewMembers = await response.json();
         setGroupedMembers(data);
@@ -135,7 +159,8 @@ export function TeamSection() {
                       <CardHeader className="text-center p-3 md:p-4">
                         <div className="relative w-16 h-16 md:w-28 md:h-28 mx-auto mb-2">
                           <img
-                            src={member.photo_url || "/placeholder.svg"}
+                            // --- DEĞİŞİKLİK: normalizeImageUrl kullanıldı ---
+                            src={normalizeImageUrl(member.photo_url) || "/placeholder.svg"}
                             alt={member.name}
                             className="w-full h-full rounded-full object-cover transition-transform duration-300 group-hover:scale-110"
                           />
