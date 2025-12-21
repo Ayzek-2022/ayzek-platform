@@ -8,31 +8,83 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { AlertCircle, Loader2, Home, Zap } from "lucide-react"
+import { AlertCircle, Loader2, Home, Zap, ShieldCheck, ArrowLeft } from "lucide-react"
 
-interface AdminLoginProps {
-  onLogin: (credentials: { email: string; password: string }) => void
-  isLoading?: boolean
-  error?: string
+// --- TİP TANIMLARI ---
+interface LoginCredentials {
+  email: string;
+  password: string;
+  totp_code?: string;
 }
 
-export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProps) {
+interface AdminLoginProps {
+  onLogin: (credentials: LoginCredentials) => Promise<any>;
+  isLoading?: boolean;
+  error?: string;
+}
+
+export function AdminLogin({ onLogin, isLoading = false, error: propError }: AdminLoginProps) {
+  // Login Aşamaları: 1=Email/Pass, 2=2FA Code
+  const [step, setStep] = useState<1 | 2>(1)
+  
   const [credentials, setCredentials] = useState({ email: "", password: "" })
+  const [totpCode, setTotpCode] = useState("")
+  
   const [showErrorDialog, setShowErrorDialog] = useState(false)
   const [isPluggedIn, setIsPluggedIn] = useState(false)
   const [showSparkles, setShowSparkles] = useState(false)
+  
+  // Yerel hata state'i
+  const [localError, setLocalError] = useState<string | null>(null)
 
   useEffect(() => {
     document.documentElement.classList.add("dark")
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!credentials.email || !credentials.password) {
-      setShowErrorDialog(true)
-      return
+  // Prop'tan gelen hatayı izle
+  useEffect(() => {
+    if (propError) {
+        if (propError === "2FA_REQUIRED") {
+            setStep(2);
+            setLocalError(null);
+        } else {
+            setLocalError(propError);
+        }
     }
-    onLogin(credentials)
+  }, [propError]);
+
+  // --- DÜZELTİLEN FONKSİYON BURASI ---
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLocalError(null)
+
+    try {
+        if (step === 1) {
+            // --- ADIM 1: KULLANICI ADI & ŞİFRE ---
+            if (!credentials.email || !credentials.password) {
+                setShowErrorDialog(true)
+                return
+            }
+            // Backend'e istek at (Kodsuz)
+            await onLogin(credentials);
+        } else {
+            // --- ADIM 2: 2FA KODU ---
+            if (totpCode.length < 6) {
+                setLocalError("Kod 6 haneli olmalıdır");
+                return;
+            }
+            // Backend'e istek at (Kodlu)
+            await onLogin({ ...credentials, totp_code: totpCode });
+        }
+    } catch (err: any) {
+        // Hata Yakalama (page.tsx'ten fırlatılan hatalar buraya düşer)
+        if (err?.message === "2FA_REQUIRED") {
+            setStep(2);
+            setLocalError(null); // 2. adıma geçerken hata mesajını temizle
+        } else {
+            setLocalError(err?.message || "Giriş başarısız.");
+        }
+    }
   }
 
   const handlePlugToggle = () => {
@@ -40,6 +92,13 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
     setTimeout(() => {
       setIsPluggedIn(!isPluggedIn)
       setShowSparkles(false)
+      // Fiş çekilince state'leri sıfırla
+      if (isPluggedIn) {
+          setStep(1);
+          setCredentials({ email: "", password: "" });
+          setTotpCode("");
+          setLocalError(null);
+      }
     }, 400)
   }
 
@@ -57,16 +116,15 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
         </Button>
 
         <div className="relative z-10 flex items-center justify-between w-full max-w-7xl mx-auto px-8">
-          {/* Left Side - Socket and Lamp */}
+          {/* Sol Taraf - Fiş ve Lamba Animasyonu */}
           <div className="flex items-center gap-24">
-            {/* Wall Socket Section */}
+            {/* Priz Bölümü */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
               className="relative"
             >
-              {/* "Enerjiyi Verin" Text */}
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -76,7 +134,6 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                 <p className="text-sm font-semibold text-cyan-400">Enerjiyi Verin</p>
               </motion.div>
 
-              {/* Wall Socket */}
               <div className="relative">
                 <motion.button
                   onClick={handlePlugToggle}
@@ -84,7 +141,6 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {/* Socket holes */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-4">
                     <div className="flex gap-5 justify-center">
                       <motion.div
@@ -125,7 +181,6 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                     </div>
                   </div>
 
-                  {/* Power indicator light */}
                   <motion.div
                     className={`absolute bottom-2 right-2 w-1.5 h-1.5 rounded-full transition-all duration-300 ${
                       isPluggedIn ? "bg-green-500" : "bg-slate-500"
@@ -137,7 +192,6 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                   />
                 </motion.button>
 
-                {/* Sparkle effects when plugging in */}
                 <AnimatePresence>
                   {showSparkles && (
                     <>
@@ -165,14 +219,13 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
               </div>
             </motion.div>
 
-            {/* Modern Desk Lamp Section */}
+            {/* Masa Lambası Bölümü */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
               className="relative flex flex-col items-center"
             >
-              {/* Power Cable */}
               <div className="absolute -left-[140px] top-[150px] w-40 h-1">
                 <svg width="147" height="80" viewBox="0 0 168 80" className="absolute -top-10">
                   <motion.path
@@ -186,7 +239,6 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                     }}
                     transition={{ repeat: Infinity, duration: 2 }}
                   />
-                  {/* Animated electricity flow */}
                   {isPluggedIn && (
                     <motion.circle
                       r="3"
@@ -204,7 +256,6 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                 </svg>
               </div>
 
-              {/* Lamp glow effect */}
               <AnimatePresence>
                 {isPluggedIn && (
                   <motion.div
@@ -218,32 +269,25 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                 )}
               </AnimatePresence>
 
-              {/* Modern Desk Lamp */}
               <div className="relative h-64 flex flex-col items-center justify-end">
-                {/* Lamp Base - Heavy circular base */}
                 <div className="absolute bottom-0 w-40 h-4 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-full shadow-2xl">
                   <div className="absolute inset-x-8 top-0 h-full bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 rounded-full"></div>
                   <div className="absolute inset-x-14 top-0 h-full bg-gradient-to-r from-slate-600 via-slate-500 to-slate-600 rounded-full"></div>
                 </div>
 
-                {/* Lamp Stand - Modern cylindrical pole */}
                 <div className="absolute bottom-4 w-4 h-28 bg-gradient-to-b from-slate-600 via-slate-700 to-slate-800 rounded-full shadow-xl">
                   <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-slate-500/50 to-transparent rounded-l-full"></div>
                 </div>
 
-                {/* Lamp Arm - Adjustable looking arm */}
                 <div className="absolute bottom-32 w-2 h-20 bg-gradient-to-b from-slate-600 to-slate-700 rounded-full transform rotate-12 origin-bottom shadow-lg"></div>
 
-                {/* Lamp Head Housing */}
                 <div className="absolute bottom-44 -left-8 transform rotate-12">
-                  {/* Main lamp shade - Modern conical design */}
                   <motion.div
                     className="relative w-32 h-24"
                     animate={{
                       filter: isPluggedIn ? "drop-shadow(0 8px 25px rgba(34,211,238,0.5))" : "drop-shadow(0 2px 8px rgba(0,0,0,0.3))",
                     }}
                   >
-                    {/* Outer shade */}
                     <div className="absolute inset-0 bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 rounded-t-3xl shadow-xl"
                          style={{
                            clipPath: "polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)"
@@ -251,7 +295,6 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                       <div className="absolute top-0 left-1/4 right-1/4 h-2 bg-gradient-to-r from-slate-600 via-slate-500 to-slate-600 rounded-t-full"></div>
                     </div>
 
-                    {/* Light Bulb Area */}
                     <div className="absolute bottom-0 left-0 right-0 h-16 overflow-hidden">
                       <motion.div
                         className="w-full h-full rounded-b-2xl"
@@ -265,7 +308,6 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                         }}
                         transition={{ duration: 0.5 }}
                       >
-                        {/* LED strips effect */}
                         {isPluggedIn && (
                           <div className="absolute inset-0 flex items-center justify-center">
                             <motion.div
@@ -284,15 +326,12 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                   </motion.div>
                 </div>
 
-                {/* Cable connector on lamp */}
                 <div className="absolute bottom-32 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-600 rounded-full shadow-inner"></div>
               </div>
 
-              {/* Light beam projection - Starts from lamp's LED box */}
               <AnimatePresence mode="wait">
                 {isPluggedIn && (
                   <>
-                    {/* Main light beam - GPU accelerated */}
                     <motion.div
                       initial={{ opacity: 0, scaleX: 0 }}
                       animate={{ 
@@ -320,35 +359,6 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                       ></div>
                     </motion.div>
 
-                    {/* Center bright beam - Optimized */}
-                    <motion.div
-                      initial={{ opacity: 0, scaleX: 0 }}
-                      animate={{ 
-                        opacity: [0, 0.55, 0.55],
-                        scaleX: [0, 0, 1]
-                      }}
-                      exit={{ opacity: 0, scaleX: 0 }}
-                      transition={{
-                        opacity: { duration: 0.4, times: [0, 0.4, 1] },
-                        scaleX: { duration: 1.8, times: [0, 0.25, 1], ease: "easeOut" }
-                      }}
-                      className="absolute left-17 -top-40 w-[750px] h-[450px] -z-20 will-change-transform"
-                      style={{ 
-                        transformOrigin: "left center",
-                        transform: "translate3d(0, 0, 0)"
-                      }}
-                    >
-                      <div 
-                        className="absolute inset-0 w-full h-full bg-gradient-to-r from-cyan-300/50 via-cyan-400/15 to-transparent blur-xl"
-                        style={{
-                          clipPath: "polygon(0% 43%, 0% 57%, 100% 65%, 100% 35%)",
-                          transform: "rotate(3deg) translate3d(0, 0, 0)",
-                          willChange: "transform"
-                        }}
-                      ></div>
-                    </motion.div>
-
-                    {/* Light particles - Reduced to 3 for performance */}
                     {[...Array(3)].map((_, i) => (
                       <motion.div
                         key={i}
@@ -375,7 +385,7 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
             </motion.div>
           </div>
 
-          {/* Login Form Section - Right Side */}
+          {/* Sağ Taraf - Giriş Formu */}
           <AnimatePresence>
             {isPluggedIn && (
               <motion.div
@@ -396,60 +406,96 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                       transition={{ delay: 0.3, type: "spring" }}
                       className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg"
                     >
-                      <Zap className="w-8 h-8 text-white" />
+                      {step === 1 ? (
+                        <Zap className="w-8 h-8 text-white" />
+                      ) : (
+                        <ShieldCheck className="w-8 h-8 text-white" />
+                      )}
                     </motion.div>
                     <h2 className="text-3xl font-bold text-transparent bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text mb-2">
-                      Welcome Back
+                      {step === 1 ? "Welcome Back" : "Güvenlik Doğrulaması"}
                     </h2>
-                    <p className="text-muted-foreground text-sm">AYZEK Yönetici Paneline Hoş Geldiniz</p>
+                    <p className="text-muted-foreground text-sm">
+                        {step === 1 ? "AYZEK Yönetici Paneline Hoş Geldiniz" : "Lütfen Authenticator kodunuzu girin"}
+                    </p>
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-5">
-                    <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.4 }}
-                      className="space-y-2"
-                    >
-                      <Label htmlFor="email">E-posta Adresi</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={credentials.email}
-                        onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
-                        placeholder="ayzekselcukuni@gmail.com"
-                        required
-                        className="bg-background/50 border-cyan-500/20 focus:border-cyan-500 h-12 rounded-xl transition-all"
-                      />
-                    </motion.div>
+                    {/* ADIM 1: EMAİL & ŞİFRE */}
+                    {step === 1 && (
+                        <>
+                            <motion.div
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 0.4 }}
+                            className="space-y-2"
+                            >
+                            <Label htmlFor="email">E-posta Adresi</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                value={credentials.email}
+                                onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
+                                placeholder="ayzekselcukuni@gmail.com"
+                                required
+                                className="bg-background/50 border-cyan-500/20 focus:border-cyan-500 h-12 rounded-xl transition-all"
+                            />
+                            </motion.div>
 
-                    <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                      className="space-y-2"
-                    >
-                      <Label htmlFor="password">Şifre</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        value={credentials.password}
-                        onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                        placeholder="••••••••"
-                        required
-                        className="bg-background/50 border-cyan-500/20 focus:border-cyan-500 h-12 rounded-xl transition-all"
-                      />
-                    </motion.div>
+                            <motion.div
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 0.5 }}
+                            className="space-y-2"
+                            >
+                            <Label htmlFor="password">Şifre</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                value={credentials.password}
+                                onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                                placeholder="••••••••"
+                                required
+                                className="bg-background/50 border-cyan-500/20 focus:border-cyan-500 h-12 rounded-xl transition-all"
+                            />
+                            </motion.div>
+                        </>
+                    )}
+
+                    {/* ADIM 2: 2FA KODU */}
+                    {step === 2 && (
+                        <motion.div
+                            initial={{ x: 20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            className="space-y-2"
+                        >
+                            <Label htmlFor="totp_code" className="text-center block mb-2">Authenticator Kodu</Label>
+                            <Input
+                                id="totp_code"
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={6}
+                                value={totpCode}
+                                onChange={(e) => {
+                                    setTotpCode(e.target.value.replace(/[^0-9]/g, ""))
+                                }}
+                                placeholder="000000"
+                                required
+                                autoFocus
+                                className="bg-background/50 border-cyan-500/20 focus:border-cyan-500 h-14 rounded-xl text-center text-2xl tracking-[0.5em] font-mono transition-all placeholder:tracking-normal"
+                            />
+                        </motion.div>
+                    )}
 
                     <AnimatePresence>
-                      {error && (
+                      {(localError) && (
                         <motion.div
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
                           className="p-4 rounded-xl bg-destructive/10 border border-destructive/30"
                         >
-                          <p className="text-sm text-destructive text-center">{error}</p>
+                          <p className="text-sm text-destructive text-center">{localError}</p>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -458,6 +504,7 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                       initial={{ y: 20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.6 }}
+                      className="flex flex-col gap-3"
                     >
                       <Button
                         type="submit"
@@ -467,28 +514,41 @@ export function AdminLogin({ onLogin, isLoading = false, error }: AdminLoginProp
                         {isLoading ? (
                           <>
                             <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                            Giriş Yapılıyor...
+                            Kontrol Ediliyor...
                           </>
                         ) : (
-                          "Giriş Yap"
+                          step === 1 ? "Giriş Yap" : "Doğrula ve Gir"
                         )}
                       </Button>
+
+                      {step === 2 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => { setStep(1); setTotpCode(""); setLocalError(null); }}
+                            className="w-full text-muted-foreground hover:text-cyan-400"
+                          >
+                              <ArrowLeft className="w-4 h-4 mr-2" /> Geri Dön
+                          </Button>
+                      )}
                     </motion.div>
 
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.7 }}
-                      className="text-center mt-4"
-                    >
-                      <button
-                        type="button"
-                        className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
-                        onClick={() => setShowErrorDialog(true)}
-                      >
-                        Şifremi Unuttum?
-                      </button>
-                    </motion.div>
+                    {step === 1 && (
+                        <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.7 }}
+                        className="text-center mt-4"
+                        >
+                        <button
+                            type="button"
+                            className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
+                            onClick={() => setShowErrorDialog(true)}
+                        >
+                            Şifremi Unuttum?
+                        </button>
+                        </motion.div>
+                    )}
                   </form>
                 </div>
               </motion.div>

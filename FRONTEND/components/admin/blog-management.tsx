@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import axios from "axios"
+// !!! DEĞİŞİKLİK BURADA: axios yerine bizim ayarlı api'yi çağırıyoruz !!!
+import { api, API_BASE } from "@/lib/api" 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -11,8 +12,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { ImageIcon, Trash2, FileText, Edit } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000").replace(/\/+$/, "")
-const api = axios.create({ baseURL: API_BASE })
+// ESKİ API TANIMINI SİLDİK. 
+// Artık lib/api.ts içindeki 'withCredentials: true' ayarlı api'yi kullanıyoruz.
 
 type BlogOut = {
   id: number
@@ -68,6 +69,7 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
   const fetchBlogs = async () => {
     setLoading(true)
     try {
+      // api.get kullanıyoruz (Cookie otomatik gider)
       const { data } = await api.get<BlogListResponse>("/blogs", { params: { page: 1, page_size: 100 } })
       setItems(data.items || [])
     } catch (e) {
@@ -97,6 +99,7 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
         formData.append("cover_image", normalizeImageUrl(image))
       }
 
+      // api.post kullanıyoruz (Cookie otomatik gider)
       const { data } = await api.post<BlogOut>("/blogs", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
@@ -132,6 +135,7 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
         formData.append("cover_image", normalizeImageUrl(editBlog.cover_image))
       }
 
+      // api.put kullanıyoruz (Cookie otomatik gider)
       const { data } = await api.put<BlogOut>(`/blogs/${editBlog.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
@@ -150,11 +154,13 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
   const handleDelete = async (id: number) => {
     if (!confirm("Blog yazısını silmek istediğinizden emin misiniz?")) return
     try {
+      // api.delete kullanıyoruz (Cookie otomatik gider)
       await api.delete(`/blogs/${id}`)
       setItems((prev) => prev.filter((b) => b.id !== id))
       onNotify("Blog silindi")
     } catch (e) {
       console.error("Blog sil hata:", e)
+      onNotify("Silme yetkiniz yok veya hata oluştu")
     }
   }
 
@@ -203,31 +209,23 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
               <div className="space-y-4">
                 <div><Label>Başlık *</Label><Input value={newBlog.title} onChange={(e) => setNewBlog((p) => ({ ...p, title: e.target.value }))} /></div>
                 
-                {/* --- DÜZELTİLEN KISIM: İÇERİK (EKLE) --- */}
                 <div>
                     <Label>İçerik *</Label>
                     <Textarea 
                         value={newBlog.description} 
                         onChange={(e) => setNewBlog((p) => ({ ...p, description: e.target.value }))} 
                         rows={8}
-                        // h-40: Sabit yükseklik (veya min-h-40)
-                        // overflow-y-auto: Yazı taşarsa kaydırma çubuğu çıkar
-                        // whitespace-pre-wrap: Satırları korur
-                        // break-words: Uzun kelimeleri böler
                         className="h-40 min-h-[160px] overflow-y-auto whitespace-pre-wrap break-words resize-none" 
                         placeholder="Blog içeriğini buraya yazın..."
                     />
                 </div>
 
-                {/* --- DÜZELTİLEN KISIM: ÖNİZLEME (EKLE) --- */}
                 <div>
                     <Label>Önizleme Metni</Label>
                     <Textarea 
                         value={newBlog.preview} 
                         onChange={(e) => setNewBlog((p) => ({ ...p, preview: e.target.value }))} 
                         rows={3} 
-                        // h-24: Sabit yükseklik
-                        // overflow-y-auto: Kaydırma çubuğu
                         className="h-24 min-h-[96px] overflow-y-auto whitespace-pre-wrap break-words resize-none"
                         placeholder="Kısa özet..." 
                     />
@@ -306,7 +304,6 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
               <div className="space-y-4">
                 <div><Label>Başlık</Label><Input value={editBlog.title} onChange={(e)=>setEditBlog({...editBlog, title:e.target.value})}/></div>
                 
-                {/* --- DÜZELTİLEN KISIM: İÇERİK (EDİT) --- */}
                 <div>
                     <Label>İçerik</Label>
                     <Textarea 
@@ -317,7 +314,6 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
                     />
                 </div>
 
-                {/* --- DÜZELTİLEN KISIM: ÖNİZLEME (EDİT) --- */}
                 <div>
                     <Label>Önizleme</Label>
                     <Textarea 

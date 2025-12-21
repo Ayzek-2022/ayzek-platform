@@ -1,8 +1,8 @@
-// components/events-calendar.tsx
-
 "use client"
 
 import { useMemo, useRef, useState } from "react"
+// !!! DEĞİŞİKLİK: Backend adresini almak için import
+import { API_BASE } from "@/lib/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -28,6 +28,23 @@ export type Event = {
 interface EventsCalendarProps {
   events: Event[]
   loading: boolean
+}
+
+// --- YARDIMCI FONKSİYONLAR ---
+
+// Resim URL'sini düzeltir (Başına http://localhost:8000 ekler)
+const normalizeImageUrl = (v: string | null | undefined) => {
+  const s = (v || "").trim()
+  if (!s) return ""
+  if (s.startsWith("http://") || s.startsWith("https://")) return s
+  
+  const path = s.startsWith("/") ? s : `/${s}`
+  
+  // Eğer yol /public veya /uploads ile başlıyorsa backend adresini ekle
+  if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
+    return `${API_BASE}${path}`
+  }
+  return path
 }
 
 const parseDate = (value: string) => {
@@ -190,8 +207,9 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
               <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-black/80 backdrop-blur-sm border border-white/10">
                 <CardHeader className="relative overflow-hidden p-0">
                   <div className="relative h-32 sm:h-36 md:h-44 lg:h-48">
+                    {/* !!! DEĞİŞİKLİK: normalizeImageUrl kullanıldı !!! */}
                     <img
-                      src={event.image || "/placeholder.svg"}
+                      src={normalizeImageUrl(event.image) || "/placeholder.svg"}
                       alt={event.title}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                     />
@@ -247,8 +265,9 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                       </DialogHeader>
 
                       <div className="space-y-6">
+                        {/* !!! DEĞİŞİKLİK: normalizeImageUrl kullanıldı !!! */}
                         <img
-                          src={event.image || "/placeholder.svg"}
+                          src={normalizeImageUrl(event.image) || "/placeholder.svg"}
                           alt={event.title}
                           className="w-full h-64 object-cover rounded-lg"
                         />

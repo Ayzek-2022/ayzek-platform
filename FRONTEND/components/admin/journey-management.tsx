@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import axios from "axios"
+// !!! DEĞİŞİKLİK BURADA: axios yerine bizim ayarlı api'yi çağırıyoruz !!!
+import { api, API_BASE } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -11,8 +12,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { ImageIcon, Trash2, Users as UsersIcon, Edit } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000").replace(/\/+$/, "")
-const api = axios.create({ baseURL: API_BASE }) // Content-Type dinamik
+// ESKİ API TANIMINI SİLDİK. 
+// Artık lib/api.ts içindeki 'withCredentials: true' ayarlı api'yi kullanıyoruz.
 
 type JourneyPersonOut = {
   id: number
@@ -62,6 +63,7 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
   const fetchJourneyPeople = async () => {
     setLoading(true)
     try {
+      // api.get (Cookie otomatik gider)
       const { data } = await api.get<Record<number, JourneyPersonOut[]>>("/journey/")
       setJourneyPeople(data)
     } catch (e) {
@@ -93,6 +95,7 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
         formData.append("photo_url", normalizeImageUrl(newPerson.photo_url))
       }
 
+      // api.post (Cookie otomatik gider)
       const { data } = await api.post<JourneyPersonOut>("/journey/", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
@@ -132,6 +135,7 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
         formData.append("photo_url", normalizeImageUrl(editPerson.photo_url))
       }
 
+      // api.put (Cookie otomatik gider)
       const { data } = await api.put<JourneyPersonOut>(`/journey/${editPerson.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
@@ -155,6 +159,7 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
   const handleDelete = async (personId: number) => {
     if (!confirm(`#${personId} ID'li kişiyi silmek istediğinizden emin misiniz?`)) return
     try {
+      // api.delete (Cookie otomatik gider)
       await api.delete(`/journey/${personId}`)
       const updatedJourneyPeople: Record<number, JourneyPersonOut[]> = {}
       for (const year in journeyPeople) {

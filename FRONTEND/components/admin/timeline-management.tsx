@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import axios from "axios"
+// !!! DEĞİŞİKLİK BURADA: axios yerine bizim ayarlı api'yi çağırıyoruz !!!
+import { api, API_BASE } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -11,8 +12,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { ImageIcon, Trash2, Edit } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000").replace(/\/+$/, "")
-const api = axios.create({ baseURL: API_BASE }) // Content-Type dinamik olacak
+// ESKİ API TANIMINI SİLDİK. 
+// Artık lib/api.ts içindeki 'withCredentials: true' ayarlı api'yi kullanıyoruz.
 
 type TimelineOut = {
   id: number
@@ -54,6 +55,7 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
   const fetchTimeline = async () => {
     setLoading(true)
     try {
+      // api.get (Cookie otomatik gider)
       const { data } = await api.get<TimelineOut[]>("/timeline", { headers: { "Cache-Control": "no-cache" } })
       setItems(data.sort((a, b) => a.id - b.id))
     } catch (e) {
@@ -74,20 +76,19 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
       formData.append("category", newItem.category)
       formData.append("date_label", newItem.date_label)
       
-      // Dosya varsa dosyayı, yoksa manuel linki ekle
       if (timelineFile) {
         formData.append("file", timelineFile)
       } else if (newItem.image_url) {
         formData.append("image_url", normalizeImageUrl(newItem.image_url))
       }
 
+      // api.post (Cookie otomatik gider)
       const { data } = await api.post<TimelineOut>("/timeline", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       
       setItems((prev) => [...prev, data])
       
-      // Temizlik
       setNewItem({ title: "", description: "", date_label: "", category: "milestone", image_url: "" })
       setTimelineFile(null)
       setAddOpen(false)
@@ -108,22 +109,20 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
       formData.append("category", editItem.category)
       formData.append("date_label", editItem.date_label)
       
-      // 1. Yeni dosya seçildiyse onu ekle
       if (timelineFile) {
         formData.append("file", timelineFile)
       } 
-      // 2. Dosya yoksa mevcut URL'yi koru
       else if (editItem.image_url) {
         formData.append("image_url", normalizeImageUrl(editItem.image_url))
       }
 
+      // api.put (Cookie otomatik gider)
       const { data } = await api.put<TimelineOut>(`/timeline/${editItem.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       
       setItems(prev => prev.map(x => (x.id === data.id ? data : x)))
       
-      // Temizlik
       setTimelineFile(null)
       setEditOpen(false)
       onNotify("Timeline güncellendi")
@@ -136,6 +135,7 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
   const handleDelete = async (id: number) => {
     if (!confirm("Timeline kaydını silmek istediğinizden emin misiniz?")) return
     try {
+      // api.delete (Cookie otomatik gider)
       await api.delete(`/timeline/${id}`)
       setItems((prev) => prev.filter((t) => t.id !== id))
       onNotify("Timeline silindi")
@@ -144,7 +144,6 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
     }
   }
 
-  // Dialog açılışlarında dosya state'ini temizleme
   const openAddDialog = (open: boolean) => {
     if (open) setTimelineFile(null)
     setAddOpen(open)
@@ -195,7 +194,7 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
                 <div>
                   <Label>Görsel (opsiyonel)</Label>
                   <div className="flex gap-2">
-                    <Input placeholder="URL girin veya dosya seçin" value={newItem.image_url} onChange={(e) => setNewItem((p) => ({ ...p, image_url: e.target.value }))} className="flex-1" />
+                    <Input placeholder="URL girin veya dosya seçin" value={newItem.image_url || ""} onChange={(e) => setNewItem((p) => ({ ...p, image_url: e.target.value }))} className="flex-1" />
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {

@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import axios, { AxiosError } from "axios"
+// !!! DEĞİŞİKLİK BURADA: axios yerine bizim ayarlı api'yi çağırıyoruz !!!
+import { api, API_BASE } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -11,8 +12,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { ImageIcon, Trash2, Edit } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000").replace(/\/+$/, "")
-const api = axios.create({ baseURL: API_BASE }) // Content-Type header'ını dinamik bırakıyoruz
+// ESKİ API TANIMINI SİLDİK. 
+// Artık lib/api.ts içindeki 'withCredentials: true' ayarlı api'yi kullanıyoruz.
 
 type PosterOut = {
   id: number
@@ -44,7 +45,7 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
   const [editOpen, setEditOpen] = useState(false)
   const [editPoster, setEditPoster] = useState<PosterOut | null>(null)
 
-  // Ortak Dosya State'i (Hem ekleme hem düzenleme için kullanacağız ama her işlem sonrasında temizleyeceğiz)
+  // Ortak Dosya State'i
   const [posterFile, setPosterFile] = useState<File | null>(null)
 
   useEffect(() => {
@@ -53,6 +54,7 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
 
   const fetchPosters = async () => {
     try {
+      // api.get (Cookie otomatik gider)
       const { data } = await api.get<PosterOut[]>("/posters", { params: { limit: 200 } })
       setPosterItems(data)
     } catch (e) {
@@ -67,7 +69,6 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
     if (newPoster.subtitle) formData.append("subtitle", newPoster.subtitle)
     if (newPoster.content) formData.append("content", newPoster.content)
     
-    // Dosya varsa dosyayı, yoksa manuel girilen URL'yi gönder
     if (posterFile) {
       formData.append("file", posterFile)
     } else if (newPoster.image_url) {
@@ -78,12 +79,12 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
     formData.append("order_index", String(posterItems.length))
 
     try {
+      // api.post (Cookie otomatik gider)
       const { data } = await api.post<PosterOut>("/posters", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       setPosterItems((prev) => [data, ...prev])
       
-      // Temizlik
       setNewPoster({ title: "", subtitle: "", content: "", image_url: "" })
       setPosterFile(null)
       setIsAddOpen(false)
@@ -94,7 +95,6 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
     }
   }
 
-  // --- DÜZELTİLEN KISIM: HANDLE UPDATE ---
   const handleUpdate = async () => {
     if (!editPoster) return
     try {
@@ -105,23 +105,20 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
       formData.append("is_active", String(editPoster.is_active))
       formData.append("order_index", String(editPoster.order_index))
 
-      // 1. Eğer yeni dosya seçildiyse onu ekle
       if (posterFile) {
         formData.append("file", posterFile)
       } 
-      // 2. Dosya seçilmediyse ama URL kutusunda bir şey yazıyorsa onu gönder (eski resim URL'si)
       else if (editPoster.image_url) {
         formData.append("image_url", editPoster.image_url)
       }
 
-      // Backend'e FormData olarak gönder
+      // api.put (Cookie otomatik gider)
       const { data } = await api.put<PosterOut>(`/posters/${editPoster.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
 
       setPosterItems(prev => prev.map(x => (x.id === data.id ? data : x)))
       
-      // Temizlik
       setPosterFile(null)
       setEditOpen(false)
       onNotify("Poster güncellendi")
@@ -130,28 +127,28 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
       onNotify("Güncelleme başarısız")
     }
   }
-  // ---------------------------------------
 
   const handleDelete = async (id: number) => {
     if (!confirm("Posteri silmek istediğinizden emin misiniz?")) return
     try {
+      // api.delete (Cookie otomatik gider)
       await api.delete(`/posters/${id}`)
       setPosterItems((prev) => prev.filter((p) => p.id !== id))
       onNotify("Poster silindi")
     } catch (e) {
       console.error("Poster sil hata:", e)
+      onNotify("Silme yetkiniz yok veya hata oluştu")
     }
   }
 
-  // Dialog açılıp kapanırken dosya state'ini temizle
   const openEditDialog = (item: PosterOut) => {
     setEditPoster(item)
-    setPosterFile(null) // Önceki işlemden kalan dosya varsa temizle
+    setPosterFile(null)
     setEditOpen(true)
   }
 
   const openAddDialog = (open: boolean) => {
-    if (open) setPosterFile(null) // Pencere açılırken temizle
+    if (open) setPosterFile(null)
     setIsAddOpen(open)
   }
 
@@ -269,8 +266,8 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
-                          setPosterFile(e.target.files[0]) // Dosyayı state'e at
-                          setEditPoster({...editPoster, image_url: e.target.files[0].name}) // UI'da ismini göster
+                          setPosterFile(e.target.files[0]) 
+                          setEditPoster({...editPoster, image_url: e.target.files[0].name}) 
                         }
                       }} />
                       <Button type="button" variant="outline" className="border-primary/20 pointer-events-none">
@@ -278,7 +275,6 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
                       </Button>
                     </div>
                   </div>
-                  {/* Dosya seçildiyse ismini göster */}
                   {posterFile && <p className="text-xs text-green-600 mt-1">Yeni dosya seçildi: {posterFile.name}</p>}
                 </div>
                 <div className="flex gap-2 pt-2">

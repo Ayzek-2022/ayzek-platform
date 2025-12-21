@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Lightbulb, LogOut, FileText, Settings } from "lucide-react";
+import { Calendar, Lightbulb, LogOut, FileText, Lock, ShieldCheck, QrCode, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "react-hot-toast";
-import EventsTab, { EventItem, EventSuggestion } from "@/components/admin/admin-etkinlikler";
+
+// Alt Bileşenler (Dosya yollarını kontrol et)
+import EventsTab from "@/components/admin/admin-etkinlikler";
 import ContentManagementTab from "@/components/admin/admin-icerik-yonetim";
 import { api } from "@/lib/api";
 
@@ -14,152 +19,112 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-const slugify = (s: string) =>
-  s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-");
-
 export function AdminDashboard({ onLogout }: AdminDashboardProps) {
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [eventSuggestions, setEventSuggestions] = useState<EventSuggestion[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState({
+    totalEvents: 0,
+    upcomingEvents: 0,
+    pendingSuggestions: 0
+  });
+  
   const [clientLoaded, setClientLoaded] = useState(false);
 
+  // --- 2FA STATE ---
+  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+  const [showSecurityDialog, setShowSecurityDialog] = useState(false);
+  const [qrCodeData, setQrCodeData] = useState<{ secret: string; qr_code: string } | null>(null);
+  const [verifyCode, setVerifyCode] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  // --- BAŞLANGIÇ YÜKLEMELERİ ---
   useEffect(() => {
     setClientLoaded(true);
+    fetchAdminProfile();
+    fetchDashboardStats();
   }, []);
 
-  const fetchEvents = useCallback(async () => {
+  const getAuthHeader = () => {
+    // lib/api.ts zaten cookie kullanıyor ama manuel header gerekiyorsa:
+    // const token = localStorage.getItem("admin_token");
+    // return { headers: { Authorization: `Bearer ${token}` } };
+    return {}; // Cookie tabanlı sistemde gerek yok
+  };
+
+  const fetchAdminProfile = async () => {
     try {
-      const { data } = await api.get("/events");
-      const formatted: EventItem[] = data.map((ev: any) => ({
-        id: ev.id,
-        title: ev.title,
-        date: new Date(ev.start_at).toISOString().split("T")[0],
-        time: new Date(ev.start_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
-        location: ev.location,
-        attendees: ev.registered ?? 0,
-        maxAttendees: ev.capacity,
-        status: "upcoming",
-        tags: ev.tags ? ev.tags.split(",").map((t: string) => t.trim()) : [],
-      }));
-      setEvents(formatted);
+      const { data } = await api.get("/admin/me");
+      setIs2FAEnabled(data.is_2fa_enabled);
     } catch (e) {
-      console.error("Etkinlikler yüklenemedi:", e);
-      toast.error("Etkinlikler yüklenirken bir sorun oluştu.");
-    }
-  }, []);
-
-  const fetchEventSuggestions = useCallback(async () => {
-    try {
-      const { data } = await api.get<EventSuggestion[]>("/event-suggestions");
-      setEventSuggestions(data);
-      setError(null);
-    } catch (e: any) {
-      console.error("Etkinlik önerileri yüklenemedi:", e?.response?.data || e);
-      setError("Etkinlik önerileri yüklenemedi. Lütfen API'nin çalıştığından emin olun.");
-    }
-  }, []);
-
-  useEffect(() => {
-    const init = async () => {
-      setIsLoading(true);
-      await Promise.all([fetchEvents(), fetchEventSuggestions()]);
-      setIsLoading(false);
-    };
-    init();
-  }, [fetchEvents, fetchEventSuggestions]);
-
-  const handleEventSuggestionAction = async (id: number, action: "approve" | "reject") => {
-    const newStatus = action === "approve" ? "accepted" : "rejected";
-    try {
-      await api.patch(`/event-suggestions/${id}/status`, { status: newStatus });
-      fetchEventSuggestions();
-      toast.success(action === "approve" ? "Öneri onaylandı" : "Öneri reddedildi");
-    } catch (e: any) {
-      toast.error(`Güncelleme başarısız: ${e?.response?.data?.detail ?? "Bilinmeyen hata"}`);
+      console.error("Admin bilgisi alınamadı", e);
     }
   };
 
-  const handleEventSuggestionDelete = async (id: number) => {
+  // Sadece istatistik sayıları için (Listeler alt bileşenlerde çekiliyor)
+  const fetchDashboardStats = async () => {
     try {
-      await api.delete(`/event-suggestions/${id}`);
-      fetchEventSuggestions();
-      toast.success("Öneri silindi");
-    } catch (e: any) {
-      toast.error(`Silme başarısız: ${e?.response?.data?.detail ?? "Bilinmeyen hata"}`);
-    }
-  };
-  
-  const handleAddEvent = async (payload: {
-    title: string;
-    description: string;
-    image: string;
-    date: string;
-    time: string;
-    location: string;
-    maxAttendees: number;
-    category: string;
-    whatsappLink: string;
-    tags: string[];
-  }) => {
-    try {
-      const startAt = `${payload.date}T${payload.time}:00`;
-      const base = slugify(payload.title);
-      const uniq = `${base}-${Date.now().toString(36)}`;
-      const body = {
-        title: payload.title,
-        description: payload.description,
-        cover_image_url: payload.image,
-        start_at: startAt,
-        location: payload.location,
-        category: payload.category,
-        capacity: payload.maxAttendees,
-        whatsapp_link: payload.whatsappLink,
-        slug: uniq,
-        tags: payload.tags.join(","),
-      };
-      const { status, data } = await api.post("/events", body);
-      if (status === 201 || status === 200) {
-        toast.success("Etkinlik başarıyla eklendi!");
-        const newEvent: EventItem = {
-          id: data.id,
-          title: data.title,
-          date: new Date(data.start_at).toISOString().split("T")[0],
-          time: new Date(data.start_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
-          location: data.location,
-          attendees: data.registered ?? 0,
-          maxAttendees: data.capacity,
-          status: "upcoming",
-          tags: data.tags ? data.tags.split(",").map((t: string) => t.trim()) : [],
-        };
-        setEvents((prev) => [newEvent, ...prev]);
-      } else {
-        throw new Error("Sunucudan başarılı yanıt dönmedi.");
-      }
-    } catch (e: any) {
-      console.error("Etkinlik eklenirken hata:", e?.response?.data || e);
-      toast.error(e?.response?.data?.detail ?? "Etkinlik eklenirken bir sorun oluştu.");
-    }
-  };
+      const [eventsRes] = await Promise.all([
+        api.get("/events"),
+        // api.get("/event-suggestions") // Backend'de varsa ekle
+      ]);
 
-  const handleDeleteEvent = async (eventId: number) => {
-    try {
-      await api.delete(`/events/${eventId}`);
-      toast.success("Etkinlik başarıyla silindi!");
-      setEvents((prev) => prev.filter((e) => e.id !== eventId));
+      const events = eventsRes.data || [];
+      const suggestions = []; // suggestionsRes.data || [];
+
+      const upcoming = events.filter((e: any) => new Date(e.start_at) > new Date()).length;
+      const pending = 0; // suggestions.filter((s: any) => s.status === "pending").length;
+
+      setStats({
+        totalEvents: events.length,
+        upcomingEvents: upcoming,
+        pendingSuggestions: pending
+      });
     } catch (e) {
-      console.error("Etkinlik silinirken hata:", e);
-      toast.error("Etkinlik silinirken bir sorun oluştu.");
+      console.error("İstatistikler alınamadı:", e);
     }
   };
 
-  const totalEvents = events.length;
-  const upcomingEvents = events.filter((e) => e.status === "upcoming").length;
-  const pendingSuggestions = eventSuggestions.filter((s) => s.status === "pending").length;
+  // --- 2FA İŞLEMLERİ ---
+  const handleStart2FASetup = async () => {
+    try {
+      const { data } = await api.post("/admin/2fa/setup");
+      setQrCodeData(data);
+    } catch (e: any) {
+      toast.error("QR Kod oluşturulamadı.");
+    }
+  };
 
-  if (!clientLoaded) {
-    return null;
-  }
+  const handleVerify2FA = async () => {
+    if (!qrCodeData || verifyCode.length !== 6) return;
+    setIsVerifying(true);
+    try {
+      await api.post("/admin/2fa/enable", {
+        secret: qrCodeData.secret,
+        code: verifyCode
+      });
+      
+      setIs2FAEnabled(true);
+      setQrCodeData(null);
+      setVerifyCode("");
+      setShowSecurityDialog(false);
+      toast.success("İki aşamalı doğrulama aktif!");
+    } catch (e: any) {
+      toast.error("Kod doğrulanamadı.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleDisable2FA = async () => {
+    if (!confirm("İki aşamalı doğrulamayı kapatmak istiyor musunuz?")) return;
+    try {
+      await api.post("/admin/2fa/disable");
+      setIs2FAEnabled(false);
+      toast.success("İki aşamalı doğrulama kapatıldı.");
+    } catch (e) {
+      toast.error("İşlem başarısız.");
+    }
+  };
+
+  if (!clientLoaded) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-card to-muted dark">
@@ -168,97 +133,115 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
           <div className="relative flex items-center h-10 rounded px-3">
             <div className="absolute inset-0 rounded bg-ayzek-gradient" />
             <div className="relative z-10 flex items-center gap-2">
-              <img src="/ayzek-logo.png" alt="AYZEK" className="w-7 h-7" />
               <span className="text-white text-lg font-display font-bold tracking-wide">AYZEK</span>
               <span className="text-white/70">•</span>
               <span className="text-white text-lg font-display font-semibold tracking-wide">Yönetici Paneli</span>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onLogout} 
-              className="border-primary/20 hover:bg-primary/10 bg-transparent"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Çıkış Yap
+          <div className="flex items-center space-x-2">
+            {/* GÜVENLİK BUTONU */}
+            <Dialog open={showSecurityDialog} onOpenChange={setShowSecurityDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="border-primary/20 hover:bg-primary/10 bg-transparent gap-2">
+                  {is2FAEnabled ? <ShieldCheck className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-yellow-500" />}
+                  Güvenlik
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Güvenlik Ayarları</DialogTitle>
+                  <DialogDescription>Hesap güvenliğinizi yönetin.</DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                  {is2FAEnabled ? (
+                    <div className="text-center space-y-4">
+                      <ShieldCheck className="w-16 h-16 text-green-500 mx-auto" />
+                      <p>2FA Aktif ve hesabınız güvende.</p>
+                      <Button variant="destructive" onClick={handleDisable2FA} className="w-full">Devre Dışı Bırak</Button>
+                    </div>
+                  ) : (
+                    !qrCodeData ? (
+                      <div className="text-center space-y-4">
+                        <Lock className="w-16 h-16 text-yellow-500 mx-auto" />
+                        <p>Google Authenticator ile hesabınızı koruyun.</p>
+                        <Button onClick={handleStart2FASetup} className="w-full bg-gradient-to-r from-primary to-accent">
+                          <QrCode className="w-4 h-4 mr-2" /> Kurulumu Başlat
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4 text-center">
+                        <img src={qrCodeData.qr_code} alt="QR Code" className="mx-auto w-40 h-40" />
+                        <Input 
+                          value={verifyCode} 
+                          onChange={(e) => setVerifyCode(e.target.value.slice(0, 6))} 
+                          placeholder="000000" 
+                          className="text-center text-lg tracking-widest" 
+                        />
+                        <Button onClick={handleVerify2FA} disabled={verifyCode.length !== 6 || isVerifying} className="w-full">
+                          {isVerifying && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Doğrula
+                        </Button>
+                      </div>
+                    )
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Button variant="outline" size="sm" onClick={onLogout} className="border-primary/20 hover:bg-primary/10 bg-transparent">
+              <LogOut className="w-4 h-4 mr-2" /> Çıkış Yap
             </Button>
           </div>
         </div>
       </header>
 
       <div className="container max-w-screen-xl mx-auto p-6">
+        {/* İSTATİSTİKLER */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-card/80 to-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card className="bg-gradient-to-br from-card/80 to-card/50 border-primary/20">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Toplam Etkinlik</CardTitle>
               <Calendar className="h-5 w-5 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                {totalEvents}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Tüm zamanlar</p>
+              <div className="text-3xl font-bold text-primary">{stats.totalEvents}</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-card/80 to-card/50 border-yellow-500/20 hover:border-yellow-500/40 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Yaklaşan Etkinlikler</CardTitle>
+          <Card className="bg-gradient-to-br from-card/80 to-card/50 border-yellow-500/20">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Yaklaşan</CardTitle>
               <Calendar className="h-5 w-5 text-yellow-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-yellow-500">{upcomingEvents}</div>
-              <p className="text-xs text-muted-foreground mt-1">Planlanmış</p>
+              <div className="text-3xl font-bold text-yellow-500">{stats.upcomingEvents}</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-card/80 to-card/50 border-orange-500/20 hover:border-orange-500/40 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card className="bg-gradient-to-br from-card/80 to-card/50 border-orange-500/20">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Bekleyen Öneriler</CardTitle>
               <Lightbulb className="h-5 w-5 text-orange-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-orange-500">{pendingSuggestions}</div>
-              <p className="text-xs text-muted-foreground mt-1">İnceleme bekliyor</p>
+              <div className="text-3xl font-bold text-orange-500">{stats.pendingSuggestions}</div>
             </CardContent>
           </Card>
         </div>
 
+        {/* ANA SEKMELER */}
         <Tabs defaultValue="events" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 bg-card/50 border border-primary/10">
-            <TabsTrigger 
-              value="events" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
-            >
-              <Calendar className="w-4 h-4 mr-2" />
-              Etkinlikler
+            <TabsTrigger value="events" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+              <Calendar className="w-4 h-4 mr-2" /> Etkinlikler
             </TabsTrigger>
-            <TabsTrigger 
-              value="content"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
-            >
-              <FileText className="w-4 h-4 mr-2" />
-              İçerik Yönetimi
+            <TabsTrigger value="content" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+              <FileText className="w-4 h-4 mr-2" /> İçerik Yönetimi
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="events" className="space-y-6">
-            {isLoading ? (
-              <div className="text-center text-muted-foreground py-10">Yükleniyor...</div>
-            ) : error ? (
-              <div className="text-center text-red-500 py-10">{error}</div>
-            ) : (
-              <EventsTab 
-                events={events} 
-                suggestions={eventSuggestions}
-                onAdd={handleAddEvent} 
-                onDelete={handleDeleteEvent}
-                onSuggestionAction={handleEventSuggestionAction}
-                onSuggestionDelete={handleEventSuggestionDelete}
-              />
-            )}
+            {/* !!! DEĞİŞİKLİK BURADA: events={...} gitti, sadece onNotify kaldı !!! */}
+            <EventsTab onNotify={(msg) => toast.success(msg)} />
           </TabsContent>
 
           <TabsContent value="content" className="space-y-6">

@@ -3,65 +3,76 @@
 import { useState, useEffect } from "react"
 import { AdminLogin } from "@/components/admin/admin-login"
 import { AdminDashboard } from "@/components/admin/admin-dashboard"
-import { useAdmin } from "@/contexts/admin-context"
+import { api } from "@/lib/api" // <-- ÖNEMLİ: Fetch yerine bunu kullanacağız
 
 export default function AdminPage() {
-  const { setIsAdminLoggedIn, setAdminUser } = useAdmin()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
   useEffect(() => {
     document.documentElement.classList.add("dark")
-    return () => {
-     // Don't remove dark class on unmount to maintain admin dark mode
-     }
+    checkAuth()
   }, [])
 
-   const handleLogin = async (credentials: { email: string; password: string }) => {
-     setIsLoading(true)
-     setError("")
+  // Sayfa yenilendiğinde cookie sayesinde otomatik giriş kontrolü
+  const checkAuth = async () => {
+    try {
+      await api.get("/admin/me")
+      setIsAuthenticated(true)
+    } catch (e) {
+      setIsAuthenticated(false)
+    }
+  }
 
-     try {
-     // Backend'deki güvenli API rotasına POST isteği gönder
-       const response = await fetch("http://127.0.0.1:8000/admin/login", {
-       method: "POST",
-        headers: {
-         "Content-Type": "application/json",
-       },
-         body: JSON.stringify(credentials),
-     })
+  const handleLogin = async (credentials: { email: string; password: string; totp_code?: string }) => {
+    setIsLoading(true)
+    setError("")
 
-        if (response.ok) {
-         // Backend başarılı yanıt döndürürse (giriş bilgileri doğruysa)
-         setIsAuthenticated(true)
-         setIsAdminLoggedIn(true)
-        setAdminUser({
-          email: credentials.email,
-          name: "AYZEK Admin",
-        })
-      } else {
-        // Backend hata mesajı döndürürse (geçersiz bilgiler)
-        const errorData = await response.json()
-        setError(errorData.detail || "Giriş başarısız. Lütfen tekrar deneyin.")
+    try {
+      // FETCH YERİNE API KULLANIYORUZ
+      // Çünkü api.ts içinde 'withCredentials: true' ayarı var.
+      // Bu sayede HttpOnly Cookie çalışır.
+      const response = await api.post("/admin/login", credentials)
+
+      if (response.status === 200) {
+        setIsAuthenticated(true)
       }
-    } catch (err) {
-      setError("Sunucuya bağlanılamadı. Lütfen ağ bağlantınızı kontrol edin.")
+    } catch (err: any) {
+      // Axios hata yapısı fetch'ten farklıdır
+      const detail = err.response?.data?.detail
+
+      if (detail === "2FA_REQUIRED") {
+        // Bu hata değil, bir sinyaldir. Bunu yukarı fırlatıp AdminLogin'in yakalamasını sağlıyoruz.
+        throw new Error("2FA_REQUIRED")
+      }
+      
+      const msg = detail || "Giriş başarısız. Lütfen tekrar deneyin."
+      setError(msg)
+      
+      // Hata olduğunu login bileşenine bildir
+      throw err 
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleLogout = () => {
-  setIsAuthenticated(false)
+  const handleLogout = async () => {
+    try {
+      await api.post("/admin/logout")
+    } catch (error) {
+      console.error("Çıkış hatası", error)
+    }
+    setIsAuthenticated(false)
     setError("")
-    setIsAdminLoggedIn(false)
-    setAdminUser(null)
+    // Çıkış sonrası sayfayı yenilemek cookie temizliği için en garanti yoldur
+    window.location.href = "/admin"
   }
  
-if (!isAuthenticated) {
+  if (!isAuthenticated) {
+    // onLogin prop'una dikkat et, async işlem sonucunu bekliyor
     return <AdminLogin onLogin={handleLogin} isLoading={isLoading} error={error} />
   }
 
- return <AdminDashboard onLogout={handleLogout} />
+  return <AdminDashboard onLogout={handleLogout} />
 }

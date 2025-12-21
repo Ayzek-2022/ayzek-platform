@@ -4,7 +4,8 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import axios from "axios"
+// import axios from "axios" // Axios yerine api kullanacağız
+import { api, API_BASE } from "@/lib/api" // Merkezi API importu
 import { usePathname } from "next/navigation"
 import { AdminNavbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
@@ -25,7 +26,17 @@ import { EventsCalendar, type Event } from "@/components/events-calendar"
 import EventGallery from "@/components/event-gallery"
 import { toast } from "sonner"
 
-// Admin paneli için yeni bileşen
+// Resim URL Düzeltici
+const normalizeImageUrl = (v: string | null | undefined) => {
+  const s = (v || "").trim()
+  if (!s) return ""
+  if (s.startsWith("http://") || s.startsWith("https://")) return s
+  const path = s.startsWith("/") ? s : `/${s}`
+  if (path.startsWith("/public/") || path.startsWith("/uploads/")) return `${API_BASE}${path}`
+  return path
+}
+
+// Admin paneli bileşeni (Form düzeltmeleriyle)
 const AdminPanel = () => {
     const [eventData, setEventData] = useState({
         title: "",
@@ -52,24 +63,34 @@ const AdminPanel = () => {
         e.preventDefault()
         setIsLoading(true)
         try {
-            await axios.post("http://127.0.0.1:8000/events", {
-                ...eventData,
-                // Kapasiteyi sayıya dönüştür
-                capacity: Number(eventData.capacity),
-                // Etiketleri diziye dönüştür
-                tags: eventData.tags.split(",").map(tag => tag.trim()),
+            // Backend "Multipart Form Data" ve ayrılmış date/time bekliyor
+            const formData = new FormData();
+            formData.append("title", eventData.title);
+            formData.append("description", eventData.description);
+            formData.append("category", eventData.category);
+            formData.append("location", eventData.location);
+            formData.append("max_attendees", String(eventData.capacity));
+            formData.append("tags", eventData.tags); 
+            if(eventData.cover_image_url) formData.append("image_url", eventData.cover_image_url);
+            
+            // Tarih ve Saati ayırıp gönderiyoruz
+            if (eventData.start_at) {
+                const dateObj = new Date(eventData.start_at);
+                const dateStr = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD
+                const timeStr = dateObj.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); // HH:MM
+                formData.append("date", dateStr);
+                formData.append("time", timeStr);
+            }
+
+            // api.post kullanıyoruz (axios yerine)
+            await api.post("/events", formData, {
+                headers: { "Content-Type": "multipart/form-data" }
             })
+
             toast.success("Etkinlik başarıyla eklendi!")
             setEventData({
-                title: "",
-                description: "",
-                category: "",
-                start_at: "",
-                location: "",
-                cover_image_url: "",
-                capacity: 0,
-                whatsapp_link: "",
-                tags: "",
+                title: "", description: "", category: "", start_at: "", location: "",
+                cover_image_url: "", capacity: 0, whatsapp_link: "", tags: "",
             })
         } catch (error) {
             console.error("Etkinlik eklenirken bir hata oluştu:", error)
@@ -162,14 +183,10 @@ export default function EventsPage() {
     const handleEventSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
-            const response = await axios.post("http://127.0.0.1:8000/event-suggestions", eventForm)
-            console.log("Event suggestion submitted:", response.data)
+            // Öneri gönderimi için api kullanımı
+            await api.post("/event-suggestions", eventForm)
             setIsEventModalOpen(false)
-            setEventForm({
-                title: "",
-                description: "",
-                contact: "",
-            })
+            setEventForm({ title: "", description: "", contact: "" })
             toast.success("Etkinlik öneriniz başarıyla gönderildi!")
         } catch (error) {
             console.error("Event suggestion submission failed:", error)
@@ -177,15 +194,18 @@ export default function EventsPage() {
         }
     }
 
-    const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([])
+    const [events, setEvents] = useState<Event[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<any>(null)
 
     useEffect(() => {
-        const fetchUpcomingEvents = async () => {
+        const fetchAllEvents = async () => {
             try {
                 setLoading(true)
-                const response = await axios.get<any[]>("http://127.0.0.1:8000/events/upcoming")
+                // !!! DÜZELTME BURADA: "/events/upcoming" yerine "/events" !!!
+                // Böylece geçmiş/gelecek tüm etkinlikleri çekiyoruz.
+                const response = await api.get<any[]>("/events")
+                
                 const formattedEvents = response.data.map(event => ({
                     id: event.id,
                     title: event.title,
@@ -195,13 +215,14 @@ export default function EventsPage() {
                     time: event.start_at,
                     duration: "3 saat",
                     location: event.location,
-                    image: event.cover_image_url,
+                    // Resim URL normalizasyonu
+                    image: normalizeImageUrl(event.cover_image_url || event.image_url),
                     attendees: event.registered,
                     maxAttendees: event.capacity,
                     registrationLink: event.whatsapp_link,
                     tags: event.tags ? (typeof event.tags === 'string' ? event.tags.split(',') : event.tags) : [],
                 }));
-                setUpcomingEvents(formattedEvents)
+                setEvents(formattedEvents)
             } catch (err: any) {
                 setError(err)
                 console.error("Etkinlikler çekilirken bir hata oluştu:", err)
@@ -209,7 +230,7 @@ export default function EventsPage() {
                 setLoading(false)
             }
         }
-        fetchUpcomingEvents()
+        fetchAllEvents()
     }, [])
 
     if (isAdmin) {
@@ -226,7 +247,7 @@ export default function EventsPage() {
             {/* Navigation Header */}
             <AdminNavbar />
 
-            {/* Hero Section with Background Pattern */}
+            {/* Hero Section */}
             <section className="py-8 sm:py-10 md:py-14 px-3 sm:px-4 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-5">
                     <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -238,17 +259,17 @@ export default function EventsPage() {
                         <rect width="100" height="100" fill="url(#waves)" />
                     </svg>
                 </div>
-        <div className="container max-w-screen-xl mx-auto text-center relative z-10">
-          <ScrollAnimation animation="fade-up">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-3 sm:mb-4 gradient-text leading-tight">
-              Topluluk Etkinlikleri
-            </h1>
-            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-2 leading-snug">
-              Teknoloji topluluğumuzu ilham vermeye, eğitmeye ve birbirine bağlamaya yönelik tasarlanmış atölyeler,
-              buluşmalar, konferanslar ve hackathonları keşfedin.
-            </p>
-          </ScrollAnimation>
-        </div>
+                <div className="container max-w-screen-xl mx-auto text-center relative z-10">
+                    <ScrollAnimation animation="fade-up">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-3 sm:mb-4 gradient-text leading-tight">
+                            Topluluk Etkinlikleri
+                        </h1>
+                        <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-2 leading-snug">
+                            Teknoloji topluluğumuzu ilham vermeye, eğitmeye ve birbirine bağlamaya yönelik tasarlanmış atölyeler,
+                            buluşmalar, konferanslar ve hackathonları keşfedin.
+                        </p>
+                    </ScrollAnimation>
+                </div>
             </section>
 
             {/* Quick Stats */}
@@ -293,9 +314,9 @@ export default function EventsPage() {
             <section className="py-6 sm:py-8 md:py-12 px-3 sm:px-4">
                 <div className="container max-w-screen-xl mx-auto">
                     <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
-                        <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Yaklaşan Etkinlikler</h2>
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Etkinlik Takvimi</h2>
                         <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
-                            Yaklaşan etkinliklerimize göz atın, türe göre filtreleyin ve en çok ilginizi çekenlere kayıt olun.
+                            Geçmiş ve gelecek tüm etkinliklerimize göz atın, türe göre filtreleyin.
                         </p>
                     </ScrollAnimation>
                     <ScrollAnimation animation="fade-up" delay={200}>
@@ -303,15 +324,16 @@ export default function EventsPage() {
                             <p className="text-center text-muted-foreground">Etkinlikler yükleniyor...</p>
                         ) : error ? (
                             <p className="text-center text-red-500">Etkinlikler çekilirken bir hata oluştu.</p>
-                        ) : upcomingEvents.length > 0 ? (
-                            <EventsCalendar events={upcomingEvents} loading={loading} />
+                        ) : events.length > 0 ? (
+                            <EventsCalendar events={events} loading={loading} />
                         ) : (
-                            <p className="text-center text-muted-foreground">Şu an için yaklaşan etkinlik bulunmamaktadır.</p>
+                            <p className="text-center text-muted-foreground">Henüz etkinlik bulunmuyor.</p>
                         )}
                     </ScrollAnimation>
                 </div>
             </section>
 
+            {/* Event Gallery */}
             <section className="py-6 sm:py-8 md:py-12 px-3 sm:px-4 bg-card/30 theme-transition">
                 <div className="container max-w-screen-xl mx-auto">
                     <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
@@ -326,6 +348,7 @@ export default function EventsPage() {
                 </div>
             </section>
 
+            {/* Suggest Event Section */}
             <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4">
                 <div className="container max-w-screen-xl mx-auto text-center">
                     <ScrollAnimation animation="fade-up">

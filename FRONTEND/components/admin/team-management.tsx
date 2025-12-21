@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import axios from "axios"
+// !!! DEĞİŞİKLİK BURADA: axios yerine bizim ayarlı api'yi çağırıyoruz !!!
+import { api, API_BASE } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -12,8 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { ImageIcon, Trash2, Star, Edit } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000").replace(/\/+$/, "")
-const api = axios.create({ baseURL: API_BASE }) // Content-Type dinamik
+// ESKİ API TANIMINI SİLDİK. 
+// Artık lib/api.ts içindeki 'withCredentials: true' ayarlı api'yi kullanıyoruz.
 
 const normalizeImageUrl = (v: string | null) => {
   const s = (v || "").trim()
@@ -79,6 +80,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
   const fetchTeams = async () => {
     setLoading(true)
     try {
+      // api.get (Cookie otomatik gider)
       const { data } = await api.get<TeamOut[]>("/teams")
       setTeams(data)
     } catch (e) {
@@ -133,7 +135,8 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
         formData.append("photo_url", normalizeImageUrl(newTeam.photo_url))
       }
 
-      const { data } = await api.post<TeamOut>("/teams", formData) // Headers otomatik
+      // api.post (Cookie otomatik gider)
+      const { data } = await api.post<TeamOut>("/teams", formData) 
       
       setTeams((prev) => [data, ...prev])
       setNewTeam(initialNewTeamState)
@@ -157,10 +160,8 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
       formData.append("description", editTeam.description)
       formData.append("is_featured", String(editTeam.is_featured))
 
-      // Üyeleri JSON string olarak ekle (Edit modunda id'leri varsa onları da koruyarak gönderebiliriz ama backend yeniden oluşturabilir)
+      // Üyeleri JSON string olarak ekle
       const validMembers = (editTeam.members || []).map((m: any) => ({
-        // id varsa gönder, yoksa gönderme (Backend bunu handle ediyor mu emin olmalısın, yoksa sadece name/role gönder)
-        // Genellikle update işleminde members listesi tamamen yenilenir.
         name: m.name,
         role: m.role,
         linkedin_url: m.linkedin_url || null
@@ -176,6 +177,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
         formData.append("photo_url", normalizeImageUrl(editTeam.photo_url))
       }
 
+      // api.put (Cookie otomatik gider)
       const { data } = await api.put<TeamOut>(`/teams/${editTeam.id}`, formData)
       
       setTeams(prev => prev.map(x => (x.id === data.id ? data : x)))
@@ -191,6 +193,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
   const handleDelete = async (id: number) => {
     if (!confirm(`#${id} ID'li takımı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`)) return
     try {
+      // api.delete (Cookie otomatik gider)
       await api.delete(`/teams/${id}`)
       setTeams((prev) => prev.filter((t) => t.id !== id))
       onNotify("Takım silindi")
@@ -369,7 +372,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
                   <Label htmlFor="editTeamFeatured">Anasayfada öne çıkar</Label>
                 </div>
                 
-                {/* EDIT MODUNDA ÜYELERİ DÜZENLEME (Basitçe gösterim, daha complex yapılabilir) */}
+                {/* EDIT MODUNDA ÜYELERİ DÜZENLEME */}
                 <div className="space-y-2">
                    <Label>Takım Üyeleri (Düzenlemek için silip yeniden ekleyin)</Label>
                    {(editTeam.members || []).map((m, idx) => (
