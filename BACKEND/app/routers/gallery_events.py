@@ -14,6 +14,9 @@ from app.schemas.gallery_events import (
     GalleryEventUpdate,
 )
 
+# !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
+from app.security import get_current_admin
+
 # Prefix senin kodunda /api/gallery-events idi, aynen koruyoruz.
 router = APIRouter(prefix="/api/gallery-events", tags=["gallery-events"])
 
@@ -21,6 +24,7 @@ router = APIRouter(prefix="/api/gallery-events", tags=["gallery-events"])
 UPLOAD_DIR = "public/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# --- GET İŞLEMLERİ (HERKESE AÇIK) ---
 @router.get("", response_model=List[GalleryEventOut])
 def list_events(db: Session = Depends(get_db)):
     return crud.list_gallery_events(db)
@@ -32,7 +36,7 @@ def retrieve_event(event_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Event not found")
     return obj
 
-# --- YENİ: DOSYA DESTEKLİ CREATE ---
+# --- CREATE İŞLEMİ (KİLİTLİ - SADECE ADMIN) ---
 @router.post("", response_model=GalleryEventOut, status_code=status.HTTP_201_CREATED)
 def create_event(
     title: str = Form(...),
@@ -42,7 +46,9 @@ def create_event(
     location: str = Form(...),
     image_url: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None), # Dosya parametresi
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     final_image_url = image_url
 
@@ -68,7 +74,7 @@ def create_event(
     )
     return crud.create_gallery_event(db, payload)
 
-# --- YENİ: DOSYA DESTEKLİ UPDATE ---
+# --- UPDATE İŞLEMİ (KİLİTLİ - SADECE ADMIN) ---
 @router.put("/{event_id}", response_model=GalleryEventOut)
 async def update_event(
     event_id: int,
@@ -80,9 +86,11 @@ async def update_event(
     location: Optional[str] = Form(None),
     image_url: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
-    # Önce kaydın var olup olmadığını kontrol edelim (crud fonksiyonun içinde kontrol yoksa burada patlamasın diye)
+    # Önce kaydın var olup olmadığını kontrol edelim
     existing_obj = crud.get_gallery_event(db, event_id)
     if not existing_obj:
         raise HTTPException(status_code=404, detail="Event not found")
@@ -124,8 +132,15 @@ async def update_event(
          raise HTTPException(status_code=404, detail="Event not found")
     return updated_obj
 
+# --- DELETE İŞLEMİ (KİLİTLİ - SADECE ADMIN) ---
 @router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_event(event_id: int, db: Session = Depends(get_db)):
+def delete_event(
+    event_id: int, 
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
+):
     ok = crud.delete_gallery_event(db, event_id)
     if not ok:
         raise HTTPException(status_code=404, detail="Event not found")
+    return None

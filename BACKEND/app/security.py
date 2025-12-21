@@ -2,8 +2,9 @@
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+# !!! Cookie Okumak İçin Request Eklendi !!!
+from fastapi import Depends, HTTPException, status, Request
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
@@ -21,8 +22,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
 if SECRET_KEY == "CHANGE_ME_IN_PROD":
     print("UYARI: JWT_SECRET_KEY .env'den okunamadı, varsayılan kullanılıyor!")
 
-# Swagger/Deps için HTTPBearer
-bearer = HTTPBearer(auto_error=True)  # auto_error=True olsun; 401 düzgün dönsün
+# Swagger UI için Bearer şeması (Görsel amaçlı kalabilir)
+security = HTTPBearer(auto_error=False)
 
 # --- PASSWORD ---
 def hash_password(password: str) -> str:
@@ -44,43 +45,52 @@ def decode_access_token(token: str) -> Optional[dict]:
     except JWTError:
         return None
 
-# --- DEPENDENCIES ---
+# --- YENİ BAĞIMLILIK (DEPENDENCY) ---
+# Token'ı önce Cookie'den, yoksa Header'dan okur.
 def require_admin(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer),
+    request: Request,
     db: Session = Depends(get_db),
 ):
-    if not credentials or credentials.scheme.lower() != "bearer":
+    token = None
+    
+    # 1. Önce güvenli Cookie'ye bak (admin_token)
+    if "admin_token" in request.cookies:
+        token = request.cookies.get("admin_token")
+    
+    # 2. Cookie yoksa Authorization Header'a bak (Postman/Swagger testi için)
+    elif "Authorization" in request.headers:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+
+    # Token bulunamadıysa hata ver
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required. Provide Bearer token.",
-            headers={"WWW-Authenticate": "Bearer"},
+            detail="Authentication required.",
         )
 
-    payload = decode_access_token(credentials.credentials)
+    # Token'ı çöz
+    payload = decode_access_token(token)
     if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
         )
 
     email = payload.get("sub")
-    # Eğer DB'de Admin tablosu yoksa/tokensal yetki kullanacaksanız
-    # token claim'leri ile de admin yetkisi verebilirsiniz:
-    is_admin_claim = payload.get("is_admin") is True or payload.get("role") in {"admin", "superadmin"}
-
-    # DB kontrolü (varsa)
+    
+    # DB kontrolü
     try:
         from .models import Admin  # lazy import
         admin = db.query(Admin).filter(Admin.email == email).first()
     except Exception:
-        admin = None  # Admin modeli yoksa claim'e düşeriz
+        admin = None
 
-    if not admin and not is_admin_claim:
+    if not admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin privileges required")
 
-    # Geri dönen obje: DB'de admin varsa onu, yoksa payload'ı döndür.
-    return admin or {"sub": email, **payload}
+    return admin
 
 # Router'ların beklediği isim:
 def get_current_admin(admin = Depends(require_admin)):

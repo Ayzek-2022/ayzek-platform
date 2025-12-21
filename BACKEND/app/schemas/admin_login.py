@@ -4,6 +4,7 @@ from typing import Optional
 class AdminLogin(BaseModel):
     email: str
     password: str
+    totp_code: Optional[str] = None
 
 class Admin(BaseModel):
     email: str

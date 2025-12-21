@@ -11,6 +11,9 @@ from app.database import get_db
 from app.crud import teams as crud
 from app.schemas.teams import TeamRead, TeamCreate, TeamUpdate
 
+# !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
+from app.security import get_current_admin
+
 router = APIRouter(prefix="/teams", tags=["teams"])
 
 # Resimlerin kaydedileceği klasör
@@ -18,7 +21,7 @@ UPLOAD_DIR = "public/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-# --- Public Rotalar (GET) ---
+# --- Public Rotalar (GET - HERKESE AÇIK) ---
 
 @router.get("/featured", response_model=List[TeamRead], summary="Anasayfa için öne çıkan (featured) takımları getir.")
 def read_featured_teams(db: Session = Depends(get_db)):
@@ -39,7 +42,7 @@ def read_team(team_id: int, db: Session = Depends(get_db)):
     return db_team
 
 
-# --- Admin Rotaları (POST, PUT, DELETE) ---
+# --- Admin Rotaları (POST, PUT, DELETE - KİLİTLİ) ---
 
 @router.post("", response_model=TeamRead, status_code=status.HTTP_201_CREATED, summary="Yeni bir takım oluştur (Admin).")
 def create_team(
@@ -52,7 +55,9 @@ def create_team(
     members: Optional[str] = Form(None), 
     photo_url: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     # 1. İsim kontrolü
     if crud.get_team_by_name(db, name=name):
@@ -115,7 +120,9 @@ def update_team(
     members: Optional[str] = Form(None),
     photo_url: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     """
     Belirtilen ID'ye sahip takımın bilgilerini günceller.
@@ -173,6 +180,8 @@ def update_team(
 def delete_team(
     team_id: int, 
     db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     """
     Belirtilen ID'ye sahip takımı ve ilişkili tüm üyelerini siler.

@@ -10,12 +10,16 @@ from app.database import get_db
 from app.schemas.blog import BlogOut, BlogCreate, BlogUpdate
 from app.crud.blog import list_blogs, get_blog, create_blog, update_blog, delete_blog
 
+# !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
+from app.security import get_current_admin
+
 router = APIRouter(prefix="/blogs", tags=["blogs"])
 
 # Resimlerin kaydedileceği klasör
 UPLOAD_DIR = "public/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# --- GET İŞLEMLERİ (HERKESE AÇIK) ---
 @router.get("", response_model=Dict[str, Any])
 def api_list_blogs(
     q: Optional[str] = Query(None),
@@ -34,7 +38,7 @@ def api_get_blog(blog_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Blog bulunamadı")
     return BlogOut.model_validate(obj)
 
-# --- YENİ: DOSYA DESTEKLİ CREATE ---
+# --- CREATE İŞLEMİ (SADECE ADMİN) ---
 @router.post("", response_model=BlogOut, status_code=201)
 def api_create_blog(
     title: str = Form(...),
@@ -42,11 +46,13 @@ def api_create_blog(
     preview_text: Optional[str] = Form(None),
     author: Optional[str] = Form(None),
     category: Optional[str] = Form(None),
-    published_date: Optional[str] = Form(None), # Parametre adı published_date
+    published_date: Optional[str] = Form(None),
     is_published: bool = Form(True),
     cover_image: Optional[str] = Form(None), 
     file: Optional[UploadFile] = File(None), 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     final_cover_image = cover_image
 
@@ -61,15 +67,17 @@ def api_create_blog(
         
         final_cover_image = f"/public/uploads/{unique_filename}"
 
-    # Pydantic şemasını oluştur
-    # --- DÜZELTME BURADA: published_date değerini 'date' alanına atıyoruz ---
+    # Boş string gelirse None yap (DB hatasını önler)
+    if not published_date:
+        published_date = None
+
     payload = BlogCreate(
         title=title,
         content=content,
         preview_text=preview_text,
         author=author,
         category=category,
-        date=published_date,  # <-- BURASI DÜZELTİLDİ (published_date -> date)
+        date=published_date,
         is_published=is_published,
         cover_image=final_cover_image
     )
@@ -77,7 +85,7 @@ def api_create_blog(
     obj = create_blog(db, payload)
     return BlogOut.model_validate(obj)
 
-# --- YENİ: DOSYA DESTEKLİ UPDATE ---
+# --- UPDATE İŞLEMİ (SADECE ADMİN) ---
 @router.put("/{blog_id}", response_model=BlogOut)
 def api_update_blog(
     blog_id: int,
@@ -90,7 +98,9 @@ def api_update_blog(
     is_published: Optional[bool] = Form(None),
     cover_image: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     # Önce kaydı bulalım
     existing_blog = get_blog(db, blog_id)
@@ -110,15 +120,17 @@ def api_update_blog(
         
         final_cover_image = f"/public/uploads/{unique_filename}"
 
-    # Güncelleme şemasını oluştur
-    # --- DÜZELTME BURADA: published_date değerini 'date' alanına atıyoruz ---
+    # Boş string gelirse None yap
+    if published_date == "":
+        published_date = None
+
     payload = BlogUpdate(
         title=title,
         content=content,
         preview_text=preview_text,
         author=author,
         category=category,
-        date=published_date,  # <-- BURASI DÜZELTİLDİ
+        date=published_date,
         is_published=is_published,
         cover_image=final_cover_image
     )
@@ -128,8 +140,14 @@ def api_update_blog(
         raise HTTPException(status_code=404, detail="Blog bulunamadı")
     return BlogOut.model_validate(obj)
 
+# --- DELETE İŞLEMİ (SADECE ADMİN) ---
 @router.delete("/{blog_id}", status_code=204)
-def api_delete_blog(blog_id: int, db: Session = Depends(get_db)):
+def api_delete_blog(
+    blog_id: int, 
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
+):
     ok = delete_blog(db, blog_id)
     if not ok:
         raise HTTPException(status_code=404, detail="Blog bulunamadı")

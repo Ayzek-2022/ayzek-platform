@@ -11,6 +11,9 @@ from app.crud import crew as crud
 from app.schemas.crew import CrewMemberCreate, CrewMemberRead, CrewMemberUpdate
 from app.models import CrewMember 
 
+# !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
+from app.security import get_current_admin
+
 router = APIRouter(
     prefix="/crew",
     tags=["Crew Members"]
@@ -20,6 +23,7 @@ router = APIRouter(
 UPLOAD_DIR = "public/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# --- GET İŞLEMİ (HERKESE AÇIK) ---
 @router.get("/", response_model=Dict[str, List[CrewMemberRead]], summary="Tüm ekip üyelerini kategorilere göre gruplanmış getirir.")
 def read_all_crew_members(db: Session = Depends(get_db)):
     """
@@ -27,7 +31,7 @@ def read_all_crew_members(db: Session = Depends(get_db)):
     """
     return crud.get_all_crew_members_grouped(db=db)
 
-# --- YENİ: DOSYA DESTEKLİ CREATE ---
+# --- CREATE İŞLEMİ (KİLİTLİ - SADECE ADMIN) ---
 @router.post("/", response_model=CrewMemberRead, status_code=status.HTTP_201_CREATED, summary="Yeni bir ekip üyesi oluşturur (Admin).")
 def create_crew_member(
     name: str = Form(...),
@@ -38,7 +42,9 @@ def create_crew_member(
     github_url: Optional[str] = Form(None),
     photo_url: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     final_photo_url = photo_url
 
@@ -66,7 +72,7 @@ def create_crew_member(
     
     return crud.create_crew_member(db=db, member=member)
 
-# --- YENİ: DOSYA DESTEKLİ UPDATE ---
+# --- UPDATE İŞLEMİ (KİLİTLİ - SADECE ADMIN) ---
 @router.put("/{member_id}", response_model=CrewMemberRead, summary="Bir ekip üyesini günceller (Admin).")
 def update_crew_member(
     member_id: int,
@@ -79,7 +85,9 @@ def update_crew_member(
     photo_url: Optional[str] = Form(None),
     order_index: Optional[int] = Form(None),
     file: Optional[UploadFile] = File(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     # Önce üye var mı kontrol et
     db_member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
@@ -117,8 +125,14 @@ def update_crew_member(
         raise HTTPException(status_code=404, detail="Ekip üyesi güncellenemedi")
     return updated
 
+# --- DELETE İŞLEMİ (KİLİTLİ - SADECE ADMIN) ---
 @router.delete("/{member_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Bir ekip üyesini siler (Admin).")
-def delete_crew_member(member_id: int, db: Session = Depends(get_db)):
+def delete_crew_member(
+    member_id: int, 
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
+):
     success = crud.delete_crew_member(db=db, member_id=member_id)
     if not success:
         raise HTTPException(status_code=404, detail="Ekip üyesi bulunamadı")

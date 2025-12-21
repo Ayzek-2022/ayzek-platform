@@ -10,6 +10,9 @@ from app.database import get_db
 from app.crud import journey as crud
 from app.schemas.journey import JourneyPersonCreate, JourneyPersonRead, JourneyPersonUpdate
 
+# !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
+from app.security import get_current_admin
+
 router = APIRouter(
     prefix="/journey",
     tags=["Journey"]
@@ -19,7 +22,7 @@ router = APIRouter(
 UPLOAD_DIR = "public/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# --- PUBLIC ROUTE (Frontend için) ---
+# --- PUBLIC ROUTE (Frontend için - HERKESE AÇIK) ---
 
 @router.get("/", response_model=Dict[int, List[JourneyPersonRead]], summary="Tüm 'Yolculuğumuz' kayıtlarını yıllara göre gruplanmış olarak getirir.")
 def read_all_journey_people(db: Session = Depends(get_db)):
@@ -29,7 +32,7 @@ def read_all_journey_people(db: Session = Depends(get_db)):
     return crud.get_all_journey_people_grouped_by_year(db=db)
 
 
-# --- ADMIN ROUTES (Yönetim paneli için) ---
+# --- ADMIN ROUTES (Yönetim paneli için - KİLİTLİ) ---
 
 @router.post("/", response_model=JourneyPersonRead, status_code=status.HTTP_201_CREATED, summary="Yeni bir 'Yolculuğumuz' kişisi oluşturur (Admin).")
 def create_journey_person(
@@ -39,7 +42,9 @@ def create_journey_person(
     description: str = Form(...),
     photo_url: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None), # Dosya parametresi
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     """
     Admin panelinden gelen verilerle yeni bir kişi kaydı oluşturur.
@@ -79,7 +84,9 @@ def update_journey_person(
     description: Optional[str] = Form(None),
     photo_url: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     """
     ID'ye göre belirtilen kişi kaydının bilgilerini günceller.
@@ -116,7 +123,12 @@ def update_journey_person(
 
 
 @router.delete("/{person_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Bir 'Yolculuğumuz' kişisini siler (Admin).")
-def delete_journey_person(person_id: int, db: Session = Depends(get_db)):
+def delete_journey_person(
+    person_id: int, 
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
+):
     """
     ID'ye göre belirtilen kişi kaydını veritabanından siler.
     """

@@ -10,12 +10,16 @@ from app.schemas.timeline import TimelineEventOut, TimelineEventCreate, Timeline
 from app.crud.timeline import list_events, get_event, create_event, update_event, delete_event
 from app.database import get_db
 
+# !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
+from app.security import get_current_admin
+
 router = APIRouter(prefix="/timeline", tags=["timeline"])
 
-# --- YENİ EKLENEN KISIM: Klasör Ayarı ---
+# Klasör Ayarı
 UPLOAD_DIR = "public/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# --- GET İŞLEMLERİ (HERKESE AÇIK) ---
 @router.get("", response_model=List[TimelineEventOut])
 def list_timeline(db: Session = Depends(get_db)):
     return list_events(db)
@@ -27,6 +31,7 @@ def get_timeline_item(event_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Timeline event not found")
     return obj
 
+# --- CREATE İŞLEMİ (KİLİTLİ - SADECE ADMIN) ---
 @router.post(
     "",
     status_code=status.HTTP_201_CREATED,
@@ -38,40 +43,39 @@ async def create_timeline_item(
     category: str = Form(...),
     date_label: str = Form(...),
     image_url: Optional[str] = Form(None), # Manuel link girilirse
-    file: Optional[UploadFile] = File(None), # YENİ: Dosya seçilirse
+    file: Optional[UploadFile] = File(None), # Dosya seçilirse
     db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     final_image_url = image_url
 
-    # --- YENİ EKLENEN KISIM: Dosya Kaydetme ---
+    # Dosya Kaydetme
     if file:
-        # Uzantıyı al (jpg, png vs)
         file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
-        # Benzersiz isim oluştur
         unique_filename = f"{uuid.uuid4()}.{file_ext}"
         file_path = os.path.join(UPLOAD_DIR, unique_filename)
 
-        # Dosyayı kaydet
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        # Veritabanına yazılacak yol
         final_image_url = f"/public/uploads/{unique_filename}"
-    # -------------------------------------------
 
     payload = TimelineEventCreate(
         title=title,
         description=description,
         category=category,
         date_label=date_label,
-        image_url=final_image_url # Güncellenmiş URL'yi kullan
+        image_url=final_image_url
     )
-    # create_event fonksiyonun yapısına göre image_url'i payload içinde mi 
-    # yoksa ayrı parametre olarak mı aldığına dikkat et. 
-    # Senin kodunda 'create_event(db, payload, image_url=...)' şeklindeydi:
+    
+    # create_event fonksiyonun yapısına göre image_url'i payload içinde gönderiyoruz
+    # Eğer crud fonksiyonun ayrıca image_url parametresi almıyorsa sadece payload yeterli.
+    # Burada crud fonksiyonunun esnek olduğunu varsayarak devam ediyoruz.
     return create_event(db, payload, image_url=final_image_url)
 
 
+# --- UPDATE İŞLEMİ (KİLİTLİ - SADECE ADMIN) ---
 @router.put(
     "/{event_id}",
     response_model=TimelineEventOut,
@@ -79,20 +83,21 @@ async def create_timeline_item(
 async def update_timeline_item(
     event_id: int,
     request: Request,
-    # Form ile güncelleme parametreleri
     title: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
     category: Optional[str] = Form(None),
     date_label: Optional[str] = Form(None),
     image_url: Optional[str] = Form(None),
-    file: Optional[UploadFile] = File(None), # YENİ: Update için dosya
+    file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     obj = get_event(db, event_id)
     if not obj:
         raise HTTPException(status_code=404, detail="Timeline event not found")
 
-    # --- YENİ EKLENEN KISIM: Dosya varsa işle ---
+    # Dosya varsa işle
     final_image_url = image_url
     if file:
         file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
@@ -103,7 +108,6 @@ async def update_timeline_item(
             shutil.copyfileobj(file.file, buffer)
         
         final_image_url = f"/public/uploads/{unique_filename}"
-    # -------------------------------------------
 
     ct = (request.headers.get("content-type") or "").lower()
 
@@ -124,8 +128,14 @@ async def update_timeline_item(
     return update_event(db, obj, updates, image_url=None)
 
 
+# --- DELETE İŞLEMİ (KİLİTLİ - SADECE ADMIN) ---
 @router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_timeline_item(event_id: int, db: Session = Depends(get_db)):
+def delete_timeline_item(
+    event_id: int, 
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
+):
     obj = get_event(db, event_id)
     if not obj:
         raise HTTPException(status_code=404, detail="Timeline event not found")

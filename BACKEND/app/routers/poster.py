@@ -9,12 +9,16 @@ from app.database import get_db
 from app.schemas.poster import PosterCreate, PosterUpdate, PosterOut
 from app.crud import poster
 
+# !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
+from app.security import get_current_admin
+
 router = APIRouter(prefix="/posters", tags=["posters"])
 
 # Resimlerin kaydedileceği klasör
 UPLOAD_DIR = "public/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# --- GET İŞLEMLERİ (HERKESE AÇIK) ---
 @router.get("", response_model=List[PosterOut])
 def list_posters(
     skip: int = 0,
@@ -31,7 +35,7 @@ def get_poster(poster_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Poster bulunamadı")
     return obj
 
-# --- YENİ EKLENEN POST (DOSYA YÜKLEME) ---
+# --- YENİ EKLENEN POST (KİLİTLİ - SADECE ADMIN) ---
 @router.post("", response_model=PosterOut, status_code=status.HTTP_201_CREATED)
 def create_poster(
     title: str = Form(..., max_length=200),
@@ -41,7 +45,9 @@ def create_poster(
     is_active: bool = Form(True),
     order_index: Optional[int] = Form(None),
     file: Optional[UploadFile] = File(None), # Dosya seçilirse
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     final_image_url = image_url
 
@@ -68,7 +74,7 @@ def create_poster(
 
     return poster.create(db, obj_in=poster_in)
 
-# --- GÜNCELLENEN PUT (DOSYA DEĞİŞTİRME DESTEĞİ) ---
+# --- GÜNCELLENEN PUT (KİLİTLİ - SADECE ADMIN) ---
 @router.put("/{poster_id}", response_model=PosterOut)
 def update_poster(
     poster_id: int,
@@ -80,7 +86,9 @@ def update_poster(
     is_active: Optional[bool] = Form(None),
     order_index: Optional[int] = Form(None),
     file: Optional[UploadFile] = File(None), # Yeni dosya yüklenirse
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
 ):
     db_obj = poster.get(db, poster_id)
     if not db_obj:
@@ -109,21 +117,30 @@ def update_poster(
         order_index=order_index
     )
     
-    # Eğer title gelmediyse güncelleme hatası almamak için (Form opsiyonel olduğu için)
-    # Pydantic modelinde exclude_unset=True kullanıldığı için sadece dolu gelenler güncellenir.
-    
     return poster.update(db, db_obj=db_obj, obj_in=update_data)
 
+# --- DELETE (KİLİTLİ - SADECE ADMIN) ---
 @router.delete("/{poster_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_poster(poster_id: int, db: Session = Depends(get_db)):
+def delete_poster(
+    poster_id: int, 
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
+):
     db_obj = poster.get(db, poster_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="Poster bulunamadı")
     poster.remove(db, poster_id)
     return
 
+# --- REORDER (KİLİTLİ - SADECE ADMIN) ---
 @router.post("/reorder", response_model=List[PosterOut])
-def reorder_posters(ids_in_order: List[int], db: Session = Depends(get_db)):
+def reorder_posters(
+    ids_in_order: List[int], 
+    db: Session = Depends(get_db),
+    # !!! KİLİT BURADA !!!
+    current_admin: dict = Depends(get_current_admin)
+):
     posters = poster.get_multi(db, limit=10000)
     id_to_obj = {p.id: p for p in posters}
     for idx, pid in enumerate(ids_in_order):
