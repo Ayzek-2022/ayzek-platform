@@ -21,6 +21,7 @@ type TimelineOut = {
   description: string
   category: string
   date_label: string
+  sort_date?: string | null
   image_url?: string | null
 }
 
@@ -36,11 +37,11 @@ const normalizeImageUrl = (v: string) => {
 export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [items, setItems] = useState<TimelineOut[]>([])
   const [loading, setLoading] = useState(false)
-  
+
   // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
-  const [newItem, setNewItem] = useState({ title: "", description: "", date_label: "", category: "milestone", image_url: "" })
-  
+  const [newItem, setNewItem] = useState({ title: "", description: "", date_label: "", sort_date: "", category: "milestone", image_url: "" })
+
   // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
   const [editItem, setEditItem] = useState<TimelineOut | null>(null)
@@ -57,7 +58,8 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
     try {
       // api.get (Cookie otomatik gider)
       const { data } = await api.get<TimelineOut[]>("/timeline", { headers: { "Cache-Control": "no-cache" } })
-      setItems(data.sort((a, b) => a.id - b.id))
+      // Backend zaten sıralı gönderiyor, client-side sıralamayı kaldırıyoruz veya backendin gönderdiği sırayı koruyoruz.
+      setItems(data)
     } catch (e) {
       console.error("Timeline list hata:", e)
     } finally {
@@ -68,14 +70,17 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
   // --- YENİ EKLEME FONKSİYONU (FormData) ---
   const handleAdd = async () => {
     if (!newItem.title || !newItem.date_label || !newItem.category) return
-    
+
     try {
       const formData = new FormData()
       formData.append("title", newItem.title)
       formData.append("description", newItem.description || "")
       formData.append("category", newItem.category)
       formData.append("date_label", newItem.date_label)
-      
+      if (newItem.sort_date) {
+        formData.append("sort_date", newItem.sort_date)
+      }
+
       if (timelineFile) {
         formData.append("file", timelineFile)
       } else if (newItem.image_url) {
@@ -86,10 +91,11 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
       const { data } = await api.post<TimelineOut>("/timeline", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      
-      setItems((prev) => [...prev, data])
-      
-      setNewItem({ title: "", description: "", date_label: "", category: "milestone", image_url: "" })
+
+      // Ekleme sonrası yeniden fetch veya listeye ekleme. En doğrusu fetch ederek sıranın backend'den gelmesini sağlamak.
+      fetchTimeline();
+
+      setNewItem({ title: "", description: "", date_label: "", sort_date: "", category: "milestone", image_url: "" })
       setTimelineFile(null)
       setAddOpen(false)
       onNotify("Timeline eklendi")
@@ -108,10 +114,13 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
       formData.append("description", editItem.description || "")
       formData.append("category", editItem.category)
       formData.append("date_label", editItem.date_label)
-      
+      if (editItem.sort_date) {
+        formData.append("sort_date", editItem.sort_date)
+      }
+
       if (timelineFile) {
         formData.append("file", timelineFile)
-      } 
+      }
       else if (editItem.image_url) {
         formData.append("image_url", normalizeImageUrl(editItem.image_url))
       }
@@ -120,9 +129,17 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
       const { data } = await api.put<TimelineOut>(`/timeline/${editItem.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      
-      setItems(prev => prev.map(x => (x.id === data.id ? data : x)))
-      
+
+      setItems(prev => {
+        // Güncellemeden sonra listeyi tekrar sıralamak yerine, güncel öğeyi yerine koyup
+        // Backend'in sıralamasını güvenmek için yeniden fetch yapılabilir veya
+        // Client-side basitçe sort_date'e göre sıralayabiliriz.
+        // Ancak en temiz yöntem listeyi yenilemek veya güncel elemanla devam etmektir.
+        // Burada sadece replace yapıyoruz.
+        return prev.map(x => (x.id === data.id ? data : x))
+      })
+      fetchTimeline(); // Sıralamayı garantiye almak için yeniden çekelim
+
       setTimelineFile(null)
       setEditOpen(false)
       onNotify("Timeline güncellendi")
@@ -190,6 +207,7 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
                 <div><Label>Başlık *</Label><Input value={newItem.title} onChange={(e) => setNewItem((p) => ({ ...p, title: e.target.value }))} /></div>
                 <div><Label>Açıklama</Label><Textarea value={newItem.description} onChange={(e) => setNewItem((p) => ({ ...p, description: e.target.value }))} rows={3} /></div>
                 <div><Label>Tarih Etiketi *</Label><Input placeholder="Mart 2024 / 2022 Q4" value={newItem.date_label} onChange={(e) => setNewItem((p) => ({ ...p, date_label: e.target.value }))} /></div>
+                <div><Label>Sıralama Tarihi *</Label><Input type="date" value={newItem.sort_date} onChange={(e) => setNewItem((p) => ({ ...p, sort_date: e.target.value }))} /></div>
                 <div><Label>Kategori *</Label><Input placeholder="milestone / success / education / event / other" value={newItem.category} onChange={(e) => setNewItem((p) => ({ ...p, category: e.target.value }))} /></div>
                 <div>
                   <Label>Görsel (opsiyonel)</Label>
@@ -225,7 +243,10 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <h3 className="font-semibold">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.date_label}</p>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>{item.date_label}</span>
+                    {item.sort_date && <span className="text-xs opacity-70">({item.sort_date})</span>}
+                  </div>
                   <p className="text-sm mt-2">{item.description}</p>
                   {item.image_url && <img src={normalizeImageUrl(item.image_url)} alt={item.title} className="mt-2 h-24 w-auto rounded object-cover" />}
                 </div>
@@ -246,20 +267,21 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
             <DialogHeader><DialogTitle>Timeline Düzenle</DialogTitle></DialogHeader>
             {editItem && (
               <div className="space-y-4">
-                <div><Label>Başlık</Label><Input value={editItem.title} onChange={(e)=>setEditItem({...editItem, title:e.target.value})}/></div>
-                <div><Label>Açıklama</Label><Textarea value={editItem.description} onChange={(e)=>setEditItem({...editItem, description:e.target.value})}/></div>
-                <div><Label>Tarih Etiketi</Label><Input value={editItem.date_label} onChange={(e)=>setEditItem({...editItem, date_label:e.target.value})}/></div>
-                <div><Label>Kategori</Label><Input value={editItem.category} onChange={(e)=>setEditItem({...editItem, category:e.target.value})}/></div>
-                
+                <div><Label>Başlık</Label><Input value={editItem.title} onChange={(e) => setEditItem({ ...editItem, title: e.target.value })} /></div>
+                <div><Label>Açıklama</Label><Textarea value={editItem.description} onChange={(e) => setEditItem({ ...editItem, description: e.target.value })} /></div>
+                <div><Label>Tarih Etiketi</Label><Input value={editItem.date_label} onChange={(e) => setEditItem({ ...editItem, date_label: e.target.value })} /></div>
+                <div><Label>Sıralama Tarihi</Label><Input type="date" value={editItem.sort_date || ""} onChange={(e) => setEditItem({ ...editItem, sort_date: e.target.value })} /></div>
+                <div><Label>Kategori</Label><Input value={editItem.category} onChange={(e) => setEditItem({ ...editItem, category: e.target.value })} /></div>
+
                 <div>
                   <Label>Görsel URL</Label>
                   <div className="flex gap-2">
-                    <Input value={editItem.image_url ?? ""} onChange={(e)=>setEditItem({...editItem, image_url:e.target.value})} className="flex-1" placeholder="URL girin veya dosya seçin" />
+                    <Input value={editItem.image_url ?? ""} onChange={(e) => setEditItem({ ...editItem, image_url: e.target.value })} className="flex-1" placeholder="URL girin veya dosya seçin" />
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
                           setTimelineFile(e.target.files[0])
-                          setEditItem({...editItem, image_url: e.target.files[0].name})
+                          setEditItem({ ...editItem, image_url: e.target.files[0].name })
                         }
                       }} />
                       <Button type="button" variant="outline" className="border-primary/20 pointer-events-none">
@@ -272,7 +294,7 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
 
                 <div className="flex gap-2 pt-2">
                   <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate}>Kaydet</Button>
-                  <Button variant="outline" className="flex-1" onClick={()=>setEditOpen(false)}>Kapat</Button>
+                  <Button variant="outline" className="flex-1" onClick={() => setEditOpen(false)}>Kapat</Button>
                 </div>
               </div>
             )}

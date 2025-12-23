@@ -117,66 +117,7 @@ export default function JoinPage() {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-6 sm:py-8 md:py-12 px-3 sm:px-4 bg-card/30 theme-transition">
-        <div className="container max-w-screen-xl mx-auto">
-          <ScrollAnimation animation="fade-up">
-            <div className="text-center mb-4">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Sıkça Sorulan Sorular</h2>
-            </div>
-          </ScrollAnimation>
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
-            <ScrollAnimation animation="fade-up" delay={0}>
-              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-[220px] sm:h-[240px] md:h-[250px] flex flex-col overflow-hidden">
-                <CardHeader className="flex-shrink-0 p-2.5 sm:p-3 md:p-3.5">
-                  <CardTitle className="text-[11px] sm:text-xs md:text-sm leading-tight">Hiç Bir Şey Bilmiyorum, Yinede Topluluğa Katılabilir miyim?</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow flex items-center justify-center p-2.5 sm:p-3 md:p-3.5 pt-0 overflow-hidden">
-                  <p className="text-muted-foreground text-[9px] sm:text-[10px] md:text-xs leading-tight">
-                    Evet, katılabilirsiniz. Topluluğumuz sıfırdan başlayarak ilerlemeye bu süreçte de ekip ruhu, çalışma disiplini ve özveri gibi iş hayatında maruz kalacağınız bir çok şeyde sizlere tecrübe katacaktır.
-                  </p>
-                </CardContent>
-              </Card>
-            </ScrollAnimation>
-            <ScrollAnimation animation="fade-up" delay={100}>
-              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-[220px] sm:h-[240px] md:h-[250px] flex flex-col overflow-hidden">
-                <CardHeader className="flex-shrink-0 p-2.5 sm:p-3 md:p-3.5">
-                  <CardTitle className="text-[11px] sm:text-xs md:text-sm leading-tight">Topluluğa Nasıl Üye Olabilirim?</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow flex items-center justify-center p-2.5 sm:p-3 md:p-3.5 pt-0 overflow-hidden">
-                  <p className="text-muted-foreground text-[9px] sm:text-[10px] md:text-xs leading-tight">
-                    Topluluğa katıl butonuna tıklayarak karşınıza gelen formu doldurmalısınız.
-                  </p>
-                </CardContent>
-              </Card>
-            </ScrollAnimation>
-            <ScrollAnimation animation="fade-up" delay={200}>
-              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-[220px] sm:h-[240px] md:h-[250px] flex flex-col overflow-hidden">
-                <CardHeader className="flex-shrink-0 p-2.5 sm:p-3 md:p-3.5">
-                  <CardTitle className="text-[11px] sm:text-xs md:text-sm leading-tight">Etkinliklerden Nasıl Haberdar Olabilirim?</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow flex items-center justify-center p-2.5 sm:p-3 md:p-3.5 pt-0 overflow-hidden">
-                  <p className="text-muted-foreground text-[9px] sm:text-[10px] md:text-xs leading-tight">
-                    WhatsApp gruplarımız, Instagram ve Linkedln hesaplarımızı takip ederek duyurulara anında ulaşabilir ve etkinliklerimize katılabilirsiniz.
-                  </p>
-                </CardContent>
-              </Card>
-            </ScrollAnimation>
-            <ScrollAnimation animation="fade-up" delay={300}>
-              <Card className="bg-black/80 border border-white/10 backdrop-blur-sm rounded-xl h-[220px] sm:h-[240px] md:h-[250px] flex flex-col overflow-hidden">
-                <CardHeader className="flex-shrink-0 p-2.5 sm:p-3 md:p-3.5">
-                  <CardTitle className="text-[11px] sm:text-xs md:text-sm leading-tight">Onay ne kadar sürer?</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow flex items-center justify-center p-2.5 sm:p-3 md:p-3.5 pt-0 overflow-hidden">
-                  <p className="text-muted-foreground text-[9px] sm:text-[10px] md:text-xs leading-tight">
-                    Çoğu başvuru 24-48 saat içinde incelenir ve tarafınıza iletilir.
-                  </p>
-                </CardContent>
-              </Card>
-            </ScrollAnimation>
-          </div>
-        </div>
-      </section>
+
 
       {/* Footer */}
       <footer className="py-6 sm:py-8 md:py-10 px-3 sm:px-4 border-t border-border bg-black/80">

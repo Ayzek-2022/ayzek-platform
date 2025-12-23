@@ -18,7 +18,7 @@ function normalizeImageUrl(v: string) {
 
   // 3. Eğer yol /public veya /uploads ile başlıyorsa, bu Backend'deki bir dosyadır.
   if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
-     return `${API_BASE}${path}`
+    return `${API_BASE}${path}`
   }
 
   // 4. Diğer durumlar için olduğu gibi döndür
@@ -134,7 +134,7 @@ export function HorizontalTimeline() {
       isDraggingRef.current = false
       try {
         el.releasePointerCapture(e.pointerId)
-      } catch {}
+      } catch { }
 
       const threshold = 70
 
@@ -142,11 +142,27 @@ export function HorizontalTimeline() {
         setActiveIndex((prev) => Math.max(0, prev - 1))
       } else if (dragOffset < -threshold) {
         setActiveIndex((prev) => Math.min(timelineEvents.length - 1, prev + 1))
+      } else if (Math.abs(dragOffset) < 5) {
+        // Click detection: if moved very little, treat as click.
+        // Since we utilize check setPointerCapture, e.target is likely the container,
+        // so we use elementFromPoint to find what's actually under the cursor.
+        const realTarget = document.elementFromPoint(e.clientX, e.clientY)
+        const item = realTarget?.closest("[data-timeline-item]")
+
+        if (item) {
+          const indexStr = item.getAttribute("data-index")
+          if (indexStr) {
+            const idx = parseInt(indexStr, 10)
+            if (!isNaN(idx)) {
+              setActiveIndex(idx)
+            }
+          }
+        }
       }
 
       setDragOffset(0)
     },
-    [dragOffset, timelineEvents.length]
+    [dragOffset, timelineEvents.length] // activeIndex dependencies might be needed if using functional update differently, but here it's fine.
   )
 
   const baseTranslate = useMemo(() => {
@@ -218,6 +234,7 @@ export function HorizontalTimeline() {
                       <div
                         key={event.id}
                         data-timeline-item
+                        data-index={index}
                         style={{
                           translate: `0px ${arcY}px`,
                           rotate: `${localTilt}deg`,
@@ -226,7 +243,7 @@ export function HorizontalTimeline() {
                           "relative flex-shrink-0 w-[75vw] xs:w-[65vw] sm:w-[55vw] md:w-[384px] transition-all duration-500 ease-out will-change-transform " +
                           (activeIndex === index
                             ? "scale-[1.08] sm:scale-[1.12] md:scale-[1.18] opacity-100 z-20"
-                            : "scale-[0.88] sm:scale-[0.85] md:scale-[0.86] opacity-100 z-10")
+                            : "scale-[0.88] sm:scale-[0.85] md:scale-[0.86] opacity-100 z-10 cursor-pointer")
                         }
                       >
                         <Card
@@ -238,10 +255,10 @@ export function HorizontalTimeline() {
                           <CardHeader className="relative overflow-hidden p-0">
                             <div className="relative h-32 sm:h-36 md:h-44 lg:h-48">
                               {/* --- GÖRSEL KISMI GÜNCELLENDİ --- */}
-                              <img 
-                                src={normalizeImageUrl(event.image_url) || "/placeholder.svg"} 
-                                alt={event.title} 
-                                className="w-full h-full object-cover" 
+                              <img
+                                src={normalizeImageUrl(event.image_url) || "/placeholder.svg"}
+                                alt={event.title}
+                                className="w-full h-full object-cover"
                               />
                               {/* ------------------------------- */}
                               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

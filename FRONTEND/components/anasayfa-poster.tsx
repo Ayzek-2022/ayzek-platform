@@ -67,7 +67,7 @@ export function AutoSlidingBanner() {
     })();
     return () => {
       cancelled = true;
-      try { ac.abort(); } catch {}
+      try { ac.abort(); } catch { }
     };
   }, []);
 
@@ -214,6 +214,7 @@ export function AutoSlidingBanner() {
           <button
             type="button"
             onClick={goToPrev}
+            onPointerDown={(e) => e.stopPropagation()}
             aria-label="Önceki"
             disabled={current === 0}
             className={[
@@ -231,6 +232,7 @@ export function AutoSlidingBanner() {
           <button
             type="button"
             onClick={goToNext}
+            onPointerDown={(e) => e.stopPropagation()}
             aria-label="Sonraki"
             disabled={current === activeSlides.length - 1}
             className={[
@@ -256,9 +258,8 @@ export function AutoSlidingBanner() {
             key={i}
             type="button"
             onClick={() => goToSlide(i)}
-            className={`w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 rounded-full transition-all ${
-              i === current ? "bg-primary scale-125" : "bg-background/60"
-            }`}
+            className={`w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 rounded-full transition-all ${i === current ? "bg-primary scale-125" : "bg-background/60"
+              }`}
             aria-label={`Go to slide ${i + 1}`}
           />
         ))}
