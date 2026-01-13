@@ -8,8 +8,48 @@ import AnimatedBg from "@/components/ui/animated-bg"
 import { NotificationsProvider } from "@/contexts/notifications"
 
 export const metadata: Metadata = {
-  title: "AYZEK - Community Memory & Event Showcase",
-  description: "A modern platform for showcasing community achievements and organizing events",
+  metadataBase: new URL('https://ayzek.io'), // Domain bağlanınca burası güncellenmeli
+  title: {
+    default: "AYZEK - Topluluk Hafızası & Etkinlik Vitrini",
+    template: "%s | AYZEK"
+  },
+  description: "Topluluk başarılarını sergileyen, etkinlikleri ölümsüzleştiren ve üyeleri bir araya getiren modern topluluk platformu.",
+  keywords: ["Ayzek", "Topluluk", "Etkinlik", "Yazılım", "Teknoloji", "Blog", "Takım"],
+  authors: [{ name: "Ayzek Team" }],
+  creator: "Ayzek",
+  openGraph: {
+    type: "website",
+    locale: "tr_TR",
+    url: "https://ayzek.io",
+    title: "AYZEK - Topluluk Hafızası & Etkinlik Vitrini",
+    description: "Topluluk başarılarını sergileyen, etkinlikleri ölümsüzleştiren ve üyeleri bir araya getiren modern topluluk platformu.",
+    siteName: "AYZEK",
+    images: [
+      {
+        url: "/ayzek-logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Ayzek Platform",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AYZEK - Topluluk Hafızası & Etkinlik Vitrini",
+    description: "Topluluk başarılarını sergileyen, etkinlikleri ölümsüzleştiren ve üyeleri bir araya getiren modern topluluk platformu.",
+    images: ["/og-image.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   other: {
     viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
   },
