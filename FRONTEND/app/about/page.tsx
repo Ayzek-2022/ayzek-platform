@@ -17,10 +17,10 @@ export default function AboutPage() {
       "Sadece projeler yapan ve yarışmalara katılan bir topluluk değiliz. Bizler kariyer basamaklarında beraber adımlar atmaya kararlı, işin sadece bilgiden ibaret olmadığına inanan, bir fikrin samimiyetle buluşmasının ardından insanların hayatlarına dokunabileceğine inanan bir aileyiz.",
   })
   const [stats, setStats] = useState([
-    { value: "150+", label: "Aktif Üye", color: "bg-purple-500/90" },
-    { value: "25+", label: "Düzenlenen Etkinlik", color: "bg-green-500/90" },
-    { value: "10+", label: "Kazanılan Ödül", color: "bg-purple-500/90" },
-    { value: "3", label: "Yıl Güçlü", color: "bg-green-500/90" },
+    { value: "4", label: "Yıllık Ekip", color: "bg-purple-500/90" },
+    { value: "200+", label: "Aktif Üye", color: "bg-green-500/90" },
+    { value: "20+", label: "Kazanılan Ödül", color: "bg-purple-500/90" },
+    { value: "50+", label: "Düzenlenen Etkinlik", color: "bg-green-500/90" },
   ])
 
   const handleEditHero = () => {
@@ -35,7 +35,7 @@ export default function AboutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-card to-muted theme-transition">
+    <div className="min-h-screen bg-transparent relative z-10 theme-transition">
       {/* Navigation Header */}
       <AdminNavbar />
 
@@ -86,7 +86,7 @@ export default function AboutPage() {
       </InlineEditWrapper>
 
       {/* Misyon & Değerler */}
-      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4 bg-card/30 theme-transition">
+      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4 bg-transparent theme-transition">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up">
             <MissionValues />
@@ -104,7 +104,7 @@ export default function AboutPage() {
       </InlineEditWrapper>
 
       {/* Takım Bölümü */}
-      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4 bg-card/30">
+      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4 bg-transparent">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up">
             <TeamSection />
@@ -144,7 +144,7 @@ export default function AboutPage() {
                   </svg>
                 </a>
                 <a
-                  href="https://github.com/ayzek"
+                  href="https://github.com/Ayzek-2022"
                   className="text-muted-foreground hover:text-primary transition-colors"
                   aria-label="GitHub"
                 >

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 // !!! DEĞİŞİKLİK BURADA: axios yerine bizim ayarlı api'yi çağırıyoruz !!!
-import { api, API_BASE } from "@/lib/api" 
+import { api, API_BASE } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -50,11 +50,11 @@ const fmtDateTR = (d: string) => {
 export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [items, setItems] = useState<BlogOut[]>([])
   const [loading, setLoading] = useState(false)
-  
+
   // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
   const [newBlog, setNewBlog] = useState({ title: "", description: "", author: "", category: "", image: "", date: "", preview: "" })
-  
+
   // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
   const [editBlog, setEditBlog] = useState<BlogOut | null>(null)
@@ -83,14 +83,14 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
   const handleAdd = async () => {
     const { title, description, author, category, image, date, preview } = newBlog
     if (!title || !date || !description || !author || !category) return
-    
+
     try {
       const formData = new FormData()
       formData.append("title", title)
       formData.append("content", description)
       formData.append("author", author)
       formData.append("category", category)
-      formData.append("published_date", date) 
+      formData.append("published_date", date)
       formData.append("preview_text", preview || "")
 
       if (blogFile) {
@@ -103,9 +103,9 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
       const { data } = await api.post<BlogOut>("/blogs", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      
+
       setItems((prev) => [data, ...prev])
-      
+
       setNewBlog({ title: "", description: "", author: "", category: "", image: "", date: "", preview: "" })
       setBlogFile(null)
       setAddOpen(false)
@@ -130,7 +130,7 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
 
       if (blogFile) {
         formData.append("file", blogFile)
-      } 
+      }
       else if (editBlog.cover_image) {
         formData.append("cover_image", normalizeImageUrl(editBlog.cover_image))
       }
@@ -139,9 +139,9 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
       const { data } = await api.put<BlogOut>(`/blogs/${editBlog.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      
+
       setItems((prev) => prev.map((x) => (x.id === data.id ? data : x)))
-      
+
       setBlogFile(null)
       setEditOpen(false)
       onNotify(`"${data.title}" güncellendi`)
@@ -208,27 +208,27 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
               </DialogHeader>
               <div className="space-y-4">
                 <div><Label>Başlık *</Label><Input value={newBlog.title} onChange={(e) => setNewBlog((p) => ({ ...p, title: e.target.value }))} /></div>
-                
+
                 <div>
-                    <Label>İçerik *</Label>
-                    <Textarea 
-                        value={newBlog.description} 
-                        onChange={(e) => setNewBlog((p) => ({ ...p, description: e.target.value }))} 
-                        rows={8}
-                        className="h-40 min-h-[160px] overflow-y-auto whitespace-pre-wrap break-words resize-none" 
-                        placeholder="Blog içeriğini buraya yazın..."
-                    />
+                  <Label>İçerik *</Label>
+                  <Textarea
+                    value={newBlog.description}
+                    onChange={(e) => setNewBlog((p) => ({ ...p, description: e.target.value }))}
+                    rows={8}
+                    className="h-40 min-h-[160px] overflow-y-auto whitespace-pre-wrap break-words resize-none"
+                    placeholder="Blog içeriğini buraya yazın..."
+                  />
                 </div>
 
                 <div>
-                    <Label>Önizleme Metni</Label>
-                    <Textarea 
-                        value={newBlog.preview} 
-                        onChange={(e) => setNewBlog((p) => ({ ...p, preview: e.target.value }))} 
-                        rows={3} 
-                        className="h-24 min-h-[96px] overflow-y-auto whitespace-pre-wrap break-words resize-none"
-                        placeholder="Kısa özet..." 
-                    />
+                  <Label>Önizleme Metni</Label>
+                  <Textarea
+                    value={newBlog.preview}
+                    onChange={(e) => setNewBlog((p) => ({ ...p, preview: e.target.value }))}
+                    rows={3}
+                    className="h-24 min-h-[96px] overflow-y-auto whitespace-pre-wrap break-words resize-none"
+                    placeholder="Kısa özet..."
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -236,7 +236,7 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
                   <div><Label>Kategori *</Label><Input value={newBlog.category} onChange={(e) => setNewBlog((p) => ({ ...p, category: e.target.value }))} /></div>
                 </div>
                 <div><Label>Tarih *</Label><Input type="date" value={newBlog.date} onChange={(e) => setNewBlog((p) => ({ ...p, date: e.target.value }))} /></div>
-                
+
                 <div>
                   <Label>Kapak Görseli (opsiyonel)</Label>
                   <div className="flex gap-2">
@@ -282,7 +282,7 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">{blog.title}</h3>
                     <p className="text-sm text-muted-foreground">{blog.author} • {blog.category} • {fmtDateTR(blog.date)}</p>
-                    <p className="text-sm mt-2 line-clamp-2">{blog.preview || blog.content}</p>
+                    <p className="text-sm mt-2 break-words whitespace-pre-wrap">{blog.preview || blog.content}</p>
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" onClick={() => openEditDialog(blog)}>Düzenle</Button>
@@ -302,38 +302,38 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
             <DialogHeader><DialogTitle>Blog Düzenle</DialogTitle></DialogHeader>
             {editBlog && (
               <div className="space-y-4">
-                <div><Label>Başlık</Label><Input value={editBlog.title} onChange={(e)=>setEditBlog({...editBlog, title:e.target.value})}/></div>
-                
+                <div><Label>Başlık</Label><Input value={editBlog.title} onChange={(e) => setEditBlog({ ...editBlog, title: e.target.value })} /></div>
+
                 <div>
-                    <Label>İçerik</Label>
-                    <Textarea 
-                        value={editBlog.content} 
-                        onChange={(e)=>setEditBlog({...editBlog, content:e.target.value})} 
-                        rows={8}
-                        className="h-40 min-h-[160px] overflow-y-auto whitespace-pre-wrap break-words resize-none"
-                    />
+                  <Label>İçerik</Label>
+                  <Textarea
+                    value={editBlog.content}
+                    onChange={(e) => setEditBlog({ ...editBlog, content: e.target.value })}
+                    rows={8}
+                    className="h-40 min-h-[160px] overflow-y-auto whitespace-pre-wrap break-words resize-none"
+                  />
                 </div>
 
                 <div>
-                    <Label>Önizleme</Label>
-                    <Textarea 
-                        value={editBlog.preview || ""} 
-                        onChange={(e)=>setEditBlog({...editBlog, preview:e.target.value})} 
-                        rows={3}
-                        className="h-24 min-h-[96px] overflow-y-auto whitespace-pre-wrap break-words resize-none"
-                    />
+                  <Label>Önizleme</Label>
+                  <Textarea
+                    value={editBlog.preview || ""}
+                    onChange={(e) => setEditBlog({ ...editBlog, preview: e.target.value })}
+                    rows={3}
+                    className="h-24 min-h-[96px] overflow-y-auto whitespace-pre-wrap break-words resize-none"
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div><Label>Yazar</Label><Input value={editBlog.author} onChange={(e)=>setEditBlog({...editBlog, author:e.target.value})}/></div>
-                  <div><Label>Kategori</Label><Input value={editBlog.category} onChange={(e)=>setEditBlog({...editBlog, category:e.target.value})}/></div>
+                  <div><Label>Yazar</Label><Input value={editBlog.author} onChange={(e) => setEditBlog({ ...editBlog, author: e.target.value })} /></div>
+                  <div><Label>Kategori</Label><Input value={editBlog.category} onChange={(e) => setEditBlog({ ...editBlog, category: e.target.value })} /></div>
                 </div>
-                <div><Label>Tarih</Label><Input type="date" value={editBlog.date} onChange={(e)=>setEditBlog({...editBlog, date:e.target.value})}/></div>
-                
+                <div><Label>Tarih</Label><Input type="date" value={editBlog.date} onChange={(e) => setEditBlog({ ...editBlog, date: e.target.value })} /></div>
+
                 <div>
                   <Label>Kapak Görseli (opsiyonel)</Label>
                   <div className="flex gap-2">
-                    <Input value={editBlog.cover_image || ""} onChange={(e)=>setEditBlog({...editBlog, cover_image:e.target.value})} placeholder="URL girin veya dosya seçin" className="flex-1" />
+                    <Input value={editBlog.cover_image || ""} onChange={(e) => setEditBlog({ ...editBlog, cover_image: e.target.value })} placeholder="URL girin veya dosya seçin" className="flex-1" />
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
@@ -351,7 +351,7 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
 
                 <div className="flex gap-2 pt-2">
                   <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate}>Kaydet</Button>
-                  <Button variant="outline" className="flex-1" onClick={()=>setEditOpen(false)}>Kapat</Button>
+                  <Button variant="outline" className="flex-1" onClick={() => setEditOpen(false)}>Kapat</Button>
                 </div>
               </div>
             )}

@@ -13,7 +13,7 @@ const values = [
     icon: Users,
     title: "İş Birliği",
     description:
-      "Bölgenin önde gelen teknoloji kurumlarıyla yaptığı iş birlikleri sayesinde güçlü bir network ağına ve sektörden tecrübelere ulaşım imkanı sağlıyoruz.",
+      "Bölgenin önde gelen teknoloji kurumlarıyla yaptığı iş birlikleri sayesinde güçlü bir network ağına ulaşım imkanı sağlıyoruz.",
     color: "text-blue-500",
   },
   {

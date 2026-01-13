@@ -30,7 +30,7 @@ function normalizeImageUrl(v: string | null | undefined) {
 
   // 3. Backend'den gelen dosya ise
   if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
-     return `${API_BASE}${path}`
+    return `${API_BASE}${path}`
   }
 
   // 4. Diğer durumlar
@@ -103,7 +103,7 @@ export function BlogExplorer() {
         setError("")
         const params: Record<string, string | number> = { page: 1, page_size: 30 }
         if (selectedCategory !== "all") {
-          params.category = selectedCategory 
+          params.category = selectedCategory
         }
         const { data } = await api.get<BlogListResponse>("/blogs", { params })
         if (cancelled) return
@@ -142,7 +142,7 @@ export function BlogExplorer() {
     return Array.from(set)
   }, [posts])
 
-  const filtered = posts 
+  const filtered = posts
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr)
@@ -221,7 +221,7 @@ export function BlogExplorer() {
             className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border border-white/10 h-full flex flex-col relative"
           >
             <div className="absolute inset-0 bg-black -z-10" />
-            
+
             {/* Kapak görseli */}
             {post.coverImage ? (
               <div className="relative h-36 sm:h-40 md:h-44 flex-shrink-0 bg-black">
@@ -256,7 +256,7 @@ export function BlogExplorer() {
                 <CardTitle className="font-display text-base sm:text-lg mb-1.5 sm:mb-2">
                   {post.title}
                 </CardTitle>
-                <CardDescription className="mb-3 sm:mb-4 line-clamp-3 text-xs sm:text-sm">
+                <CardDescription className="mb-3 sm:mb-4 line-clamp-3 text-xs sm:text-sm break-words">
                   {post.excerpt}
                 </CardDescription>
 
@@ -306,7 +306,7 @@ export function BlogExplorer() {
                   {/* İçerik */}
                   <div className="max-h-[60vh] overflow-auto pr-2">
                     {post.coverImage && (
-                        <img src={post.coverImage} alt={post.title} className="w-full h-auto mb-4 rounded-lg" />
+                      <img src={post.coverImage} alt={post.title} className="w-full h-auto mb-4 rounded-lg" />
                     )}
                     {/* DÜZELTME: break-words eklendi */}
                     <article className="text-[15px] leading-7 text-foreground/90 whitespace-pre-wrap break-words">

@@ -36,11 +36,11 @@ const normalizeImageUrl = (v: string) => {
 
 export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [posterItems, setPosterItems] = useState<PosterOut[]>([])
-  
+
   // Ekleme State'leri
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [newPoster, setNewPoster] = useState({ title: "", subtitle: "", content: "", image_url: "" })
-  
+
   // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
   const [editPoster, setEditPoster] = useState<PosterOut | null>(null)
@@ -68,13 +68,13 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
     formData.append("title", newPoster.title)
     if (newPoster.subtitle) formData.append("subtitle", newPoster.subtitle)
     if (newPoster.content) formData.append("content", newPoster.content)
-    
+
     if (posterFile) {
       formData.append("file", posterFile)
     } else if (newPoster.image_url) {
       formData.append("image_url", newPoster.image_url)
     }
-    
+
     formData.append("is_active", "true")
     formData.append("order_index", String(posterItems.length))
 
@@ -84,7 +84,7 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
         headers: { "Content-Type": "multipart/form-data" },
       })
       setPosterItems((prev) => [data, ...prev])
-      
+
       setNewPoster({ title: "", subtitle: "", content: "", image_url: "" })
       setPosterFile(null)
       setIsAddOpen(false)
@@ -107,7 +107,7 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
 
       if (posterFile) {
         formData.append("file", posterFile)
-      } 
+      }
       else if (editPoster.image_url) {
         formData.append("image_url", editPoster.image_url)
       }
@@ -118,7 +118,7 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
       })
 
       setPosterItems(prev => prev.map(x => (x.id === data.id ? data : x)))
-      
+
       setPosterFile(null)
       setEditOpen(false)
       onNotify("Poster güncellendi")
@@ -159,7 +159,7 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
           <Edit className="w-4 h-4 mr-2" /> Posterleri Yönet
         </Button>
       </DialogTrigger>
-      
+
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <VisuallyHidden>
           <DialogTitle>Poster Yönetimi</DialogTitle>
@@ -236,7 +236,7 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
               <CardContent className="p-4">
                 <h3 className="font-semibold line-clamp-1">{item.title}</h3>
                 <p className="text-xs text-muted-foreground line-clamp-1">{item.subtitle}</p>
-                <p className="text-sm mt-2 line-clamp-3">{item.content}</p>
+                <p className="text-sm mt-2 break-words whitespace-pre-wrap">{item.content}</p>
                 <div className="flex justify-end mt-3 gap-2">
                   <Button size="sm" variant="outline" onClick={() => openEditDialog(item)}>Düzenle</Button>
                   <Button size="sm" variant="destructive" onClick={() => handleDelete(item.id)}>
@@ -256,18 +256,18 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
             </DialogHeader>
             {editPoster && (
               <div className="space-y-4">
-                <div><Label>Başlık</Label><Input value={editPoster.title} onChange={(e)=>setEditPoster({...editPoster, title:e.target.value})}/></div>
-                <div><Label>Alt Başlık</Label><Input value={editPoster.subtitle ?? ""} onChange={(e)=>setEditPoster({...editPoster, subtitle:e.target.value})}/></div>
-                <div><Label>İçerik</Label><Textarea value={editPoster.content ?? ""} onChange={(e)=>setEditPoster({...editPoster, content:e.target.value})}/></div>
+                <div><Label>Başlık</Label><Input value={editPoster.title} onChange={(e) => setEditPoster({ ...editPoster, title: e.target.value })} /></div>
+                <div><Label>Alt Başlık</Label><Input value={editPoster.subtitle ?? ""} onChange={(e) => setEditPoster({ ...editPoster, subtitle: e.target.value })} /></div>
+                <div><Label>İçerik</Label><Textarea value={editPoster.content ?? ""} onChange={(e) => setEditPoster({ ...editPoster, content: e.target.value })} /></div>
                 <div>
                   <Label>Görsel URL</Label>
                   <div className="flex gap-2">
-                    <Input value={editPoster.image_url ?? ""} onChange={(e)=>setEditPoster({...editPoster, image_url:e.target.value})} className="flex-1" placeholder="URL girin veya dosya seçin" />
+                    <Input value={editPoster.image_url ?? ""} onChange={(e) => setEditPoster({ ...editPoster, image_url: e.target.value })} className="flex-1" placeholder="URL girin veya dosya seçin" />
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
-                          setPosterFile(e.target.files[0]) 
-                          setEditPoster({...editPoster, image_url: e.target.files[0].name}) 
+                          setPosterFile(e.target.files[0])
+                          setEditPoster({ ...editPoster, image_url: e.target.files[0].name })
                         }
                       }} />
                       <Button type="button" variant="outline" className="border-primary/20 pointer-events-none">
@@ -279,7 +279,7 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
                 </div>
                 <div className="flex gap-2 pt-2">
                   <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate}>Kaydet</Button>
-                  <Button variant="outline" className="flex-1" onClick={()=>setEditOpen(false)}>Kapat</Button>
+                  <Button variant="outline" className="flex-1" onClick={() => setEditOpen(false)}>Kapat</Button>
                 </div>
               </div>
             )}

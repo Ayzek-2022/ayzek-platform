@@ -46,7 +46,7 @@ function PersonCard({ leader }: { leader: Leader }) {
       </CardHeader>
       {leader.about && (
         <CardContent className="pt-0 px-2.5 pb-3 sm:px-3 sm:pb-4 md:px-4">
-          <p className="text-[10px] sm:text-xs md:text-sm text-center italic line-clamp-2">"{leader.about}"</p>
+          <p className="text-[10px] sm:text-xs md:text-sm text-center italic line-clamp-3 min-h-[3.75em] break-words whitespace-pre-wrap">"{leader.about}"</p>
         </CardContent>
       )}
     </Card>

@@ -22,7 +22,7 @@ function normalizeImageUrl(v: string) {
 
   // 3. Backend'den gelen dosya ise
   if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
-     return `${API_BASE}${path}`
+    return `${API_BASE}${path}`
   }
 
   // 4. Diğer durumlar
@@ -48,7 +48,7 @@ type Team = {
   about?: string
 }
 
-function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: string; glow:string; pill: string } }) {
+function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: string; glow: string; pill: string } }) {
   const [open, setOpen] = React.useState(false)
   // const shortCode = team.code
 
@@ -74,10 +74,10 @@ function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: strin
         {/* DÜZENLEME: Anasayfadaki canlı görünüm için 'z-10', 'ring-black/20' ve 'dark:ring-black/40' sınıfları eklendi. */}
         <div className={`relative z-10 grid place-items-center size-20 sm:size-24 md:size-32 rounded-full bg-gradient-to-br ${palette.ring} shadow-xl ${palette.glow} ring-1 ring-black/20 dark:ring-black/40 overflow-hidden`}>
           {team.logoUrl ? (
-            <Image 
+            <Image
               // --- DEĞİŞİKLİK: normalizeImageUrl kullanıldı ---
-              src={normalizeImageUrl(team.logoUrl)} 
-              alt={team.name} 
+              src={normalizeImageUrl(team.logoUrl)}
+              alt={team.name}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -86,14 +86,14 @@ function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: strin
             <Users className="size-5 sm:size-6 md:size-7 text-white/90" />
           )}
         </div>
-        
+
         <div className="relative z-10 mt-2 sm:mt-3 md:mt-4 w-full px-2 sm:px-3 text-center">
           {team.about ? (
-            <p className="text-[10px] sm:text-xs md:text-sm text-white/75 leading-tight line-clamp-2">
+            <p className="text-[10px] sm:text-xs md:text-sm text-white/75 leading-tight line-clamp-3 break-words min-h-[3.6em]">
               {team.about}
             </p>
           ) : (
-            <p className="text-[10px] sm:text-xs md:text-sm text-white/60 line-clamp-2">&nbsp;</p>
+            <p className="text-[10px] sm:text-xs md:text-sm text-white/60 line-clamp-3 break-words min-h-[3.6em]">&nbsp;</p>
           )}
         </div>
 
@@ -121,14 +121,14 @@ function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: strin
           <div className="z-10">
             <DialogHeader>
               <DialogTitle className="flex items-center justify-between gap-2">
-                <span>{team.name}</span>
+                <span className="break-words">{team.name}</span>
                 {/* Removed code display span as per instructions */}
                 {/* <span className="text-xs font-normal text-muted-foreground">{team.code}</span> */}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-3 sm:space-y-4">
               {team.about && (
-                <p className="text-xs sm:text-sm leading-relaxed text-white/85">{team.about}</p>
+                <p className="text-xs sm:text-sm leading-relaxed text-white/85 break-words whitespace-pre-wrap">{team.about}</p>
               )}
               {team.categories?.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">

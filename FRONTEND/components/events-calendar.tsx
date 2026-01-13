@@ -37,9 +37,9 @@ const normalizeImageUrl = (v: string | null | undefined) => {
   const s = (v || "").trim()
   if (!s) return ""
   if (s.startsWith("http://") || s.startsWith("https://")) return s
-  
+
   const path = s.startsWith("/") ? s : `/${s}`
-  
+
   // Eğer yol /public veya /uploads ile başlıyorsa backend adresini ekle
   if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
     return `${API_BASE}${path}`
@@ -233,7 +233,7 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                   <CardTitle className="font-display text-sm sm:text-base md:text-lg mb-1.5 sm:mb-2 line-clamp-2">
                     {event.title}
                   </CardTitle>
-                  <CardDescription className="text-xs sm:text-sm md:text-base mb-3 sm:mb-4 line-clamp-2">
+                  <CardDescription className="text-xs sm:text-sm md:text-base mb-3 sm:mb-4 line-clamp-2 break-words min-h-[3em]">
                     {event.description}
                   </CardDescription>
 
@@ -258,10 +258,10 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                     <DialogTrigger asChild>
                       <Button className="w-full text-xs sm:text-sm h-8 sm:h-9 md:h-10">Detayları Görüntüle</Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
+                    <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
                       <DialogHeader>
-                        <DialogTitle className="font-display text-2xl">{event.title}</DialogTitle>
-                        <DialogDescription className="text-base">{event.description}</DialogDescription>
+                        <DialogTitle className="font-display text-2xl break-words pr-4">{event.title}</DialogTitle>
+                        <DialogDescription className="text-base break-words whitespace-pre-wrap">{event.description}</DialogDescription>
                       </DialogHeader>
 
                       <div className="space-y-6">
@@ -318,7 +318,7 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                           <Button asChild className="flex-1">
                             <a href={event.registrationLink} target="_blank" rel="noopener noreferrer">
                               <ExternalLink className="w-4 h-4 mr-2" />
-                              Şimdi Kaydol
+                              Etkinliğe Başvur
                             </a>
                           </Button>
                         </div>

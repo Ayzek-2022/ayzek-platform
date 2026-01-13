@@ -14,9 +14,7 @@ import { CrewManagement } from "@/components/admin/crew-management"
 
 export default function ContentManagementTab() {
   const { addNotification } = useAdmin()
-  const [posterCount] = useState(5) // Örnek değer
-  const [timelineCount] = useState(3)
-  const [galleryCount] = useState(9)
+
 
   const handleNotify = (message: string) => {
     addNotification({ type: "system", title: "Başarılı", message, read: false })
@@ -36,10 +34,6 @@ export default function ContentManagementTab() {
           <CardDescription>Ana sayfa banner ve hero bölümünü yönetin</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex justify-between items-center px-3 py-2 rounded-lg bg-muted/50">
-            <span className="text-sm font-medium">Toplam Poster:</span>
-            <span className="text-2xl font-bold text-primary">{posterCount}</span>
-          </div>
           <PosterManagement onNotify={handleNotify} />
         </CardContent>
       </Card>
@@ -56,10 +50,6 @@ export default function ContentManagementTab() {
           <CardDescription>Timeline etkinliklerini ve kilometre taşlarını yönetin</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex justify-between items-center px-3 py-2 rounded-lg bg-muted/50">
-            <span className="text-sm font-medium">Toplam Kilometre Taşı:</span>
-            <span className="text-2xl font-bold text-accent">{timelineCount}</span>
-          </div>
           <TimelineManagement onNotify={handleNotify} />
         </CardContent>
       </Card>
@@ -76,10 +66,6 @@ export default function ContentManagementTab() {
           <CardDescription>Ana sayfa ve etkinlik sayfası galerilerini yönetin</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex justify-between items-center px-3 py-2 rounded-lg bg-muted/50">
-            <span className="text-sm font-medium">Toplam Görsel:</span>
-            <span className="text-2xl font-bold text-orange-500">{galleryCount}</span>
-          </div>
           <GalleryManagement onNotify={handleNotify} />
         </CardContent>
       </Card>

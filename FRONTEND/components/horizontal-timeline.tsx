@@ -266,12 +266,12 @@ export function HorizontalTimeline() {
                             </div>
                             <div className="p-2.5 sm:p-3 md:p-4 pb-2.5 sm:pb-3 md:pb-4">
                               <div className="flex items-start justify-between mb-1.5 sm:mb-2 md:mb-3 gap-2">
-                                <CardTitle className="font-display text-xs sm:text-sm md:text-base lg:text-xl leading-snug flex-1">{event.title}</CardTitle>
+                                <CardTitle className="font-display text-xs sm:text-sm md:text-base lg:text-xl leading-snug flex-1 break-words">{event.title}</CardTitle>
                                 <span className="text-[9px] sm:text-[10px] md:text-sm font-semibold text-primary bg-primary/10 px-1.5 py-0.5 sm:px-2 md:px-3 md:py-1 rounded-full flex-shrink-0">
                                   {event.date_label}
                                 </span>
                               </div>
-                              <CardDescription className="text-[10px] sm:text-xs md:text-sm leading-relaxed line-clamp-2 sm:line-clamp-3">{event.description}</CardDescription>
+                              <CardDescription className="text-[10px] sm:text-xs md:text-sm leading-relaxed line-clamp-2 sm:line-clamp-3 break-words">{event.description}</CardDescription>
                             </div>
                           </CardHeader>
                         </Card>

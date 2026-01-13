@@ -114,6 +114,9 @@ export function AutoSlidingBanner() {
 
   // --- swipe/drag handlers (pointer events) ---
   const onPointerDown: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    // Button fix
+    if ((e.target as HTMLElement).closest("button")) return;
+
     // sadece sol tık/primary veya touch
     if (e.button !== 0 && e.pointerType === "mouse") return;
     startX.current = e.clientX;
@@ -214,7 +217,6 @@ export function AutoSlidingBanner() {
           <button
             type="button"
             onClick={goToPrev}
-            onPointerDown={(e) => e.stopPropagation()}
             aria-label="Önceki"
             disabled={current === 0}
             className={[
@@ -232,7 +234,6 @@ export function AutoSlidingBanner() {
           <button
             type="button"
             onClick={goToNext}
-            onPointerDown={(e) => e.stopPropagation()}
             aria-label="Sonraki"
             disabled={current === activeSlides.length - 1}
             className={[

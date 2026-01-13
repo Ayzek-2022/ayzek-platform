@@ -49,12 +49,12 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
   const [crewMembers, setCrewMembers] = useState<Record<string, CrewMemberOut[]>>({})
   const [loading, setLoading] = useState(true)
   const [selectedCat, setSelectedCat] = useState<CrewCategory>("Başkan ve Yardımcılar")
-  
+
   // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
   const initialNewCrewState = { name: "", role: "", description: "", photo_url: "", linkedin_url: "", github_url: "" }
   const [newCrew, setNewCrew] = useState(initialNewCrewState)
-  
+
   // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
   const [editCrew, setEditCrew] = useState<CrewMemberOut | null>(null)
@@ -86,7 +86,7 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
       onNotify("İsim ve Görev alanları zorunludur")
       return
     }
-    
+
     try {
       const formData = new FormData()
       formData.append("name", newCrew.name)
@@ -107,12 +107,12 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
       const { data } = await api.post<CrewMemberOut>("/crew/", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      
+
       setCrewMembers(prev => {
         const categoryData = prev[data.category] ? [...prev[data.category], data] : [data]
         return { ...prev, [data.category]: categoryData }
       })
-      
+
       // Temizlik
       setNewCrew(initialNewCrewState)
       setCrewFile(null)
@@ -140,7 +140,7 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
       // 1. Yeni dosya seçildiyse onu ekle
       if (crewFile) {
         formData.append("file", crewFile)
-      } 
+      }
       // 2. Dosya yoksa mevcut URL'yi koru
       else if (editCrew.photo_url) {
         formData.append("photo_url", normalizeImageUrl(editCrew.photo_url))
@@ -150,13 +150,13 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
       const { data } = await api.put<CrewMemberOut>(`/crew/${editCrew.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      
+
       setCrewMembers(prev => {
         const cp = { ...prev }
         cp[data.category] = (cp[data.category] || []).map(x => (x.id === data.id ? data : x))
         return cp
       })
-      
+
       // Temizlik
       setCrewFile(null)
       setEditOpen(false)
@@ -224,7 +224,7 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
               {CREW_CATEGORIES.map((c) => (<option key={c} value={c}>{c}</option>))}
             </select>
           </div>
-          
+
           <Dialog open={addOpen} onOpenChange={openAddDialog}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-primary to-accent mt-6">Üye Ekle</Button>
@@ -238,7 +238,7 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
                 <div><Label>İsim Soyisim *</Label><Input value={newCrew.name} onChange={(e) => setNewCrew(p => ({ ...p, name: e.target.value }))} /></div>
                 <div><Label>Görevi *</Label><Input value={newCrew.role} onChange={(e) => setNewCrew(p => ({ ...p, role: e.target.value }))} /></div>
                 <div><Label>Açıklama (Kısa Konuşma)</Label><Textarea value={newCrew.description} onChange={(e) => setNewCrew(p => ({ ...p, description: e.target.value }))} rows={3} /></div>
-                
+
                 <div>
                   <Label>Fotoğraf (opsiyonel)</Label>
                   <div className="flex gap-2">
@@ -291,7 +291,7 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
                         <div className="flex-1">
                           <h4 className="font-semibold">{member.name}</h4>
                           <p className="text-sm text-muted-foreground">{member.role}</p>
-                          {member.description && <p className="text-sm mt-1">{member.description}</p>}
+                          {member.description && <p className="text-sm mt-1 break-words whitespace-pre-wrap">{member.description}</p>}
                         </div>
                         <div className="flex gap-2">
                           <Button size="sm" variant="outline" onClick={() => openEditDialog(member)}>Düzenle</Button>
@@ -316,19 +316,19 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
             <DialogHeader><DialogTitle>Üyeyi Düzenle</DialogTitle></DialogHeader>
             {editCrew && (
               <div className="space-y-3">
-                <div><Label>İsim Soyisim</Label><Input value={editCrew.name} onChange={(e)=>setEditCrew({...editCrew, name:e.target.value})}/></div>
-                <div><Label>Görevi</Label><Input value={editCrew.role} onChange={(e)=>setEditCrew({...editCrew, role:e.target.value})}/></div>
-                <div><Label>Açıklama</Label><Textarea value={editCrew.description ?? ""} onChange={(e)=>setEditCrew({...editCrew, description:e.target.value})}/></div>
-                
+                <div><Label>İsim Soyisim</Label><Input value={editCrew.name} onChange={(e) => setEditCrew({ ...editCrew, name: e.target.value })} /></div>
+                <div><Label>Görevi</Label><Input value={editCrew.role} onChange={(e) => setEditCrew({ ...editCrew, role: e.target.value })} /></div>
+                <div><Label>Açıklama</Label><Textarea value={editCrew.description ?? ""} onChange={(e) => setEditCrew({ ...editCrew, description: e.target.value })} /></div>
+
                 <div>
                   <Label>Fotoğraf URL</Label>
                   <div className="flex gap-2">
-                    <Input value={editCrew.photo_url ?? ""} onChange={(e)=>setEditCrew({...editCrew, photo_url:e.target.value})} className="flex-1" placeholder="URL girin veya dosya seçin" />
+                    <Input value={editCrew.photo_url ?? ""} onChange={(e) => setEditCrew({ ...editCrew, photo_url: e.target.value })} className="flex-1" placeholder="URL girin veya dosya seçin" />
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
                           setCrewFile(e.target.files[0])
-                          setEditCrew({...editCrew, photo_url: e.target.files[0].name})
+                          setEditCrew({ ...editCrew, photo_url: e.target.files[0].name })
                         }
                       }} />
                       <Button type="button" variant="outline" className="border-primary/20 pointer-events-none">
@@ -339,11 +339,11 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
                   {crewFile && <p className="text-xs text-green-600 mt-1">Yeni dosya seçildi: {crewFile.name}</p>}
                 </div>
 
-                <div><Label>LinkedIn URL</Label><Input value={editCrew.linkedin_url ?? ""} onChange={(e)=>setEditCrew({...editCrew, linkedin_url:e.target.value})}/></div>
-                <div><Label>GitHub URL</Label><Input value={editCrew.github_url ?? ""} onChange={(e)=>setEditCrew({...editCrew, github_url:e.target.value})}/></div>
+                <div><Label>LinkedIn URL</Label><Input value={editCrew.linkedin_url ?? ""} onChange={(e) => setEditCrew({ ...editCrew, linkedin_url: e.target.value })} /></div>
+                <div><Label>GitHub URL</Label><Input value={editCrew.github_url ?? ""} onChange={(e) => setEditCrew({ ...editCrew, github_url: e.target.value })} /></div>
                 <div className="flex gap-2 pt-2">
                   <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate}>Kaydet</Button>
-                  <Button variant="outline" className="flex-1" onClick={()=>setEditOpen(false)}>Kapat</Button>
+                  <Button variant="outline" className="flex-1" onClick={() => setEditOpen(false)}>Kapat</Button>
                 </div>
               </div>
             )}

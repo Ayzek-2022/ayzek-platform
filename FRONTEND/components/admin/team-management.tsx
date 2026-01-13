@@ -52,7 +52,7 @@ type NewTeamMember = {
 export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [teams, setTeams] = useState<TeamOut[]>([])
   const [loading, setLoading] = useState(true)
-  
+
   // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
   const initialNewTeamState = {
@@ -65,7 +65,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
     members: [{ name: "", role: "", linkedin_url: "" }],
   }
   const [newTeam, setNewTeam] = useState(initialNewTeamState)
-  
+
   // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
   const [editTeam, setEditTeam] = useState<TeamOut | null>(null)
@@ -122,9 +122,9 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
 
       // Üyeleri JSON string olarak ekle
       const validMembers = newTeam.members.filter(m => m.name && m.role).map(m => ({
-          name: m.name,
-          role: m.role,
-          linkedin_url: m.linkedin_url || null
+        name: m.name,
+        role: m.role,
+        linkedin_url: m.linkedin_url || null
       }))
       formData.append("members", JSON.stringify(validMembers))
 
@@ -136,8 +136,10 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
       }
 
       // api.post (Cookie otomatik gider)
-      const { data } = await api.post<TeamOut>("/teams", formData) 
-      
+      const { data } = await api.post<TeamOut>("/teams", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+
       setTeams((prev) => [data, ...prev])
       setNewTeam(initialNewTeamState)
       setTeamFile(null)
@@ -171,15 +173,17 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
       // 1. Yeni dosya seçildiyse onu ekle
       if (teamFile) {
         formData.append("file", teamFile)
-      } 
+      }
       // 2. Dosya yoksa mevcut URL'yi koru
       else if (editTeam.photo_url) {
         formData.append("photo_url", normalizeImageUrl(editTeam.photo_url))
       }
 
       // api.put (Cookie otomatik gider)
-      const { data } = await api.put<TeamOut>(`/teams/${editTeam.id}`, formData)
-      
+      const { data } = await api.put<TeamOut>(`/teams/${editTeam.id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+
       setTeams(prev => prev.map(x => (x.id === data.id ? data : x)))
       setTeamFile(null)
       setEditOpen(false)
@@ -277,7 +281,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
                   <Checkbox id="teamFeatured" checked={newTeam.is_featured} onCheckedChange={(c) => setNewTeam((p) => ({ ...p, is_featured: !!c }))} />
                   <Label htmlFor="teamFeatured">Anasayfada öne çıkar</Label>
                 </div>
-                
+
                 {/* ÜYE EKLEME KISMI */}
                 <div className="space-y-2">
                   <Label>Takım Üyeleri</Label>
@@ -322,7 +326,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
                 <CardContent className="p-4">
                   <h3 className="font-semibold">{team.name}</h3>
                   <p className="text-xs text-muted-foreground">{team.project_name}</p>
-                  <p className="text-sm mt-2 line-clamp-2">{team.description}</p>
+                  <p className="text-sm mt-2 break-words whitespace-pre-wrap">{team.description}</p>
                   <div className="flex justify-end mt-3 gap-2">
                     <Button size="sm" variant="outline" onClick={() => openEditDialog(team)}>Düzenle</Button>
                     <Button size="sm" variant="destructive" onClick={() => handleDelete(team.id)}>
@@ -342,21 +346,21 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
             {editTeam && (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div><Label>Takım Adı</Label><Input value={editTeam.name} onChange={(e)=>setEditTeam({...editTeam, name:e.target.value})}/></div>
-                  <div><Label>Proje Adı</Label><Input value={editTeam.project_name} onChange={(e)=>setEditTeam({...editTeam, project_name:e.target.value})}/></div>
+                  <div><Label>Takım Adı</Label><Input value={editTeam.name} onChange={(e) => setEditTeam({ ...editTeam, name: e.target.value })} /></div>
+                  <div><Label>Proje Adı</Label><Input value={editTeam.project_name} onChange={(e) => setEditTeam({ ...editTeam, project_name: e.target.value })} /></div>
                 </div>
-                <div><Label>Açıklama</Label><Textarea value={editTeam.description} onChange={(e)=>setEditTeam({...editTeam, description:e.target.value})}/></div>
+                <div><Label>Açıklama</Label><Textarea value={editTeam.description} onChange={(e) => setEditTeam({ ...editTeam, description: e.target.value })} /></div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div><Label>Kategori</Label><Input value={editTeam.category} onChange={(e)=>setEditTeam({...editTeam, category:e.target.value})}/></div>
+                  <div><Label>Kategori</Label><Input value={editTeam.category} onChange={(e) => setEditTeam({ ...editTeam, category: e.target.value })} /></div>
                   <div>
                     <Label>Foto URL</Label>
                     <div className="flex gap-2">
-                      <Input value={editTeam.photo_url ?? ""} onChange={(e)=>setEditTeam({...editTeam, photo_url:e.target.value})} className="flex-1" placeholder="URL girin veya dosya seçin" />
+                      <Input value={editTeam.photo_url ?? ""} onChange={(e) => setEditTeam({ ...editTeam, photo_url: e.target.value })} className="flex-1" placeholder="URL girin veya dosya seçin" />
                       <div className="relative">
                         <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                           if (e.target.files && e.target.files[0]) {
                             setTeamFile(e.target.files[0])
-                            setEditTeam({...editTeam, photo_url: e.target.files[0].name})
+                            setEditTeam({ ...editTeam, photo_url: e.target.files[0].name })
                           }
                         }} />
                         <Button type="button" variant="outline" className="border-primary/20 pointer-events-none">
@@ -368,44 +372,44 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Checkbox id="editTeamFeatured" checked={!!editTeam.is_featured} onCheckedChange={(c)=>setEditTeam({...editTeam, is_featured: !!c})}/>
+                  <Checkbox id="editTeamFeatured" checked={!!editTeam.is_featured} onCheckedChange={(c) => setEditTeam({ ...editTeam, is_featured: !!c })} />
                   <Label htmlFor="editTeamFeatured">Anasayfada öne çıkar</Label>
                 </div>
-                
+
                 {/* EDIT MODUNDA ÜYELERİ DÜZENLEME */}
                 <div className="space-y-2">
-                   <Label>Takım Üyeleri (Düzenlemek için silip yeniden ekleyin)</Label>
-                   {(editTeam.members || []).map((m, idx) => (
-                      <div key={idx} className="grid grid-cols-4 gap-2">
-                        <Input placeholder="Ad Soyad" value={m.name} onChange={(e) => {
-                             const newMembers = [...editTeam.members];
-                             newMembers[idx] = {...newMembers[idx], name: e.target.value};
-                             setEditTeam({...editTeam, members: newMembers});
-                        }} />
-                        <Input placeholder="Rol" value={m.role} onChange={(e) => {
-                             const newMembers = [...editTeam.members];
-                             newMembers[idx] = {...newMembers[idx], role: e.target.value};
-                             setEditTeam({...editTeam, members: newMembers});
-                        }} />
-                        <Input placeholder="LinkedIn" value={m.linkedin_url || ""} onChange={(e) => {
-                             const newMembers = [...editTeam.members];
-                             newMembers[idx] = {...newMembers[idx], linkedin_url: e.target.value};
-                             setEditTeam({...editTeam, members: newMembers});
-                        }} />
-                        <Button type="button" variant="destructive" size="sm" onClick={() => {
-                             const newMembers = editTeam.members.filter((_, i) => i !== idx);
-                             setEditTeam({...editTeam, members: newMembers});
-                        }}>Sil</Button>
-                      </div>
-                   ))}
-                   <Button type="button" variant="outline" size="sm" onClick={() => {
-                       setEditTeam({...editTeam, members: [...editTeam.members, { id: 0, name: "", role: "", linkedin_url: "" }]})
-                   }}>+ Üye Ekle</Button>
+                  <Label>Takım Üyeleri (Düzenlemek için silip yeniden ekleyin)</Label>
+                  {(editTeam.members || []).map((m, idx) => (
+                    <div key={idx} className="grid grid-cols-4 gap-2">
+                      <Input placeholder="Ad Soyad" value={m.name} onChange={(e) => {
+                        const newMembers = [...editTeam.members];
+                        newMembers[idx] = { ...newMembers[idx], name: e.target.value };
+                        setEditTeam({ ...editTeam, members: newMembers });
+                      }} />
+                      <Input placeholder="Rol" value={m.role} onChange={(e) => {
+                        const newMembers = [...editTeam.members];
+                        newMembers[idx] = { ...newMembers[idx], role: e.target.value };
+                        setEditTeam({ ...editTeam, members: newMembers });
+                      }} />
+                      <Input placeholder="LinkedIn" value={m.linkedin_url || ""} onChange={(e) => {
+                        const newMembers = [...editTeam.members];
+                        newMembers[idx] = { ...newMembers[idx], linkedin_url: e.target.value };
+                        setEditTeam({ ...editTeam, members: newMembers });
+                      }} />
+                      <Button type="button" variant="destructive" size="sm" onClick={() => {
+                        const newMembers = editTeam.members.filter((_, i) => i !== idx);
+                        setEditTeam({ ...editTeam, members: newMembers });
+                      }}>Sil</Button>
+                    </div>
+                  ))}
+                  <Button type="button" variant="outline" size="sm" onClick={() => {
+                    setEditTeam({ ...editTeam, members: [...editTeam.members, { id: 0, name: "", role: "", linkedin_url: "" }] })
+                  }}>+ Üye Ekle</Button>
                 </div>
 
                 <div className="flex gap-2 pt-2">
                   <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate}>Kaydet</Button>
-                  <Button variant="outline" className="flex-1" onClick={()=>setEditOpen(false)}>Kapat</Button>
+                  <Button variant="outline" className="flex-1" onClick={() => setEditOpen(false)}>Kapat</Button>
                 </div>
               </div>
             )}

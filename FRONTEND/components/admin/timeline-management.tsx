@@ -247,7 +247,7 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
                     <span>{item.date_label}</span>
                     {item.sort_date && <span className="text-xs opacity-70">({item.sort_date})</span>}
                   </div>
-                  <p className="text-sm mt-2">{item.description}</p>
+                  <p className="text-sm mt-2 break-words whitespace-pre-wrap">{item.description}</p>
                   {item.image_url && <img src={normalizeImageUrl(item.image_url)} alt={item.title} className="mt-2 h-24 w-auto rounded object-cover" />}
                 </div>
                 <div className="flex gap-2 ml-4">

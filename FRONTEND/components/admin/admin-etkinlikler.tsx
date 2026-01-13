@@ -87,7 +87,7 @@ const mapBackendToFrontend = (ev: BackendEvent): EventItem => {
 };
 
 const getStatusColor = (status: string) => {
-  switch(status) {
+  switch (status) {
     case "pending": return "bg-yellow-500";
     case "accepted": return "bg-green-500";
     case "rejected": return "bg-red-500";
@@ -97,7 +97,7 @@ const getStatusColor = (status: string) => {
 };
 
 const getStatusText = (status: string) => {
-  switch(status) {
+  switch (status) {
     case "pending": return "Beklemede";
     case "accepted": return "Onaylandı";
     case "rejected": return "Reddedildi";
@@ -138,8 +138,8 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
   const [selectedSuggestion, setSelectedSuggestion] = useState<EventSuggestion | null>(null);
   const [isSuggestionDetailOpen, setIsSuggestionDetailOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<{type: 'event' | 'suggestion', id: number} | null>(null);
-  
+  const [itemToDelete, setItemToDelete] = useState<{ type: 'event' | 'suggestion', id: number } | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // --- VERİ ÇEKME ---
@@ -151,14 +151,18 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
     setLoading(true);
     try {
       // 1. Etkinlikleri Çek ve Dönüştür
-      const eventsRes = await api.get<BackendEvent[]>("/events"); 
+      const eventsRes = await api.get<BackendEvent[]>("/events");
       const formattedEvents = eventsRes.data.map(mapBackendToFrontend);
       setEvents(formattedEvents);
 
-      // 2. Önerileri Çek (Eğer endpoint varsa)
-      // const suggestionsRes = await api.get("/community/suggestions"); 
-      // setSuggestions(suggestionsRes.data);
-      
+      // 2. Önerileri Çek
+      try {
+        const suggestionsRes = await api.get<EventSuggestion[]>("/event-suggestions");
+        setSuggestions(suggestionsRes.data);
+      } catch (err) {
+        console.warn("Öneriler çekilemedi, endpoint henüz hazır olmayabilir:", err);
+      }
+
     } catch (e) {
       console.error("Veri çekme hatası:", e);
       // onNotify("Veriler yüklenirken hata oluştu.");
@@ -171,7 +175,7 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
-      setImage(file.name); 
+      setImage(file.name);
     }
   };
 
@@ -192,7 +196,7 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
       formData.append("max_attendees", String(maxAttendees));
       formData.append("category", category);
       formData.append("tags", tags);
-      
+
       if (imageFile) {
         formData.append("file", imageFile);
       } else if (image) {
@@ -207,7 +211,7 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
       // Dönen veriyi Frontend formatına çevirip listeye ekle
       const newEvent = mapBackendToFrontend(data);
       setEvents((prev) => [newEvent, ...prev]);
-      
+
       resetForm();
       setIsDialogOpen(false);
       onNotify("Etkinlik başarıyla oluşturuldu.");
@@ -234,7 +238,7 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
 
   // --- SİLME İŞLEMİ ---
   const handleDeleteClick = (type: 'event' | 'suggestion', id: number) => {
-    setItemToDelete({type, id});
+    setItemToDelete({ type, id });
     setDeleteConfirmOpen(true);
   };
 
@@ -247,7 +251,7 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
         setEvents(prev => prev.filter(e => e.id !== itemToDelete.id));
         onNotify("Etkinlik silindi.");
       } else {
-        // await api.delete(`/community/suggestions/${itemToDelete.id}`);
+        await api.delete(`/event-suggestions/${itemToDelete.id}`);
         setSuggestions(prev => prev.filter(s => s.id !== itemToDelete.id));
         onNotify("Öneri silindi.");
       }
@@ -372,7 +376,7 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
 
             <CardContent>
               {loading ? (
-                 <div className="text-center py-10 text-muted-foreground">Yükleniyor...</div>
+                <div className="text-center py-10 text-muted-foreground">Yükleniyor...</div>
               ) : events.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <LucideCalendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -394,10 +398,10 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
                       {events.map((event) => (
                         <TableRow key={event.id} className="hover:bg-muted/30 transition-colors">
                           <TableCell className="font-medium">
-                             <div className="flex items-center gap-3">
-                                {event.image_url && <img src={normalizeImageUrl(event.image_url)} alt="" className="w-8 h-8 rounded object-cover" />}
-                                {event.title}
-                             </div>
+                            <div className="flex items-center gap-3">
+                              {event.image_url && <img src={normalizeImageUrl(event.image_url)} alt="" className="w-8 h-8 rounded object-cover" />}
+                              {event.title}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-1">
@@ -418,8 +422,8 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="sm"
                               onClick={() => handleDeleteClick('event', event.id)}
                               className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
@@ -470,7 +474,7 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
                           <span>📅 {toTurkishDate(suggestion.created_at.split('T')[0])}</span>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-2 ml-4">
                         <Button variant="ghost" size="sm" onClick={() => { setSelectedSuggestion(suggestion); setIsSuggestionDetailOpen(true); }}>
                           <Eye className="w-4 h-4" />

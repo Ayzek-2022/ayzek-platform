@@ -37,11 +37,11 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
   const [journeyPeople, setJourneyPeople] = useState<Record<number, JourneyPersonOut[]>>({})
   const [loading, setLoading] = useState(true)
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear())
-  
+
   // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
   const [newPerson, setNewPerson] = useState({ name: "", role: "", description: "", photo_url: "" })
-  
+
   // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
   const [editPerson, setEditPerson] = useState<JourneyPersonOut | null>(null)
@@ -80,14 +80,14 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
       onNotify("İsim, Görev ve Açıklama alanları zorunludur")
       return
     }
-    
+
     try {
       const formData = new FormData()
       formData.append("year", String(selectedYear))
       formData.append("name", newPerson.name)
       formData.append("role", newPerson.role)
       formData.append("description", newPerson.description)
-      
+
       // Dosya varsa dosyayı, yoksa manuel linki ekle
       if (journeyFile) {
         formData.append("file", journeyFile)
@@ -99,12 +99,12 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
       const { data } = await api.post<JourneyPersonOut>("/journey/", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      
+
       setJourneyPeople(prev => {
         const yearData = prev[data.year] ? [...prev[data.year], data] : [data]
         return { ...prev, [data.year]: yearData }
       })
-      
+
       // Temizlik
       setNewPerson({ name: "", role: "", description: "", photo_url: "" })
       setJourneyFile(null)
@@ -125,11 +125,11 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
       formData.append("name", editPerson.name)
       formData.append("role", editPerson.role)
       formData.append("description", editPerson.description)
-      
+
       // 1. Yeni dosya seçildiyse onu ekle
       if (journeyFile) {
         formData.append("file", journeyFile)
-      } 
+      }
       // 2. Dosya yoksa mevcut URL'yi koru
       else if (editPerson.photo_url) {
         formData.append("photo_url", normalizeImageUrl(editPerson.photo_url))
@@ -139,13 +139,13 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
       const { data } = await api.put<JourneyPersonOut>(`/journey/${editPerson.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      
+
       setJourneyPeople(prev => {
         const cp = { ...prev }
         cp[data.year] = (cp[data.year] || []).map(x => (x.id === data.id ? data : x))
         return cp
       })
-      
+
       // Temizlik
       setJourneyFile(null)
       setEditOpen(false)
@@ -213,7 +213,7 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
               {yearsList.map((y) => (<option key={y} value={y}>{y}</option>))}
             </select>
           </div>
-          
+
           <Dialog open={addOpen} onOpenChange={openAddDialog}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-primary to-accent mt-6">Kişi Ekle</Button>
@@ -227,7 +227,7 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
                 <div><Label>İsim Soyisim *</Label><Input value={newPerson.name} onChange={(e) => setNewPerson(p => ({ ...p, name: e.target.value }))} /></div>
                 <div><Label>Görevi *</Label><Input value={newPerson.role} onChange={(e) => setNewPerson(p => ({ ...p, role: e.target.value }))} /></div>
                 <div><Label>Açıklama (Kısa Söz) *</Label><Textarea value={newPerson.description} onChange={(e) => setNewPerson(p => ({ ...p, description: e.target.value }))} rows={3} /></div>
-                
+
                 <div>
                   <Label>Resim (opsiyonel)</Label>
                   <div className="flex gap-2">
@@ -278,7 +278,7 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
                         <div className="flex-1">
                           <h4 className="font-semibold">{person.name}</h4>
                           <p className="text-sm text-muted-foreground">{person.role}</p>
-                          <p className="text-sm mt-1">{person.description}</p>
+                          <p className="text-sm mt-1 break-words whitespace-pre-wrap">{person.description}</p>
                         </div>
                         <div className="flex gap-2">
                           <Button size="sm" variant="outline" onClick={() => openEditDialog(person)}>Düzenle</Button>
@@ -303,19 +303,19 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
             <DialogHeader><DialogTitle>Kişiyi Düzenle</DialogTitle></DialogHeader>
             {editPerson && (
               <div className="space-y-3">
-                <div><Label>İsim Soyisim</Label><Input value={editPerson.name} onChange={(e)=>setEditPerson({...editPerson, name:e.target.value})}/></div>
-                <div><Label>Görevi</Label><Input value={editPerson.role} onChange={(e)=>setEditPerson({...editPerson, role:e.target.value})}/></div>
-                <div><Label>Açıklama</Label><Textarea value={editPerson.description} onChange={(e)=>setEditPerson({...editPerson, description:e.target.value})}/></div>
-                
+                <div><Label>İsim Soyisim</Label><Input value={editPerson.name} onChange={(e) => setEditPerson({ ...editPerson, name: e.target.value })} /></div>
+                <div><Label>Görevi</Label><Input value={editPerson.role} onChange={(e) => setEditPerson({ ...editPerson, role: e.target.value })} /></div>
+                <div><Label>Açıklama</Label><Textarea value={editPerson.description} onChange={(e) => setEditPerson({ ...editPerson, description: e.target.value })} /></div>
+
                 <div>
                   <Label>Resim URL</Label>
                   <div className="flex gap-2">
-                    <Input value={editPerson.photo_url ?? ""} onChange={(e)=>setEditPerson({...editPerson, photo_url:e.target.value})} className="flex-1" placeholder="URL girin veya dosya seçin" />
+                    <Input value={editPerson.photo_url ?? ""} onChange={(e) => setEditPerson({ ...editPerson, photo_url: e.target.value })} className="flex-1" placeholder="URL girin veya dosya seçin" />
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
                           setJourneyFile(e.target.files[0])
-                          setEditPerson({...editPerson, photo_url: e.target.files[0].name})
+                          setEditPerson({ ...editPerson, photo_url: e.target.files[0].name })
                         }
                       }} />
                       <Button type="button" variant="outline" className="border-primary/20 pointer-events-none">
@@ -328,7 +328,7 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
 
                 <div className="flex gap-2 pt-2">
                   <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate}>Kaydet</Button>
-                  <Button variant="outline" className="flex-1" onClick={()=>setEditOpen(false)}>Kapat</Button>
+                  <Button variant="outline" className="flex-1" onClick={() => setEditOpen(false)}>Kapat</Button>
                 </div>
               </div>
             )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react"
 import Particles, { initParticlesEngine } from "@tsparticles/react"
+import { usePathname } from "next/navigation"
 import { loadSlim } from "@tsparticles/slim"
 
 export default function AnimatedBg() {
@@ -22,14 +23,17 @@ export default function AnimatedBg() {
     []
   )
 
-  if (!ready) return null
+  const pathname = usePathname()
+
+  if (!ready || pathname?.startsWith("/admin")) return null
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
+    <>
+      <div className="pointer-events-none fixed inset-0 z-0 bg-gradient-to-br from-background via-card to-muted" aria-hidden="true" />
       <Particles
         id="ayzek-animated-bg"
         options={{
-          fullScreen: false,
+          fullScreen: { enable: true, zIndex: 0 },
           background: { color: { value: "transparent" } },
           fpsLimit: 60,
           detectRetina: true,
@@ -55,6 +59,6 @@ export default function AnimatedBg() {
           },
         }}
       />
-    </div>
+    </>
   )
 }

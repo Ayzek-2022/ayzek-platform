@@ -20,7 +20,7 @@ function normalizeImageUrl(v: string | null) {
 
   // 3. Backend'den gelen dosya ise
   if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
-     return `${API_BASE}${path}`
+    return `${API_BASE}${path}`
   }
 
   // 4. Diğer durumlar
@@ -65,7 +65,7 @@ export function TeamSection() {
         if (!response.ok) throw new Error("Ekip üyeleri verisi alınamadı.");
         const data: GroupedCrewMembers = await response.json();
         setGroupedMembers(data);
-        
+
         // Initialize current indexes for each category
         const initialIndexes: Record<string, number> = {};
         Object.keys(data).forEach(key => {
@@ -175,7 +175,7 @@ export function TeamSection() {
                       </CardHeader>
 
                       <CardContent className="p-3 pt-0 md:p-4 md:pt-0 space-y-2">
-                        <p className="text-[10px] md:text-sm text-muted-foreground leading-tight text-center min-h-[3rem] overflow-hidden">
+                        <p className="text-[10px] md:text-sm text-muted-foreground leading-tight text-center min-h-[5em] line-clamp-4 overflow-hidden break-words whitespace-pre-wrap">
                           {member.description || ""}
                         </p>
                         <div className="flex justify-center gap-2 md:gap-3 pt-1">
