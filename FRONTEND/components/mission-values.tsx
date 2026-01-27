@@ -62,7 +62,7 @@ export function MissionValues() {
               "En iyi yeniliklerin, farklı zihinlerin bir araya gelerek fikir alışverişinde bulunması ve birbirinin
               yolculuğunu desteklemesiyle gerçekleştiğine inanıyoruz."
             </p>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2"> AYZEK Topluluğu </p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2"> AYZEK TOPLULUĞU </p>
           </div>
         </div>
       </div>

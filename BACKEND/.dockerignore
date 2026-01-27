@@ -1,0 +1,18 @@
+# Python sanal ortamını engelle (Zaten Docker içinde baştan kurulacak)
+venv/
+.venv/
+env/
+
+# Python'un çalışma sırasında oluşturduğu geçici dosyalar
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Varsa node_modules (Backend'de olması gerekmiyor ama temizleyelim)
+node_modules/
+
+# Gizli ayar dosyaları ve Git
+.git
+.gitignore
+.env

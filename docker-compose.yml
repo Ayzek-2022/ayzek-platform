@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:17
+    container_name: ayzek_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: emrullah2456 
+      POSTGRES_DB: ayzekdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  ayzek-backend:
+    build: ./BACKEND
+    container_name: ayzek_backend_cont
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:emrullah2456@db:5432/ayzekdb
+    volumes:
+      - ./BACKEND/public/uploads:/app/public/uploads
+    ports:
+      - "8000:8000"
+    restart: always
+
+  ayzek-frontend:
+    build: ./FRONTEND
+    container_name: ayzek_frontend_cont
+    ports:
+      - "3000:3000"
+    depends_on:
+      - ayzek-backend
+    restart: always
+
+volumes:
+  postgres_data:
