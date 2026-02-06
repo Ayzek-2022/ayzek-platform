@@ -37,8 +37,8 @@ yarn install
 
 ```bash
 # .env.local
-NEXT_PUBLIC_API_URL=http://api.ayzek.tr/api
-NEXT_PUBLIC_API_BASE_URL=http://api.ayzek.tr
+NEXT_PUBLIC_API_URL=https://api.ayzek.tr/api
+NEXT_PUBLIC_API_BASE_URL=https://api.ayzek.tr
 NEXT_PUBLIC_ADMIN_PASSWORD=admin123
 ```
 
@@ -258,7 +258,7 @@ Projeyi çalıştırmadan önce:
 
 Sorularınız için:
 
-- 🌐 Website: [ayzek.com](https://ayzek.com)
+- 🌐 Website: [ayzek.tr](https://ayzek.tr)
 - 📧 Email: info@ayzek.com
 - 💬 Discord: [AYZEK Community]
 

@@ -8,7 +8,7 @@ import AnimatedBg from "@/components/ui/animated-bg"
 import { NotificationsProvider } from "@/contexts/notifications"
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ayzek.io'), // Domain bağlanınca burası güncellenmeli
+  metadataBase: new URL('https://ayzek.tr'), // Domain bağlanınca burası güncellenmeli
   title: {
     default: "AYZEK - Topluluk Hafızası & Etkinlik Vitrini",
     template: "%s | AYZEK"

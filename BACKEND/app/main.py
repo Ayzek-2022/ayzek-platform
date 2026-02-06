@@ -5,6 +5,8 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 from dotenv import load_dotenv
 import logging, os
+from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 # --- GÜVENLİK (RATE LIMIT) IMPORTLARI ---
 from slowapi import _rate_limit_exceeded_handler
@@ -30,17 +32,24 @@ from app.routers.crew import router as crew_router
 
 app = FastAPI(title="AYZEK Platform Backend", version="1.0.0")
 
-# --- RATE LIMITER'I AKTİF ET ---
-# Bu satırlar sunucuya "Trafik polisini göreve başlat" der.
+class ProxyFixMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        forwarded_proto = request.headers.get("x-forwarded-proto")
+        if forwarded_proto:
+            request.scope["scheme"] = forwarded_proto
+        return await call_next(request)
+
+app.add_middleware(ProxyFixMiddleware)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 env_origins = os.getenv("ALLOWED_ORIGINS", "")
 ALLOWED_ORIGINS = [o.strip() for o in env_origins.split(",") if o.strip()] or [ 
-   "http://localhost",
+    "http://localhost",
     "http://localhost:3000",
-    "http://94.177.147.50",       # <-- Bunu ekle
-    "http://ayzek.tr",  # <-- Bunu da ekle
+    "https://ayzek.tr",       # <-- Bunu ekle
+    "http://ayzek.tr",
+    "https://api.ayzek.tr",  # <-- Bunu da ekle
 ]
 
 app.add_middleware(

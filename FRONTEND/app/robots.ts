@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: '/admin/',
         },
-        sitemap: 'https://ayzek.io/sitemap.xml',
+        sitemap: 'https://ayzek.tr/sitemap.xml',
     }
 }
