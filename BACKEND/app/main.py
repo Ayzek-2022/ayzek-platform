@@ -40,7 +40,7 @@ ALLOWED_ORIGINS = [o.strip() for o in env_origins.split(",") if o.strip()] or [
    "http://localhost",
     "http://localhost:3000",
     "http://94.177.147.50",       # <-- Bunu ekle
-    "http://94.177.147.50:3000",  # <-- Bunu da ekle
+    "http://ayzek.tr",  # <-- Bunu da ekle
 ]
 
 app.add_middleware(

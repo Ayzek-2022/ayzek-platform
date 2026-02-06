@@ -37,8 +37,8 @@ yarn install
 
 ```bash
 # .env.local
-NEXT_PUBLIC_API_URL=http://94.177.147.50:8000/api
-NEXT_PUBLIC_API_BASE_URL=http://94.177.147.50:8000
+NEXT_PUBLIC_API_URL=http://api.ayzek.tr/api
+NEXT_PUBLIC_API_BASE_URL=http://api.ayzek.tr
 NEXT_PUBLIC_ADMIN_PASSWORD=admin123
 ```
 
@@ -48,7 +48,7 @@ NEXT_PUBLIC_ADMIN_PASSWORD=admin123
 npm run dev
 ```
 
-🎉 **Hazır!** [http://94.177.147.50:3000](http://94.177.147.50:3000) adresini tarayıcınızda açın.
+🎉 **Hazır!** [http://ayzek.tr](http://ayzek.tr) adresini tarayıcınızda açın.
 
 ---
 
@@ -242,7 +242,7 @@ Projeyi çalıştırmadan önce:
 - [ ] Backend API çalışıyor (varsa)
 - [ ] Port 3000 boş
 - [ ] `npm run dev` çalıştırıldı
-- [ ] http://94.177.147.50:3000 açıldı
+- [ ] http://ayzek.tr açıldı
 
 ---
 

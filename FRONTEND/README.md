@@ -83,8 +83,8 @@ Aşağıdaki değişkenleri ekleyin:
 
 ```env
 # API Configuration
-NEXT_PUBLIC_API_URL=http://94.177.147.50:8000/api
-NEXT_PUBLIC_API_BASE_URL=http://94.177.147.50:8000
+NEXT_PUBLIC_API_URL=http://api.ayzek.tr/api
+NEXT_PUBLIC_API_BASE_URL=http://api.ayzek.tr
 
 # Admin Configuration
 NEXT_PUBLIC_ADMIN_PASSWORD=your_admin_password_here
