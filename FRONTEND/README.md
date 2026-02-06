@@ -83,8 +83,8 @@ Aşağıdaki değişkenleri ekleyin:
 
 ```env
 # API Configuration
-NEXT_PUBLIC_API_URL=http://localhost:8000/api
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=94.177.147.50:8000/api
+NEXT_PUBLIC_API_BASE_URL=94.177.147.50:8000
 
 # Admin Configuration
 NEXT_PUBLIC_ADMIN_PASSWORD=your_admin_password_here
@@ -108,7 +108,7 @@ pnpm dev
 yarn dev
 ```
 
-Uygulama [http://localhost:3000](http://localhost:3000) adresinde çalışmaya başlayacaktır.
+Uygulama [94.177.147.50:3000](94.177.147.50:3000) adresinde çalışmaya başlayacaktır.
 
 ### Production Build
 

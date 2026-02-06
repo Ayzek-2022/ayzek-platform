@@ -32,7 +32,7 @@ interface EventsCalendarProps {
 
 // --- YARDIMCI FONKSİYONLAR ---
 
-// Resim URL'sini düzeltir (Başına http://localhost:8000 ekler)
+// Resim URL'sini düzeltir (Başına 94.177.147.50:8000ekler)
 const normalizeImageUrl = (v: string | null | undefined) => {
   const s = (v || "").trim()
   if (!s) return ""

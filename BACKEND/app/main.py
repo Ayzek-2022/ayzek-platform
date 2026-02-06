@@ -37,10 +37,8 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 env_origins = os.getenv("ALLOWED_ORIGINS", "")
 ALLOWED_ORIGINS = [o.strip() for o in env_origins.split(",") if o.strip()] or [ 
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://ayzek.tr",
-    "http://ayzek.tr",
+    "94.177.147.50:3000",
+    "94.177.147.50:3000",
 ]
 
 app.add_middleware(
