@@ -1,7 +1,7 @@
 import axios from "axios"
 
 export const API_BASE =
-  (process.env.NEXT_PUBLIC_API_BASE || "94.177.147.50:8000").replace(/\/+$/, "")
+  (process.env.NEXT_PUBLIC_API_BASE || "http://94.177.147.50:8000").replace(/\/+$/, "")
 
 export const api = axios.create({
   baseURL: API_BASE,
