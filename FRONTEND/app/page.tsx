@@ -20,7 +20,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { EventCardSkeleton, TeamCardSkeleton } from "@/components/skeleton-loaders";
 
 // --- YENİ EKLENEN KISIMLAR ---
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://94.177.147.50:8000";
 
 function normalizeImageUrl(v: string | null | undefined) {
   const s = (v || "").trim();
