@@ -7,7 +7,9 @@ import { Calendar, Users, MapPin } from "lucide-react"
 import { api } from "@/lib/api"
 
 // --- YENİ EKLENEN KISIMLAR ---
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://api.ayzek.tr"
+
 
 function normalizeImageUrl(v: string) {
   const s = (v || "").trim()
@@ -21,7 +23,7 @@ function normalizeImageUrl(v: string) {
 
   // 3. Eğer yol /public veya /uploads ile başlıyorsa, bu Backend'deki bir dosyadır.
   if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
-     return `${API_BASE}${path}`
+    return `${API_BASE}${path}`
   }
 
   // 4. Diğer durumlar için olduğu gibi döndür
@@ -60,19 +62,19 @@ export default function EventGallery() {
 
   useEffect(() => {
     let alive = true
-    ;(async () => {
-      setLoading(true)
-      try {
-        const res = await api.get<GalleryEvent[]>("/api/gallery-events")
-        if (!alive) return
-        const data = [...res.data].sort((a, b) => (a.date < b.date ? 1 : -1))
-        setItems(data)
-      } catch (e: any) {
-        if (alive) setError(e.message || "İstek hatası")
-      } finally {
-        if (alive) setLoading(false)
-      }
-    })()
+      ; (async () => {
+        setLoading(true)
+        try {
+          const res = await api.get<GalleryEvent[]>("/api/gallery-events")
+          if (!alive) return
+          const data = [...res.data].sort((a, b) => (a.date < b.date ? 1 : -1))
+          setItems(data)
+        } catch (e: any) {
+          if (alive) setError(e.message || "İstek hatası")
+        } finally {
+          if (alive) setLoading(false)
+        }
+      })()
     return () => {
       alive = false
     }
@@ -118,37 +120,37 @@ export default function EventGallery() {
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {items.map((photo) => (
-        <div
-          key={photo.id}
-          className="
+          <div
+            key={photo.id}
+            className="
             relative group cursor-pointer
             flex-none w-[85vw] sm:w-[70vw] snap-center
             md:w-auto
           "
-          onMouseEnter={() => setHoveredId(photo.id)}
-          onMouseLeave={() => setHoveredId(null)}
-        >
-          <div className="relative overflow-hidden rounded-lg aspect-[4/3] bg-muted">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              // --- DEĞİŞİKLİK: normalizeImageUrl kullanıldı ---
-              src={normalizeImageUrl(photo.image_url) || "/placeholder.svg"}
-              alt={photo.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
+            onMouseEnter={() => setHoveredId(photo.id)}
+            onMouseLeave={() => setHoveredId(null)}
+          >
+            <div className="relative overflow-hidden rounded-lg aspect-[4/3] bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                // --- DEĞİŞİKLİK: normalizeImageUrl kullanıldı ---
+                src={normalizeImageUrl(photo.image_url) || "/placeholder.svg"}
+                alt={photo.title}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
 
-            {/* Kategori rozeti */}
-            <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4">
-              <Badge variant="secondary" className="bg-background/90 text-foreground text-[10px] sm:text-xs">
-                {photo.category}
-              </Badge>
-            </div>
+              {/* Kategori rozeti */}
+              <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4">
+                <Badge variant="secondary" className="bg-background/90 text-foreground text-[10px] sm:text-xs">
+                  {photo.category}
+                </Badge>
+              </div>
 
-            {/* Hover paneli: desktopta görünür, mobilde hover olmadığı için gizli kalır */}
-            {hoveredId === photo.id && (
-              <div className="absolute inset-0 flex items-end p-0 animate-fade-in">
-                <Card
-                  className="
+              {/* Hover paneli: desktopta görünür, mobilde hover olmadığı için gizli kalır */}
+              {hoveredId === photo.id && (
+                <div className="absolute inset-0 flex items-end p-0 animate-fade-in">
+                  <Card
+                    className="
                     w-full
                     h-[70%] md:h-[75%]
                     bg-black/80 backdrop-blur
@@ -156,41 +158,41 @@ export default function EventGallery() {
                     pointer-events-auto
                     rounded-t-none md:rounded-t-lg
                   "
-                >
-                  <CardContent className="p-4 sm:p-5 md:p-6 h-full overflow-y-auto">
-                    <h3 className="font-semibold text-base sm:text-lg mb-2 sm:mb-3 text-white">
-                      {photo.title}
-                    </h3>
+                  >
+                    <CardContent className="p-4 sm:p-5 md:p-6 h-full overflow-y-auto">
+                      <h3 className="font-semibold text-base sm:text-lg mb-2 sm:mb-3 text-white">
+                        {photo.title}
+                      </h3>
 
-                    <p className="text-xs sm:text-sm text-white/90 mb-3 sm:mb-4 line-clamp-4 sm:line-clamp-5 md:line-clamp-8">
-                      {photo.description}
-                    </p>
+                      <p className="text-xs sm:text-sm text-white/90 mb-3 sm:mb-4 line-clamp-4 sm:line-clamp-5 md:line-clamp-8">
+                        {photo.description}
+                      </p>
 
-                    <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 text-[10px] sm:text-xs text-white/80">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                        <span>{fmtTRDate(photo.date)}</span>
-                      </div>
-
-                      {typeof photo.participants === "number" && (
+                      <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 text-[10px] sm:text-xs text-white/80">
                         <div className="flex items-center gap-1">
-                          <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                          <span>{photo.participants} kişi</span>
+                          <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                          <span>{fmtTRDate(photo.date)}</span>
                         </div>
-                      )}
 
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                        <span>{photo.location}</span>
+                        {typeof photo.participants === "number" && (
+                          <div className="flex items-center gap-1">
+                            <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                            <span>{photo.participants} kişi</span>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                          <span>{photo.location}</span>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
       </div>
 
       {/* Nokta navigasyonu - sadece mobilde göster */}

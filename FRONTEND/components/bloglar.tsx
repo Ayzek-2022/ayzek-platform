@@ -15,7 +15,9 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 // --- AYARLAR ---
+
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "https://api.ayzek.tr").replace(/\/+$/, "")
+
 const api = axios.create({ baseURL: API_BASE })
 
 function normalizeImageUrl(v: string | null | undefined) {

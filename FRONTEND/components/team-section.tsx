@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Github, Linkedin } from "lucide-react"
 
 // --- YENİ EKLENEN KISIMLAR ---
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://api.ayzek.tr"
+
 
 function normalizeImageUrl(v: string | null) {
   const s = (v || "").trim()

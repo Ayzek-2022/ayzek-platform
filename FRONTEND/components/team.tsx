@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Users, Linkedin } from "lucide-react"
 
 // --- YENİ EKLENEN KISIMLAR ---
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://api.ayzek.tr"
 
 function normalizeImageUrl(v: string) {

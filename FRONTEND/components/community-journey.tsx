@@ -6,7 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://api.ayzek.tr"
+
 
 function normalizeImageUrl(v: string) {
   const s = (v || "").trim()
