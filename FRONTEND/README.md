@@ -83,8 +83,8 @@ Aşağıdaki değişkenleri ekleyin:
 
 ```env
 # API Configuration
-NEXT_PUBLIC_API_URL=http://api.ayzek.tr/api
-NEXT_PUBLIC_API_BASE_URL=http://api.ayzek.tr
+NEXT_PUBLIC_API_URL=https://api.ayzek.tr/api
+NEXT_PUBLIC_API_BASE_URL=https://api.ayzek.tr
 
 # Admin Configuration
 NEXT_PUBLIC_ADMIN_PASSWORD=your_admin_password_here
@@ -108,7 +108,7 @@ pnpm dev
 yarn dev
 ```
 
-Uygulama [http://94.177.147.50](http://94.177.147.50) adresinde çalışmaya başlayacaktır.
+Uygulama [http://ayzek.tr](http://ayzek.tr) adresinde çalışmaya başlayacaktır.
 
 ### Production Build
 
@@ -348,7 +348,7 @@ chore: Genel bakım
 ## 📞 İletişim
 
 AYZEK Topluluğu
-- Website: [ayzek.com](https://ayzek.com)
+- Website: [ayzek.tr](https://ayzek.tr)
 - Email: info@ayzek.com
 
 ## 📄 Lisans

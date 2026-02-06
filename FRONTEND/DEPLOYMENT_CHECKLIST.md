@@ -26,14 +26,14 @@ import { NextSeo } from "next-seo";
 <NextSeo
   title="AYZEK - Teknoloji Topluluğu"
   description="Selçuk Üniversitesi teknoloji topluluğu"
-  canonical="https://ayzek.com"
+  canonical="https://ayzek.tr"
   openGraph={{
-    url: "https://ayzek.com",
+    url: "https://ayzek.tr",
     title: "AYZEK - Teknoloji Topluluğu",
     description: "Selçuk Üniversitesi teknoloji topluluğu",
     images: [
       {
-        url: "https://ayzek.com/og-image.jpg",
+        url: "https://ayzek.tr/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "AYZEK Logo",
@@ -206,37 +206,37 @@ import { MetadataRoute } from "next";
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: "https://ayzek.com",
+      url: "https://ayzek.tr",
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1,
     },
     {
-      url: "https://ayzek.com/about",
+      url: "https://ayzek.tr/about",
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
-      url: "https://ayzek.com/events",
+      url: "https://ayzek.tr/events",
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
-      url: "https://ayzek.com/teams",
+      url: "https://ayzek.tr/teams",
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
-      url: "https://ayzek.com/blog",
+      url: "https://ayzek.tr/blog",
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
-      url: "https://ayzek.com/join",
+      url: "https://ayzek.tr/join",
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.6,
@@ -257,7 +257,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: "/admin/",
     },
-    sitemap: "https://ayzek.com/sitemap.xml",
+    sitemap: "https://ayzek.tr/sitemap.xml",
   };
 }
 ```
