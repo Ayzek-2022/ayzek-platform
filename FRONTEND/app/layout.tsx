@@ -6,6 +6,7 @@ import { AdminProvider } from "@/contexts/admin-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import AnimatedBg from "@/components/ui/animated-bg"
 import { NotificationsProvider } from "@/contexts/notifications"
+import { GoogleTagManager } from '@next/third-parties/google'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ayzek.tr'), // Domain bağlanınca burası güncellenmeli
@@ -77,6 +78,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </AdminProvider>
           </NotificationsProvider>
         </ThemeProvider>
+
+        {/* Google Tag Manager Entegrasyonu */}
+        <GoogleTagManager gtmId="GTM-5R2SVX3S" />
       </body>
     </html>
   )
