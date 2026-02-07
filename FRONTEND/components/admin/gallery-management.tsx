@@ -31,16 +31,18 @@ const normalizeImageUrl = (v: string) => {
   if (s.startsWith("http://") || s.startsWith("https://")) return s
   const path = s.startsWith("/") ? s : `/${s}`
   if (path.startsWith("/public/") || path.startsWith("/uploads/")) return `${API_BASE}${path}`
-  return path
+
+  // Fallback
+  return `${API_BASE}/public/uploads${path}`
 }
 
 export function GalleryManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [items, setItems] = useState<GalleryEvent[]>([])
-  
+
   // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
   const [newItem, setNewItem] = useState({ title: "", description: "", image_url: "", category: "Workshop", date: "", location: "" })
-  
+
   // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
   const [editItem, setEditItem] = useState<GalleryEvent | null>(null)
@@ -66,7 +68,7 @@ export function GalleryManagement({ onNotify }: { onNotify: (msg: string) => voi
   const handleAdd = async () => {
     const { title, description, image_url, category, date, location } = newItem
     if (!title || !description || !category || !date || !location) return
-    
+
     try {
       const formData = new FormData()
       formData.append("title", title)
@@ -86,9 +88,9 @@ export function GalleryManagement({ onNotify }: { onNotify: (msg: string) => voi
       const { data } = await api.post<GalleryEvent>("/api/gallery-events", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      
+
       setItems((prev) => [data, ...prev])
-      
+
       // Temizlik
       setNewItem({ title: "", description: "", image_url: "", category: "Workshop", date: "", location: "" })
       setGalleryFile(null)
@@ -114,7 +116,7 @@ export function GalleryManagement({ onNotify }: { onNotify: (msg: string) => voi
       // 1. Yeni dosya seçildiyse ekle
       if (galleryFile) {
         formData.append("file", galleryFile)
-      } 
+      }
       // 2. Dosya yoksa mevcut URL'yi koru
       else if (editItem.image_url) {
         formData.append("image_url", normalizeImageUrl(editItem.image_url))
@@ -124,9 +126,9 @@ export function GalleryManagement({ onNotify }: { onNotify: (msg: string) => voi
       const { data } = await api.put<GalleryEvent>(`/api/gallery-events/${editItem.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      
+
       setItems(prev => prev.map(x => (x.id === data.id ? data : x)))
-      
+
       // Temizlik
       setGalleryFile(null)
       setEditOpen(false)
@@ -195,7 +197,7 @@ export function GalleryManagement({ onNotify }: { onNotify: (msg: string) => voi
               <div className="space-y-4">
                 <div><Label>Başlık *</Label><Input value={newItem.title} onChange={(e) => setNewItem((p) => ({ ...p, title: e.target.value }))} /></div>
                 <div><Label>Açıklama *</Label><Textarea value={newItem.description} onChange={(e) => setNewItem((p) => ({ ...p, description: e.target.value }))} rows={3} /></div>
-                
+
                 <div>
                   <Label>Görsel (opsiyonel)</Label>
                   <div className="flex gap-2">
@@ -233,9 +235,9 @@ export function GalleryManagement({ onNotify }: { onNotify: (msg: string) => voi
             <Card key={item.id} className="overflow-hidden">
               <div className="aspect-video bg-muted flex items-center justify-center">
                 {item.image_url ? (
-                   <img src={normalizeImageUrl(item.image_url)} alt={item.title} className="w-full h-full object-cover" />
+                  <img src={normalizeImageUrl(item.image_url)} alt={item.title} className="w-full h-full object-cover" />
                 ) : (
-                   <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
                 )}
               </div>
               <CardContent className="p-3">
@@ -258,18 +260,18 @@ export function GalleryManagement({ onNotify }: { onNotify: (msg: string) => voi
             <DialogHeader><DialogTitle>Galeri Düzenle</DialogTitle></DialogHeader>
             {editItem && (
               <div className="space-y-4">
-                <div><Label>Başlık</Label><Input value={editItem.title} onChange={(e)=>setEditItem({...editItem, title:e.target.value})}/></div>
-                <div><Label>Açıklama</Label><Textarea value={editItem.description} onChange={(e)=>setEditItem({...editItem, description:e.target.value})}/></div>
-                
+                <div><Label>Başlık</Label><Input value={editItem.title} onChange={(e) => setEditItem({ ...editItem, title: e.target.value })} /></div>
+                <div><Label>Açıklama</Label><Textarea value={editItem.description} onChange={(e) => setEditItem({ ...editItem, description: e.target.value })} /></div>
+
                 <div>
                   <Label>Görsel URL</Label>
                   <div className="flex gap-2">
-                    <Input value={editItem.image_url} onChange={(e)=>setEditItem({...editItem, image_url:e.target.value})} className="flex-1" placeholder="URL girin veya dosya seçin" />
+                    <Input value={editItem.image_url} onChange={(e) => setEditItem({ ...editItem, image_url: e.target.value })} className="flex-1" placeholder="URL girin veya dosya seçin" />
                     <div className="relative">
                       <Input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
                           setGalleryFile(e.target.files[0])
-                          setEditItem({...editItem, image_url: e.target.files[0].name})
+                          setEditItem({ ...editItem, image_url: e.target.files[0].name })
                         }
                       }} />
                       <Button type="button" variant="outline" className="border-primary/20 pointer-events-none">
@@ -280,12 +282,12 @@ export function GalleryManagement({ onNotify }: { onNotify: (msg: string) => voi
                   {galleryFile && <p className="text-xs text-green-600 mt-1">Yeni dosya seçildi: {galleryFile.name}</p>}
                 </div>
 
-                <div><Label>Kategori</Label><Input value={editItem.category} onChange={(e)=>setEditItem({...editItem, category:e.target.value})}/></div>
-                <div><Label>Tarih</Label><Input type="date" value={editItem.date} onChange={(e)=>setEditItem({...editItem, date:e.target.value})}/></div>
-                <div><Label>Konum</Label><Input value={editItem.location} onChange={(e)=>setEditItem({...editItem, location:e.target.value})}/></div>
+                <div><Label>Kategori</Label><Input value={editItem.category} onChange={(e) => setEditItem({ ...editItem, category: e.target.value })} /></div>
+                <div><Label>Tarih</Label><Input type="date" value={editItem.date} onChange={(e) => setEditItem({ ...editItem, date: e.target.value })} /></div>
+                <div><Label>Konum</Label><Input value={editItem.location} onChange={(e) => setEditItem({ ...editItem, location: e.target.value })} /></div>
                 <div className="flex gap-2 pt-2">
                   <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate}>Kaydet</Button>
-                  <Button variant="outline" className="flex-1" onClick={()=>setEditOpen(false)}>Kapat</Button>
+                  <Button variant="outline" className="flex-1" onClick={() => setEditOpen(false)}>Kapat</Button>
                 </div>
               </div>
             )}

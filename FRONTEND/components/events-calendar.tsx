@@ -37,15 +37,17 @@ interface EventsCalendarProps {
 const normalizeImageUrl = (v: string | null | undefined) => {
   const s = (v || "").trim()
   if (!s) return ""
+
   if (s.startsWith("http://") || s.startsWith("https://")) return s
 
   const path = s.startsWith("/") ? s : `/${s}`
 
-  // Eğer yol /public veya /uploads ile başlıyorsa backend adresini ekle
   if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
     return `${API_BASE}${path}`
   }
-  return path
+
+  // Fallback: Diğer durumlar için varsayılan olarak backend'e yönlendir
+  return `${API_BASE}/public/uploads${path}`
 }
 
 const parseDate = (value: string) => {

@@ -13,19 +13,19 @@ function normalizeImageUrl(v: string) {
   const s = (v || "").trim()
   if (!s) return ""
 
-  // 1. Eğer zaten tam bir http/https linki ise dokunma
+  // 1. R2 veya harici link kontrolü
   if (s.startsWith("http://") || s.startsWith("https://")) return s
 
   // 2. Başında slash yoksa ekle
   const path = s.startsWith("/") ? s : `/${s}`
 
-  // 3. Eğer yol /public veya /uploads ile başlıyorsa, bu Backend'deki bir dosyadır.
+  // 3. Backend'deki dosya kontrolü
   if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
     return `${API_BASE}${path}`
   }
 
-  // 4. Diğer durumlar için olduğu gibi döndür
-  return path
+  // 4. Diğer durumlar için varsayılan olarak backend'e yönlendir
+  return `${API_BASE}/public/uploads${path}`
 }
 // -----------------------------
 
