@@ -234,6 +234,7 @@ export function BlogExplorer() {
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover transition-transform duration-300 group-hover:scale-110"
+                  quality={60}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10">
@@ -317,6 +318,7 @@ export function BlogExplorer() {
                           alt={post.title}
                           fill
                           className="object-cover rounded-lg"
+                          quality={60}
                         />
                       </div>
                     )}

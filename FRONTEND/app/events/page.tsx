@@ -4,6 +4,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
+import Image from "next/image"
 // import axios from "axios" // Axios yerine api kullanacağız
 import { api, API_BASE } from "@/lib/api" // Merkezi API importu
 import { usePathname } from "next/navigation"
@@ -432,7 +433,9 @@ export default function EventsPage() {
                     <ScrollAnimation animation="fade-up">
                         <div className="flex flex-col items-center space-y-4 sm:space-y-5 md:space-y-6">
                             <div className="flex items-center space-x-2">
-                                <img src="/ayzek-logo.png" alt="AYZEK" className="w-5 h-5 sm:w-6 sm:h-6" />
+                                <div className="relative w-5 h-5 sm:w-6 sm:h-6">
+                                    <Image src="/ayzek-logo.png" alt="AYZEK" fill className="object-contain" quality={60} />
+                                </div>
                                 <span className="text-lg sm:text-xl font-display font-bold text-primary">AYZEK</span>
                             </div>
                             <p className="text-muted-foreground text-center max-w-md text-xs sm:text-sm md:text-base px-2">

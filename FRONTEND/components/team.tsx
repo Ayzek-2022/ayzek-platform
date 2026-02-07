@@ -81,6 +81,7 @@ function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: strin
               alt={team.name}
               fill
               className="object-cover"
+              quality={60}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
