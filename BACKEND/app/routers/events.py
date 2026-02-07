@@ -1,3 +1,4 @@
+from utils.r2_service import upload_file_to_r2
 import os
 import shutil
 import uuid
@@ -83,12 +84,12 @@ def create_event(
         if file:
             file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
             unique_filename = f"{uuid.uuid4()}.{file_ext}"
-            file_path = os.path.join(UPLOAD_DIR, unique_filename)
-
-            with open(file_path, "wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
             
-            final_image_url = f"/public/uploads/{unique_filename}"
+            uploaded_url = upload_file_to_r2(file.file, unique_filename, file.content_type)
+            if not uploaded_url:
+                raise HTTPException(status_code=500, detail="Resim yüklenemedi")
+
+            final_image_url = uploaded_url
 
         # 1. Tarih ve Saati birleştir (ISO Formatı)
         # Örnek: "2025-12-24" + "08:30" -> "2025-12-24T08:30:00"
@@ -149,12 +150,12 @@ def update_event(
     if file:
         file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
         unique_filename = f"{uuid.uuid4()}.{file_ext}"
-        file_path = os.path.join(UPLOAD_DIR, unique_filename)
-
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
         
-        final_image_url = f"/public/uploads/{unique_filename}"
+        uploaded_url = upload_file_to_r2(file.file, unique_filename, file.content_type)
+        if not uploaded_url:
+            raise HTTPException(status_code=500, detail="Resim yüklenemedi")
+
+        final_image_url = uploaded_url
 
     # Güncelleme verilerini hazırla
     update_data = {}

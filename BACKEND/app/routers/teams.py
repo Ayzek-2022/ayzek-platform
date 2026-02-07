@@ -1,3 +1,4 @@
+from utils.r2_service import upload_file_to_r2
 import os
 import shutil
 import uuid
@@ -59,12 +60,12 @@ def create_team(
     if file:
         file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
         unique_filename = f"{uuid.uuid4()}.{file_ext}"
-        file_path = os.path.join(UPLOAD_DIR, unique_filename)
-
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
         
-        final_photo_url = f"/public/uploads/{unique_filename}"
+        uploaded_url = upload_file_to_r2(file.file, unique_filename, file.content_type)
+        if not uploaded_url:
+            raise HTTPException(status_code=500, detail="Resim yüklenemedi")
+
+        final_photo_url = uploaded_url
 
     # 3. JSON string olarak gelen üyeleri listeye çevir
     try:
@@ -110,10 +111,12 @@ def update_team(
     if file:
         file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
         unique_filename = f"{uuid.uuid4()}.{file_ext}"
-        file_path = os.path.join(UPLOAD_DIR, unique_filename)
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        final_photo_url = f"/public/uploads/{unique_filename}"
+        
+        uploaded_url = upload_file_to_r2(file.file, unique_filename, file.content_type)
+        if not uploaded_url:
+            raise HTTPException(status_code=500, detail="Resim yüklenemedi")
+
+        final_photo_url = uploaded_url
 
     update_data = {}
     if name is not None: update_data["name"] = name

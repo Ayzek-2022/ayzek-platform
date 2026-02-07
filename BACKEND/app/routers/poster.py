@@ -1,3 +1,4 @@
+from utils.r2_service import upload_file_to_r2
 import os
 import shutil
 import uuid
@@ -55,13 +56,12 @@ def create_poster(
     if file:
         file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
         unique_filename = f"{uuid.uuid4()}.{file_ext}"
-        file_path = os.path.join(UPLOAD_DIR, unique_filename)
-
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
         
-        # Frontend'in erişeceği yol
-        final_image_url = f"/public/uploads/{unique_filename}"
+        uploaded_url = upload_file_to_r2(file.file, unique_filename, file.content_type)
+        if not uploaded_url:
+            raise HTTPException(status_code=500, detail="Resim yüklenemedi")
+
+        final_image_url = uploaded_url
 
     poster_in = PosterCreate(
         title=title,
@@ -100,12 +100,12 @@ def update_poster(
     if file:
         file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
         unique_filename = f"{uuid.uuid4()}.{file_ext}"
-        file_path = os.path.join(UPLOAD_DIR, unique_filename)
-
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
         
-        final_image_url = f"/public/uploads/{unique_filename}"
+        uploaded_url = upload_file_to_r2(file.file, unique_filename, file.content_type)
+        if not uploaded_url:
+            raise HTTPException(status_code=500, detail="Resim yüklenemedi")
+
+        final_image_url = uploaded_url
     
     # Güncelleme objesini hazırla (Eğer final_image_url None ise eskisini korur crud tarafında)
     update_data = PosterUpdate(
