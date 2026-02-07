@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import Image from "next/image"
 
 // --- AYARLAR ---
 
@@ -227,10 +228,12 @@ export function BlogExplorer() {
             {/* Kapak görseli */}
             {post.coverImage ? (
               <div className="relative h-36 sm:h-40 md:h-44 flex-shrink-0 bg-black">
-                <img
+                <Image
                   src={post.coverImage}
                   alt={post.title}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10">
@@ -308,7 +311,14 @@ export function BlogExplorer() {
                   {/* İçerik */}
                   <div className="max-h-[60vh] overflow-auto pr-2">
                     {post.coverImage && (
-                      <img src={post.coverImage} alt={post.title} className="w-full h-auto mb-4 rounded-lg" />
+                      <div className="relative w-full aspect-video mb-4">
+                        <Image
+                          src={post.coverImage}
+                          alt={post.title}
+                          fill
+                          className="object-cover rounded-lg"
+                        />
+                      </div>
                     )}
                     {/* DÜZELTME: break-words eklendi */}
                     <article className="text-[15px] leading-7 text-foreground/90 whitespace-pre-wrap break-words">

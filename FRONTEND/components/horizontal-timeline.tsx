@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from "react"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Image from "next/image"
 
 // --- YENİ EKLENEN KISIMLAR ---
 
@@ -257,10 +258,13 @@ export function HorizontalTimeline() {
                           <CardHeader className="relative overflow-hidden p-0">
                             <div className="relative h-32 sm:h-36 md:h-44 lg:h-48">
                               {/* --- GÖRSEL KISMI GÜNCELLENDİ --- */}
-                              <img
+                              {/* --- GÖRSEL KISMI GÜNCELLENDİ --- */}
+                              <Image
                                 src={normalizeImageUrl(event.image_url) || "/placeholder.svg"}
                                 alt={event.title}
-                                className="w-full h-full object-cover"
+                                fill
+                                sizes="(max-width: 768px) 100vw, 400px"
+                                className="object-cover"
                               />
                               {/* ------------------------------- */}
                               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

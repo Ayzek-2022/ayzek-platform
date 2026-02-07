@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 type Poster = {
   id: number;
@@ -174,7 +175,7 @@ export function AutoSlidingBanner() {
         className="absolute inset-0 flex transition-transform duration-700 ease-in-out"
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
-        {activeSlides.map((slide) => {
+        {activeSlides.map((slide, index) => {
           const imgSrc = buildImgSrc(slide.image_url);
           return (
             <div
@@ -182,13 +183,13 @@ export function AutoSlidingBanner() {
               className="relative w-full h-full flex-shrink-0 flex items-end pb-8 sm:pb-12 md:pb-16 lg:pb-20"
             >
               <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/50 to-background/10 z-10" />
-              <img
+              <Image
                 src={imgSrc}
                 alt={slide.title}
-                className="absolute inset-0 w-full h-full object-cover"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = "/ayzek-logo.png";
-                }}
+                fill
+                className="object-cover"
+                priority={index === 0}
+                sizes="100vw"
               />
 
               <div className="relative z-20 container max-w-screen-xl mx-auto px-4 sm:px-6 w-full">

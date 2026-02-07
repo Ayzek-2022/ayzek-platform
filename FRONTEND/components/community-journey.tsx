@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-mo
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import Image from "next/image"
 
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://api.ayzek.tr"
@@ -38,11 +39,15 @@ function PersonCard({ leader }: { leader: Leader }) {
   return (
     <Card className="bg-white/90 dark:bg-black/70 border border-black/10 dark:border-white/10 backdrop-blur-sm transition-shadow hover:shadow-lg h-full">
       <CardHeader className="text-center p-2.5 sm:p-3 md:p-4">
-        <img
-          src={normalizeImageUrl(leader.avatar || "") || "/placeholder.svg"}
-          alt={leader.name}
-          className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full mx-auto mb-2 sm:mb-2.5 md:mb-3 object-cover"
-        />
+        <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mx-auto mb-2 sm:mb-2.5 md:mb-3">
+          <Image
+            src={normalizeImageUrl(leader.avatar || "") || "/placeholder.svg"}
+            alt={leader.name}
+            fill
+            className="rounded-full object-cover"
+            sizes="64px"
+          />
+        </div>
         <CardTitle className="font-display text-xs sm:text-sm md:text-base lg:text-lg leading-tight">{leader.name}</CardTitle>
         <p className="text-[10px] sm:text-xs text-muted-foreground">{leader.role}</p>
       </CardHeader>
