@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Github, Linkedin } from "lucide-react"
+import Image from "next/image"
 
 // --- YENİ EKLENEN KISIMLAR ---
 
@@ -160,11 +161,13 @@ export function TeamSection() {
                     <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm rounded-xl h-full">
                       <CardHeader className="text-center p-3 md:p-4">
                         <div className="relative w-16 h-16 md:w-28 md:h-28 mx-auto mb-2">
-                          <img
-                            // --- DEĞİŞİKLİK: normalizeImageUrl kullanıldı ---
+                          {/* --- DEĞİŞİKLİK: next/image kullanıldı --- */}
+                          <Image
                             src={normalizeImageUrl(member.photo_url) || "/placeholder.svg"}
                             alt={member.name}
-                            className="w-full h-full rounded-full object-cover transition-transform duration-300 group-hover:scale-110"
+                            fill
+                            sizes="(max-width: 768px) 64px, 112px"
+                            className="rounded-full object-cover transition-transform duration-300 group-hover:scale-110"
                           />
                           <div className="absolute inset-0 rounded-full bg-gradient-to-t from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         </div>

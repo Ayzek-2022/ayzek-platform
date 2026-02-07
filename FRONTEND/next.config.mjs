@@ -7,7 +7,14 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'api.ayzek.tr',
+        pathname: '/**',
+      },
+    ],
+    formats: ['image/avif', 'image/webp'],
   },
 }
 

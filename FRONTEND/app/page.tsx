@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Link from "next/link";
+import Image from "next/image";
 import { AutoSlidingBanner } from "@/components/anasayfa-poster";
 import { ScrollAnimation } from "@/components/scroll-animations";
 import { ParallaxSection } from "@/components/parallax-section";
@@ -376,10 +377,11 @@ export default function HomePage() {
                         </div>
                         <div className={`relative z-10 grid place-items-center size-20 sm:size-24 md:size-32 rounded-full bg-gradient-to-br ${pal.ring} shadow-xl ${pal.glow} ring-1 ring-black/20 dark:ring-black/40 overflow-hidden`}>
                           {t.logoUrl ? (
-                            <img src={t.logoUrl} alt={t.name} className="h-full w-full object-cover" />
+                            <Image src={t.logoUrl} alt={t.name} fill className="object-cover" />
                           ) : (
                             <Users className="size-5 sm:size-6 md:size-7 text-white/90" />
-                          )}
+                          )
+                          }
                         </div>
 
                         {/* Description Text */}
@@ -423,7 +425,9 @@ export default function HomePage() {
           <ScrollAnimation animation="fade-in">
             <div className="flex flex-col items-center space-y-3 sm:space-y-4">
               <div className="flex items-center space-x-2">
-                <img src="/ayzek-logo.png" alt="AYZEK" className="w-5 h-5 sm:w-6 sm:h-6" />
+                <div className="relative w-5 h-5 sm:w-6 sm:h-6">
+                  <Image src="/ayzek-logo.png" alt="AYZEK" fill className="object-contain" />
+                </div>
                 <span className="text-lg sm:text-xl font-display font-bold text-primary">AYZEK</span>
               </div>
               <p className="text-muted-foreground text-center max-w-md text-xs sm:text-sm md:text-base px-2">
@@ -485,11 +489,14 @@ export default function HomePage() {
                   <p className="text-base text-muted-foreground break-words whitespace-pre-wrap">{selectedEvent.description}</p>
                 </div>
 
-                <img
-                  src={normalizeImageUrl(selectedEvent.cover_image_url || selectedEvent.image_url) || "/placeholder.svg"}
-                  alt={selectedEvent.title}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
+                <div className="relative w-full h-64">
+                  <Image
+                    src={normalizeImageUrl(selectedEvent.cover_image_url || selectedEvent.image_url) || "/placeholder.svg"}
+                    alt={selectedEvent.title}
+                    fill
+                    className="object-cover rounded-lg"
+                  />
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">

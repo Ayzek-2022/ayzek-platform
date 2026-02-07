@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { TeamSection } from "@/components/team-section"
 import { MissionValues } from "@/components/mission-values"
 import { CommunityJourney } from "@/components/community-journey"
@@ -118,7 +119,9 @@ export default function AboutPage() {
           <ScrollAnimation animation="fade-up">
             <div className="flex flex-col items-center space-y-3 sm:space-y-4">
               <div className="flex items-center space-x-2">
-                <img src="/ayzek-logo.png" alt="AYZEK" className="w-5 h-5 sm:w-6 sm:h-6" />
+                <div className="relative w-5 h-5 sm:w-6 sm:h-6">
+                  <Image src="/ayzek-logo.png" alt="AYZEK" fill className="object-contain" />
+                </div>
                 <span className="text-lg sm:text-xl font-display font-bold text-primary">AYZEK</span>
               </div>
               <p className="text-muted-foreground text-center max-w-md text-xs sm:text-sm md:text-base px-2">

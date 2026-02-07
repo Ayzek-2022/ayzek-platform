@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Users, MapPin } from "lucide-react"
 import { api } from "@/lib/api"
+import Image from "next/image"
 
 // --- YENİ EKLENEN KISIMLAR ---
 
@@ -131,12 +132,15 @@ export default function EventGallery() {
             onMouseLeave={() => setHoveredId(null)}
           >
             <div className="relative overflow-hidden rounded-lg aspect-[4/3] bg-muted">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                // --- DEĞİŞİKLİK: normalizeImageUrl kullanıldı ---
+              {/* next/image ile optimize edilmiş resim */}
+              <Image
                 src={normalizeImageUrl(photo.image_url) || "/placeholder.svg"}
                 alt={photo.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                loading="lazy"
+                quality={70}
               />
 
               {/* Kategori rozeti */}

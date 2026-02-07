@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Calendar, Clock, MapPin, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react"
+import Image from "next/image"
 
 export type Event = {
   id: number
@@ -208,10 +209,13 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                 <CardHeader className="relative overflow-hidden p-0">
                   <div className="relative h-32 sm:h-36 md:h-44 lg:h-48">
                     {/* !!! DEĞİŞİKLİK: normalizeImageUrl kullanıldı !!! */}
-                    <img
+                    {/* !!! DEĞİŞİKLİK: next/image kullanıldı !!! */}
+                    <Image
                       src={normalizeImageUrl(event.image) || "/placeholder.svg"}
                       alt={event.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
@@ -266,11 +270,16 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
 
                       <div className="space-y-6">
                         {/* !!! DEĞİŞİKLİK: normalizeImageUrl kullanıldı !!! */}
-                        <img
-                          src={normalizeImageUrl(event.image) || "/placeholder.svg"}
-                          alt={event.title}
-                          className="w-full h-64 object-cover rounded-lg"
-                        />
+                        {/* !!! DEĞİŞİKLİK: next/image kullanıldı !!! */}
+                        <div className="relative w-full h-64">
+                          <Image
+                            src={normalizeImageUrl(event.image) || "/placeholder.svg"}
+                            alt={event.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 672px"
+                            className="object-cover rounded-lg"
+                          />
+                        </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-3">
