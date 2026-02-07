@@ -1,3 +1,4 @@
+from utils.r2_service import upload_file_to_r2
 import os
 import shutil
 import uuid
@@ -60,12 +61,12 @@ def api_create_blog(
     if file:
         file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
         unique_filename = f"{uuid.uuid4()}.{file_ext}"
-        file_path = os.path.join(UPLOAD_DIR, unique_filename)
-
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
         
-        final_cover_image = f"/public/uploads/{unique_filename}"
+        uploaded_url = upload_file_to_r2(file.file, unique_filename, file.content_type)
+        if not uploaded_url:
+            raise HTTPException(status_code=500, detail="Resim yüklenemedi")
+
+        final_cover_image = uploaded_url
 
     # Boş string gelirse None yap (DB hatasını önler)
     if not published_date:
@@ -113,12 +114,12 @@ def api_update_blog(
     if file:
         file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
         unique_filename = f"{uuid.uuid4()}.{file_ext}"
-        file_path = os.path.join(UPLOAD_DIR, unique_filename)
-
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
         
-        final_cover_image = f"/public/uploads/{unique_filename}"
+        uploaded_url = upload_file_to_r2(file.file, unique_filename, file.content_type)
+        if not uploaded_url:
+            raise HTTPException(status_code=500, detail="Resim yüklenemedi")
+
+        final_cover_image = uploaded_url
 
     # Boş string gelirse None yap
     if published_date == "":
