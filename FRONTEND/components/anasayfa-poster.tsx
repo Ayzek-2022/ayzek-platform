@@ -188,7 +188,7 @@ export function AutoSlidingBanner() {
                 alt={slide.title}
                 fill
                 className="object-cover"
-                priority={true}
+                priority={index === 0 || index === 1}
                 quality={60}
                 sizes="100vw"
               />
