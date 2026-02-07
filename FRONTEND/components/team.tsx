@@ -6,28 +6,27 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Users, Linkedin } from "lucide-react"
+import { API_BASE } from "@/lib/api"
 
 // --- YENİ EKLENEN KISIMLAR ---
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://api.ayzek.tr"
 
 function normalizeImageUrl(v: string) {
   const s = (v || "").trim()
   if (!s) return ""
 
-  // 1. Eğer tam bir http linki ise dokunma
+  // 1. R2 veya harici link kontrolü
   if (s.startsWith("http://") || s.startsWith("https://")) return s
 
   // 2. Başında slash yoksa ekle
   const path = s.startsWith("/") ? s : `/${s}`
 
-  // 3. Backend'den gelen dosya ise
+  // 3. Backend'deki dosya kontrolü
   if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
     return `${API_BASE}${path}`
   }
 
-  // 4. Diğer durumlar
-  return path
+  // 4. Default fallback: Backend public/uploads
+  return `${API_BASE}/public/uploads${path}`
 }
 // -----------------------------
 

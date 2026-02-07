@@ -16,10 +16,13 @@ function normalizeImageUrl(v: string) {
   if (!s) return ""
   if (s.startsWith("http://") || s.startsWith("https://")) return s
   const path = s.startsWith("/") ? s : `/${s}`
+
   if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
     return `${API_BASE}${path}`
   }
-  return path
+
+  // Fallback
+  return `${API_BASE}/public/uploads${path}`
 }
 
 type Leader = {

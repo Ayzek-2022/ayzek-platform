@@ -23,21 +23,29 @@ function buildImgSrc(raw?: string | null) {
   if (!raw) return "/ayzek-logo.png";
   const url = raw.trim();
 
-  // 1. Eğer tam bir http/https linki ise dokunma
+  // 1. R2 veya harici link kontrolü
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
 
-  // 2. Eğer Backend tarafından yüklenen bir dosya ise (/public/uploads/...)
-  // Başına API adresini ekle ki sunucudan çekebilsin
+  // 2. Backend'deki dosya kontrolü (/public/uploads/...)
   if (url.startsWith("/public/") || url.startsWith("/uploads/")) {
     const path = url.startsWith("/") ? url : `/${url}`;
     return `${API_BASE}${path}`;
   }
 
   // 3. Eğer manuel olarak "/" ile başlayan bir yol girildiyse (Frontend public klasörü için)
-  if (url.startsWith("/")) return url;
+  if (url.startsWith("/")) {
+    // Özel durum: /uploads veya /public ile başlamıyorsa, ama / ile başlıyorsa
+    // Frontend asset'i olabilir.
+    // Ancak legacy backend assetleri de olabilir. 
+    // Garanti olsun diye fallback'i backend yapıyoruz,
+    // ama frontend static assets (ayzek-logo.png gibi) bu fonksiyona girmiyor genelde.
+    // Yine de, "/image.png" gibi bir şey gelirse frontend public'ten mi backend public'ten mi?
+    // Kullanıcının isteği üzerine backend/public/uploads'a yönlendirelim.
+    return url;
+  }
 
-  // 4. Diğer durumlar için varsayılan olarak backend'e yönlendir
-  return `${API_BASE}/${url.replace(/^\/+/, "")}`;
+  // 4. Fallback: Backend public/uploads
+  return `${API_BASE}/public/uploads/${url}`;
 }
 // ------------------------------------------
 

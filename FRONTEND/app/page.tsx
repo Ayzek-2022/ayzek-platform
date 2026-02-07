@@ -29,18 +29,19 @@ function normalizeImageUrl(v: string | null | undefined) {
   const s = (v || "").trim();
   if (!s) return "";
 
-  // 1. Zaten tam URL ise dokunma
+  // 1. R2 veya harici link kontrolü
   if (s.startsWith("http://") || s.startsWith("https://")) return s;
 
   // 2. Başında slash yoksa ekle
   const path = s.startsWith("/") ? s : `/${s}`;
 
-  // 3. Backend'den gelen dosya ise prefix ekle
+  // 3. Backend'deki dosya kontrolü
   if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
     return `${API_BASE}${path}`;
   }
 
-  return path;
+  // 4. Default fallback: Backend public/uploads
+  return `${API_BASE}/public/uploads${path}`;
 }
 // -----------------------------
 
