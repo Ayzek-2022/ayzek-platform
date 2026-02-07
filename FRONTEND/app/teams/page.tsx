@@ -1,6 +1,7 @@
 "use client"
 
 import { AdminNavbar } from "@/components/navbar"
+import Image from "next/image"
 import { ScrollAnimation } from "@/components/scroll-animations"
 import { TeamExplorer } from "@/components/team"
 
@@ -92,7 +93,9 @@ export default function JoinPage() {
           <ScrollAnimation animation="fade-up">
             <div className="flex flex-col items-center space-y-3 sm:space-y-4">
               <div className="flex items-center space-x-2">
-                <img src="/ayzek-logo.png" alt="AYZEK" className="w-5 h-5 sm:w-6 sm:h-6" />
+                <div className="relative w-5 h-5 sm:w-6 sm:h-6">
+                  <Image src="/ayzek-logo.png" alt="AYZEK" fill className="object-contain" quality={60} />
+                </div>
                 <span className="text-lg sm:text-xl font-display font-bold text-primary">AYZEK</span>
               </div>
               <p className="text-muted-foreground text-center max-w-md text-xs sm:text-sm md:text-base px-2">

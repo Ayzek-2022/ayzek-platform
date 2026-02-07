@@ -46,6 +46,7 @@ function PersonCard({ leader }: { leader: Leader }) {
             fill
             className="rounded-full object-cover"
             sizes="64px"
+            quality={60}
           />
         </div>
         <CardTitle className="font-display text-xs sm:text-sm md:text-base lg:text-lg leading-tight">{leader.name}</CardTitle>

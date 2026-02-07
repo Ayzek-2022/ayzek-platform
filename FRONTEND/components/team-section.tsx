@@ -168,6 +168,7 @@ export function TeamSection() {
                             fill
                             sizes="(max-width: 768px) 64px, 112px"
                             className="rounded-full object-cover transition-transform duration-300 group-hover:scale-110"
+                            quality={60}
                           />
                           <div className="absolute inset-0 rounded-full bg-gradient-to-t from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         </div>

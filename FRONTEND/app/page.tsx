@@ -377,7 +377,7 @@ export default function HomePage() {
                         </div>
                         <div className={`relative z-10 grid place-items-center size-20 sm:size-24 md:size-32 rounded-full bg-gradient-to-br ${pal.ring} shadow-xl ${pal.glow} ring-1 ring-black/20 dark:ring-black/40 overflow-hidden`}>
                           {t.logoUrl ? (
-                            <Image src={t.logoUrl} alt={t.name} fill className="object-cover" />
+                            <Image src={t.logoUrl} alt={t.name} fill className="object-cover" quality={60} />
                           ) : (
                             <Users className="size-5 sm:size-6 md:size-7 text-white/90" />
                           )
@@ -426,7 +426,7 @@ export default function HomePage() {
             <div className="flex flex-col items-center space-y-3 sm:space-y-4">
               <div className="flex items-center space-x-2">
                 <div className="relative w-5 h-5 sm:w-6 sm:h-6">
-                  <Image src="/ayzek-logo.png" alt="AYZEK" fill className="object-contain" />
+                  <Image src="/ayzek-logo.png" alt="AYZEK" fill className="object-contain" quality={60} />
                 </div>
                 <span className="text-lg sm:text-xl font-display font-bold text-primary">AYZEK</span>
               </div>
@@ -495,6 +495,7 @@ export default function HomePage() {
                     alt={selectedEvent.title}
                     fill
                     className="object-cover rounded-lg"
+                    quality={60}
                   />
                 </div>
 

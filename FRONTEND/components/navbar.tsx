@@ -35,7 +35,7 @@ export function AdminNavbar() {
           <div className="flex items-center gap-1.5 md:gap-2 min-w-0 flex-shrink-0">
             <a href="/" className="flex items-center space-x-1.5 md:space-x-2">
               <div className="relative w-7 h-7 md:w-8 md:h-8">
-                <Image src="/ayzek-logo.png" alt="AYZEK" fill className="object-contain" />
+                <Image src="/ayzek-logo.png" alt="AYZEK" fill className="object-contain" priority />
               </div>
               <span className="text-xl md:text-2xl font-display font-bold text-primary whitespace-nowrap">AYZEK</span>
             </a>
