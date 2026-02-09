@@ -13,8 +13,15 @@ const nextConfig = {
         hostname: 'api.ayzek.tr',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: '*.r2.dev',
+        pathname: '/**',
+      },
     ],
-    formats: ['image/avif', 'image/webp'],
+    // 👇 İŞTE ÇÖZÜM BU SATIRDA!
+    // Bu satır sayesinde "Motor bozuk" hatası (500) gelmeyecek, resim direkt açılacak.
+    unoptimized: true, 
   },
 }
 
